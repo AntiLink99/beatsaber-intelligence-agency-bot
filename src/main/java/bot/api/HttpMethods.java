@@ -26,9 +26,8 @@ public class HttpMethods {
 	public String get(String url) throws IOException {
 		GetMethod get = new GetMethod(url);
 		setAgent(get);
-		int statusCode = http.executeMethod(get);
 		
-		System.out.println(url);
+		int statusCode = http.executeMethod(get);
 		if (statusCode != 200) {
 			throw new HttpException("Data could not be fetched. Statuscode: "+statusCode);
 		}

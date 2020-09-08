@@ -1,6 +1,7 @@
 package bot.foaa.dto;
 
 import java.io.Serializable;
+import java.util.List;
 
 public class Player implements Serializable {
 
@@ -14,6 +15,8 @@ public class Player implements Serializable {
 	private float pp;
 	private String country;
 	private long discordUserId;
+	private List<Integer> historyValues;
+	private String history;
 
 	public String getPlayerId() {
 		return playerId;
@@ -77,6 +80,22 @@ public class Player implements Serializable {
 
 	public void setDiscordUserId(long discordUserId) {
 		this.discordUserId = discordUserId;
+	}
+
+	public String getHistory() {
+		return history;
+	}
+
+	public void setHistory(String history) {
+		this.history = history;
+	}
+
+	public List<Integer> getHistoryValues() {
+		return historyValues;
+	}
+
+	public void setHistoryValues(List<Integer> historyValues) {
+		this.historyValues = historyValues;
 	}
 
 }

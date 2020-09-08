@@ -9,7 +9,7 @@ public class DBConstants {
 	public static final String DELETE_PLAYER_STMT_BY_ID = "delete from player where player_id = ?;";
 	public static final String DELETE_PLAYER_STMT_BY_NAME = "delete from player where player_name = ?;";
 	
-	public static final String INSERT_PLAYER_STMT = buildInsertStatement("player","player_id","player_name","player_avatar","player_rank","player_country_rank","player_pp","player_country","discord_user_id");
+	public static final String INSERT_PLAYER_STMT = buildInsertStatement("player","player_id","player_name","player_avatar","player_rank","player_country_rank","player_pp","player_country","discord_user_id","player_history");
 	public static final String DB_HOST = System.getenv("db_hostname");
 	public static final String DB_USERNAME = System.getenv("db_username");
 	public static final String DB_PASSWORD = System.getenv("db_password");

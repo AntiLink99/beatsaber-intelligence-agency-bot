@@ -7,7 +7,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import bot.foaa.dto.Player;
 
@@ -19,7 +21,7 @@ public class DatabaseManager {
 		if (con == null) {
 			try {
 				Class.forName("com.mysql.cj.jdbc.Driver");
-				con = DriverManager.getConnection("jdbc:mysql://localhost:3306/" + DBConstants.DB_NAME + "?serverTimezone=UTC&useUnicode=yes&characterEncoding=UTF-8", DBConstants.DB_USERNAME, DBConstants.DB_PASSWORD);
+				con = DriverManager.getConnection("jdbc:mysql://localhost:3306/" + DBConstants.DB_NAME + "?autoReconnect=true&serverTimezone=UTC&useUnicode=yes&characterEncoding=UTF-8", DBConstants.DB_USERNAME, DBConstants.DB_PASSWORD);
 			} catch (Exception e) {
 				e.printStackTrace();
 				System.out.println(e);
@@ -39,6 +41,7 @@ public class DatabaseManager {
 			stmt.setFloat(6, player.getPp());
 			stmt.setString(7, player.getCountry());
 			stmt.setLong(8, player.getDiscordUserId());
+			stmt.setString(9, player.getHistory());
 			return stmt.executeUpdate() == 1;
 		} catch (SQLIntegrityConstraintViolationException e) {
 			// ok
@@ -80,6 +83,10 @@ public class DatabaseManager {
 				player.setPp(rs.getFloat("player_pp"));
 				player.setCountry(rs.getString("player_country"));
 				player.setDiscordUserId(rs.getLong("discord_user_id"));
+				player.setHistory(rs.getString("player_history"));
+				if (player.getHistory() != null) {
+					player.setHistoryValues(Arrays.asList(player.getHistory().split(",")).stream().map(val -> Integer.parseInt(val)).collect(Collectors.toList()));
+				}
 				players.add(player);
 			}
 		} catch (SQLException e) {

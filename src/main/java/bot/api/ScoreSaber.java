@@ -1,32 +1,36 @@
 package bot.api;
 
 import java.io.IOException;
-
-import org.json.JSONObject;
+import java.util.Arrays;
+import java.util.stream.Collectors;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 import bot.foaa.dto.Player;
 
 public class ScoreSaber {
 
-	JsonHandler handler;
+	HttpMethods http;
 	Gson gson;
-
+	
 	public ScoreSaber() {
-		handler = new JsonHandler();
+		http = new HttpMethods();
 		gson = new Gson();
 	}
 
 	public Player getPlayerById(String playerId) {
-		JSONObject response;
+		JsonObject response;
 		try {
-			response = handler.getJsonFromUrl(ApiConstants.SS_PLAYER_PRE_URL + playerId + ApiConstants.SS_PLAYER_POST_URL);
+			response = JsonParser.parseString((http.get(ApiConstants.SS_PLAYER_PRE_URL + playerId + ApiConstants.SS_PLAYER_POST_URL))).getAsJsonObject();
 		} catch (IOException e) {
 			return null;
 		}
-		JSONObject playerInfo = response.getJSONObject("playerInfo");
+		JsonObject playerInfo = response.getAsJsonObject("playerInfo");
 
-		return gson.fromJson(playerInfo.toString(), Player.class);
+		Player ssPlayer = gson.fromJson(playerInfo.toString(), Player.class);
+		ssPlayer.setHistoryValues(Arrays.asList(ssPlayer.getHistory().split(",")).stream().map(val -> Integer.parseInt(val)).collect(Collectors.toList()));
+		return ssPlayer;
 	}
 }

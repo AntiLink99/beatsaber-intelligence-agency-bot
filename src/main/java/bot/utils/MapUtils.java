@@ -9,7 +9,7 @@ import java.util.Set;
 
 import org.apache.commons.collections4.map.LinkedMap;
 
-import bot.foaa.dto.PlayerImprovement;
+import bot.dto.PlayerImprovement;
 
 public class MapUtils {
 

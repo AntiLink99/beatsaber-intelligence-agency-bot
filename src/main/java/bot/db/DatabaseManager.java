@@ -11,7 +11,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import bot.foaa.dto.Player;
+import bot.dto.Player;
 
 public class DatabaseManager {
 	private Connection con;
@@ -53,7 +53,7 @@ public class DatabaseManager {
 	}
 
 	public boolean deletePlayer(Player player) {
-		String stmtToUse = player.getPlayerId() == null ? DBConstants.DELETE_PLAYER_STMT_BY_NAME : DBConstants.DELETE_PLAYER_STMT_BY_ID;
+		String stmtToUse = player.getPlayerId() == null ? DBConstants.DELETE_PLAYER_BY_NAME_STMT : DBConstants.DELETE_PLAYER_BY_ID_STMT;
 		String playerNameOrId = player.getPlayerId() == null ? player.getPlayerName() : player.getPlayerId();
 		try {
 			PreparedStatement stmt = con.prepareStatement(stmtToUse);
@@ -68,6 +68,19 @@ public class DatabaseManager {
 		return false;
 	}
 
+	public boolean deletePlayerByDiscordUserId(long userId) {
+		try {
+			PreparedStatement stmt = con.prepareStatement(DBConstants.DELETE_PLAYER_BY_DISCORD_ID);
+			stmt.setLong(1, userId);
+			return stmt.executeUpdate() == 1;
+		} catch (SQLIntegrityConstraintViolationException e) {
+			e.printStackTrace();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return false;
+	}
+	
 	public List<Player> getAllStoredPlayers() {
 		List<Player> players = new ArrayList<Player>();
 		try {
@@ -117,5 +130,35 @@ public class DatabaseManager {
 			e.printStackTrace();
 		}
 		return null;
+	}
+
+	public long getPlayerIdByDiscordId(long discordUserId) {
+		try {
+			PreparedStatement stmt = con.prepareStatement(DBConstants.SELECT_PLAYER_ID_BY_DISCORD_ID_STMT);
+			stmt.setLong(1, discordUserId);
+
+			ResultSet rs = stmt.executeQuery();
+			if (rs != null && rs.next()) {
+				return rs.getLong("player_id");
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return -1;
+	}
+
+	public long getDiscordIdByPlayerId(String playerId) {
+		try {
+			PreparedStatement stmt = con.prepareStatement(DBConstants.SELECT_DISCORD_ID_BY_PLAYER_ID_STMT);
+			stmt.setString(1, playerId);
+
+			ResultSet rs = stmt.executeQuery();
+			if (rs != null && rs.next()) {
+				return rs.getLong("discord_user_id");
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return -1;
 	}
 }

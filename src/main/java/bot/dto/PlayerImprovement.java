@@ -1,4 +1,4 @@
-package bot.foaa.dto;
+package bot.dto;
 
 import bot.utils.Format;
 

@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 import bot.main.BotConstants;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Role;
+import net.dv8tion.jda.api.exceptions.HierarchyException;
 
 public class RoleManager {
 
@@ -13,38 +14,46 @@ public class RoleManager {
 		if (member == null || rank > 5000) {
 			return false;
 		}
-		int milestone = findMilestoneForRank(rank);
+		int milestone = ListValueUtils.findMilestoneForRank(rank);
 		Role milestoneRole = member.getRoles().stream().filter(role -> role.getName().equals(BotConstants.rolePrefix + milestone)).findFirst().orElse(null);
-		List<Role> milestoneRoles = getMilestoneRolesFromMember(member);
+		List<Role> milestoneRoles = getMemberRolesByName(member, BotConstants.rolePrefix);
 		return milestoneRole == null || milestoneRoles.size() > 1;
 	}
 
-	public static int findMilestoneForRank(int rank) {
-		for (int milestone : BotConstants.rankMilestones) {
-			if (rank <= milestone) {
-				return milestone;
-			}
-		}
-		return -1;
-	}
-
 	public static void assignMilestoneRole(int newRank, Member member) {
-		int milestone = findMilestoneForRank(newRank);
-		List<Role> milestoneRoles = member.getGuild().getRolesByName(BotConstants.rolePrefix + milestone, true);
-		if (milestoneRoles.size() != 0) {
-			Role milestoneRole = milestoneRoles.get(0);
-			member.getGuild().addRoleToMember(member, milestoneRole).queue();
-		}
+		int milestone = ListValueUtils.findMilestoneForRank(newRank);
+		assignRole(member, BotConstants.rolePrefix + milestone);
 	}
 
-	public static void removeAllMilestoneRoles(Member member) {
-		List<Role> milestoneRoles = getMilestoneRolesFromMember(member);
+	public static void removeMemberRolesByName(Member member, String name) {
+		List<Role> milestoneRoles = getMemberRolesByName(member, name);
 		for (Role role : milestoneRoles) {
 			member.getGuild().removeRoleFromMember(member, role).queue();
 		}
 	}
-	
-	private static List<Role> getMilestoneRolesFromMember(Member member) {
-		return member.getRoles().stream().filter(role -> role.getName().contains(BotConstants.rolePrefix)).collect(Collectors.toList());
+
+	private static List<Role> getMemberRolesByName(Member member, String name) {
+		return member.getRoles().stream().filter(role -> role.getName().toLowerCase().contains(name.toLowerCase())).collect(Collectors.toList());
+	}
+
+	public static Role assignRole(Member member, String rolename) {
+		List<Role> milestoneRoles = member.getGuild().getRolesByName(rolename, true);
+		if (milestoneRoles.size() > 0) {
+			Role milestoneRole = milestoneRoles.get(0);
+			try {
+				member.getGuild().addRoleToMember(member, milestoneRole).queue();
+			} catch (HierarchyException e) {
+				System.out.println("Role " + milestoneRole.getName() + " is higher than me!");
+			}
+			return milestoneRole;
+		}
+		return null;
+	}
+
+	public static boolean memberHasRole(Member member, String milestoneRolesName, String roleToSearch) {
+		List<Role> roles = getMemberRolesByName(member, milestoneRolesName);
+		boolean memberHasRole = roles != null && roles.stream().anyMatch(r -> r.getName().toLowerCase().equals(roleToSearch));
+		boolean memberHasMoreThanOneRole = roles.size() > 1;
+		return memberHasRole && !memberHasMoreThanOneRole;
 	}
 }

@@ -1,12 +1,9 @@
 package bot.main;
 
 import java.io.FileNotFoundException;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -14,30 +11,42 @@ import java.util.stream.Collectors;
 
 import javax.security.auth.login.LoginException;
 
+import org.apache.commons.lang3.StringUtils;
+
 import bot.api.ApiConstants;
+import bot.api.BeatSaver;
 import bot.api.ScoreSaber;
+import bot.chart.PlayerChart;
+import bot.commands.ClaimPPRole;
+import bot.commands.HandlePlayerRegisteration;
+import bot.commands.Improvement;
+import bot.commands.ListPlayers;
+import bot.commands.RandomQuote;
+import bot.commands.RegisterAll;
+import bot.commands.UpdatePlayer;
 import bot.db.DBConstants;
 import bot.db.DatabaseManager;
-import bot.foaa.dto.Player;
-import bot.foaa.dto.PlayerImprovement;
-import bot.listeners.RegisterAllListener;
+import bot.dto.Player;
 import bot.utils.DiscordUtils;
 import bot.utils.Format;
-import bot.utils.MapUtils;
+import bot.utils.ListValueUtils;
 import bot.utils.Messages;
 import bot.utils.RoleManager;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.ReadyEvent;
+import net.dv8tion.jda.api.events.guild.member.GuildMemberLeaveEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 
 public class BeatSaberBot extends ListenerAdapter {
 
 	ScoreSaber ss = new ScoreSaber();
+	BeatSaver bs = new BeatSaver();
 	DatabaseManager db = new DatabaseManager();
 
 	public static void main(String[] args) {
@@ -55,28 +64,42 @@ public class BeatSaberBot extends ListenerAdapter {
 			TextChannel testChannel = jda.getTextChannelById(Long.valueOf(System.getenv("channel_id")));
 			Runnable runnable = new Runnable() {
 				public void run() {
-					List<Player> players = db.getAllStoredPlayers();
-					for (Player storedPlayer : players) {
-						Player ssPlayer = ss.getPlayerById(storedPlayer.getPlayerId());
-						ssPlayer.setDiscordUserId(storedPlayer.getDiscordUserId());
-						if (ssPlayer.getRank() != storedPlayer.getRank()) {
-							db.deletePlayer(storedPlayer);
-							db.savePlayer(ssPlayer);
-							Member member = testChannel.getMembers().stream().filter(m -> m.getIdLong() == ssPlayer.getDiscordUserId()).findFirst().orElse(null);
-							if (RoleManager.isNewMilestone(ssPlayer.getRank(), member)) {
-								System.out.println("Changed role: " + ssPlayer.getPlayerName() + " New Rank: " + ssPlayer.getRank() + " - Old Rank: " + storedPlayer.getRank() + "   " + "(Top " + String.valueOf(RoleManager.findMilestoneForRank(ssPlayer.getRank()) + ")"));
-								RoleManager.removeAllMilestoneRoles(member);
-								RoleManager.assignMilestoneRole(ssPlayer.getRank(), member);
-								Messages.sendMilestoneMessage(ssPlayer, testChannel);
+					try {
+						List<Player> players = db.getAllStoredPlayers();
+						for (Player storedPlayer : players) {
+							Player ssPlayer = ss.getPlayerById(storedPlayer.getPlayerId());
+							if (ssPlayer == null) {
+								continue;
+							}
+							ssPlayer.setDiscordUserId(storedPlayer.getDiscordUserId());
+							if (ssPlayer.getRank() != storedPlayer.getRank()) {
+								db.deletePlayer(storedPlayer);
+								db.savePlayer(ssPlayer);
+								Member member = testChannel.getMembers().stream().filter(m -> m.getIdLong() == ssPlayer.getDiscordUserId()).findFirst().orElse(null);
+								if (RoleManager.isNewMilestone(ssPlayer.getRank(), member)) {
+									System.out.println("Changed role: " + ssPlayer.getPlayerName() + " New Rank: " + ssPlayer.getRank() + " - Old Rank: " + storedPlayer.getRank() + "   " + "(Top " + String.valueOf(ListValueUtils.findMilestoneForRank(ssPlayer.getRank()) + ")"));
+									RoleManager.removeMemberRolesByName(member, BotConstants.rolePrefix);
+									RoleManager.assignMilestoneRole(ssPlayer.getRank(), member);
+									Messages.sendMilestoneMessage(ssPlayer, testChannel);
+								}
+							}
+
+							try {
+								TimeUnit.MILLISECONDS.sleep(100);
+							} catch (InterruptedException e) {
+								e.printStackTrace();
 							}
 						}
+					} catch (Exception e) {
+						e.printStackTrace();
+						System.out.println("There was an exception in scheduled task: " + e.getMessage());
 					}
 					System.gc();
 				}
 			};
 
 			ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor();
-			service.scheduleAtFixedRate(runnable, 0, 5, TimeUnit.MINUTES);
+			service.scheduleAtFixedRate(runnable, 0, 10, TimeUnit.MINUTES);
 		} catch (LoginException e) {
 			e.printStackTrace();
 		}
@@ -91,181 +114,119 @@ public class BeatSaberBot extends ListenerAdapter {
 		channel.sendTyping().queue();
 
 		List<String> msgParts = Arrays.asList(msg.split(" ", 3));
-		Player player = null;
 
-		List<String> commandsWithPlayerInfo = new ArrayList<String>();
-		commandsWithPlayerInfo.add("register");
-		commandsWithPlayerInfo.add("unregister");
-		commandsWithPlayerInfo.add("update");
-
-		String command = msgParts.get(1);
-		if (commandsWithPlayerInfo.contains(command)) {
-			if (msgParts.size() == 3) {
-				String urlOrPlayerName = msgParts.get(2);
-				if (urlOrPlayerName.contains("https://")) {
-					try {
-						if (msgParts.size() < 3) {
-							throw new FileNotFoundException("ScoreSaber URL is missing! Syntax: \"ru register <URL>\"");
-						}
-						player = getScoreSaberPlayerFromUrl(msgParts.get(2));
-						player.setDiscordUserId(event.getAuthor().getIdLong());
-					} catch (FileNotFoundException e) {
-						Messages.sendMessage(e.getMessage(), channel);
-						return;
-					}
-				} else if (commandsWithPlayerInfo.contains(command) && !command.equals("register")) {
-					player = new Player();
-					player.setPlayerName(urlOrPlayerName);
-				} else {
-					Messages.sendMessage("Could not find player \"" + urlOrPlayerName + "\".", channel);
-					return;
-				}
-			} else {
-				Messages.sendMessage("Player URL or name is missing. Please try again. Try \"ru help\" for more info.", channel);
+		// Recruiting Server
+		if (event.getGuild().getIdLong() == BotConstants.recruitingServerId) {
+			if (!Arrays.asList(BotConstants.allowedRecruitingCommands).contains(msgParts.get(1).toLowerCase())) {
+				Messages.sendMessage("Sorry, i can only do that in the main server.", channel);
+				return;
+			} else if (event.getMember().getRoles().stream().anyMatch(role -> role.getIdLong() == BotConstants.recruitRoleId)) {
+				Messages.sendMessage("Sorry, only FOAA members can do that.", channel);
 				return;
 			}
 		}
+		//
+		Player player = getPlayerDependingOnCommand(msgParts, event);
 		db.connectToDatabase(DBConstants.DB_HOST);
-		switch (msgParts.get(1)) {
-		case "register": {
-			boolean successSave = db.savePlayer(player);
-			if (!successSave) {
-				Messages.sendMessage("The player \"" + player.getPlayerName() + "\" is already registered! Use \"ru unregister <URL / Username>\" to remove the player from the database.", channel);
+		switch (msgParts.get(1).toLowerCase()) {
+		case "register":
+			boolean success = HandlePlayerRegisteration.registerPlayer(player, db, channel);
+			if (!success) {
 				break;
 			}
-			Messages.sendMessage("Player \"" + player.getPlayerName() + "\" was registered successfully and will be tracked from now on.", channel);
-		}
-		case "update": {
-			Player storedPlayer = db.getPlayerByName(player.getPlayerName());
-			Player ssPlayer = player;
-
-			if (storedPlayer == null) {
-				Messages.sendMessage("Could not find player \"" + player.getPlayerName() + "\".", channel);
-				break;
-			}
-
-			if (ssPlayer.getPlayerId() == null) {
-				ssPlayer = ss.getPlayerById(storedPlayer.getPlayerId());
-			}
-
-			final long playerDiscordId = storedPlayer.getDiscordUserId();
-			ssPlayer.setDiscordUserId(playerDiscordId);
-			Member member = channel.getMembers().stream().filter(m -> m.getIdLong() == playerDiscordId).findFirst().orElse(null);
-
-			if (RoleManager.isNewMilestone(ssPlayer.getRank(), member)) {
-				db.deletePlayer(storedPlayer);
-				db.savePlayer(ssPlayer);
-				RoleManager.removeAllMilestoneRoles(member);
-				RoleManager.assignMilestoneRole(ssPlayer.getRank(), member);
-				Messages.sendMilestoneMessage(ssPlayer, channel);
-			} else {
-				Messages.sendMessage("Player \"" + ssPlayer.getPlayerName() + "\" was not updated since the milestone is still the same. (Top " + RoleManager.findMilestoneForRank(ssPlayer.getRank()) + ")", channel);
+		case "update":
+			UpdatePlayer.updatePlayer(player, db, ss, channel);
+		case "claimpp":
+			ClaimPPRole.validateAndAssignRole(event.getMember(), db, ss, channel, true);
+			break;
+		case "claimppall":
+			if (DiscordUtils.isAdmin(event.getAuthor())) {
+				ClaimPPRole.validateAndAssignRoleForAll(event, db, ss);
 			}
 			break;
-		}
-		case "updateall": {
-			try {
-				List<Player> storedPlayers = db.getAllStoredPlayers();
-				for (Player storedPlayer : storedPlayers) {
-					Player ssPlayer = ss.getPlayerById(storedPlayer.getPlayerId());
-					ssPlayer.setDiscordUserId(storedPlayer.getDiscordUserId());
-					try {
-						TimeUnit.MILLISECONDS.sleep(125);
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
-					boolean successDelete = db.deletePlayer(storedPlayer);
-					if (!successDelete) {
-						Messages.sendMessage("The player \"" + storedPlayer.getPlayerName() + "\" could not be removed from the database.", channel);
-						break;
-					}
-	
-					boolean successSave = db.savePlayer(ssPlayer);
-					if (!successSave) {
-						Messages.sendMessage("The player \"" + storedPlayer.getPlayerName() + "\" is already registered! Use \"ru unregister <URL / Username>\" to remove the player from the database.", channel);
-						break;
-					}
-				}
-				Messages.sendMessage("All players were updated successfully.", channel);
-			} catch (Exception e) {
-				Messages.sendMessage("Could not fetch players. I probably sent too many requests. Whoops.", channel);
-				e.printStackTrace();
+		case "updateall":
+			if (DiscordUtils.isAdmin(event.getAuthor())) {
+				UpdatePlayer.updateAllPlayers(db, ss, channel);
 			}
 			break;
-		}
 		case "unregister":
-			boolean successDelete = db.deletePlayer(player);
-			if (!successDelete) {
-				Messages.sendMessage("The player \"" + player.getPlayerName() + "\" is already not registered.", channel);
-				break;
-			}
-			Messages.sendMessage("Player \"" + player.getPlayerName() + "\" was unregistered successfully.", channel);
+			HandlePlayerRegisteration.unregisterPlayer(player, db, event);
 			break;
-
-		case "list": {
-			List<Player> storedPlayers = db.getAllStoredPlayers();
-			List<Member> allMembers = channel.getGuild().getMembers();
-
-			Collections.sort(storedPlayers, (p1, p2) -> String.CASE_INSENSITIVE_ORDER.compare(DiscordUtils.getMemberNameFromId(allMembers, p1.getDiscordUserId()), DiscordUtils.getMemberNameFromId(allMembers, p2.getDiscordUserId())));
-			TreeMap<String, String> nameWithUrl = new TreeMap<String, String>();
-
-			if (storedPlayers.isEmpty()) {
-				Messages.sendMessage("No players are being tracked! Use \"ru register <URL>\".", channel);
-				break;
-			}
-
-			for (int index = 0; index < storedPlayers.size(); index++) {
-				if (index % 25 == 0 && index != 0) {
-					Messages.sendMessageStringMap(nameWithUrl, channel);
-					nameWithUrl.clear();
-				}
-				Player listPlayer = storedPlayers.get(index);
-				// DEV: Kein Hinzufügen
-				nameWithUrl.put(Format.bold(DiscordUtils.getMemberNameFromId(allMembers, listPlayer.getDiscordUserId())), ApiConstants.USER_PRE_URL + listPlayer.getPlayerId());
-			}
-			Messages.sendMessageStringMap(nameWithUrl, channel);
+		case "list":
+			ListPlayers.sendRegisteredPlayers(db, channel);
 			break;
-		}
 		case "registerall":
-			List<Member> guildMembers = channel.getGuild().getMembers();
-			List<Long> storedUserIds = db.getAllStoredPlayers().stream().map(p -> p.getDiscordUserId()).collect(Collectors.toList());
-
-			List<Member> missingMembers = guildMembers.stream().filter(m -> !storedUserIds.contains(m.getIdLong()) && !m.getUser().isBot()).collect(Collectors.toList());
-			List<String> missingMemberNames = missingMembers.stream().map(m -> m.getEffectiveName()).sorted(String.CASE_INSENSITIVE_ORDER).collect(Collectors.toList());
-
-			String message = Format.bold("These members are not registered yet:\n\n");
-			message = message.concat(String.join("\n", missingMemberNames));
-			Messages.sendMessage(message, channel);
-
-			event.getJDA().addEventListener(new RegisterAllListener(channel, event.getAuthor(), missingMembers, db));
+			RegisterAll.registerAllMembers(db, event);
 			break;
 		case "improvement":
-			List<Player> storedPlayers = db.getAllStoredPlayers();
-			List<PlayerImprovement> improvements = new ArrayList<PlayerImprovement>();
-			for (Player storedPlayer : storedPlayers) {
-				List<Integer> historyValues = storedPlayer.getHistoryValues();
-
-				int newRank = historyValues.get(historyValues.size() - 1);
-				int oldRank = historyValues.get(historyValues.size() - 1 - 7);
-				improvements.add(new PlayerImprovement(storedPlayer.getPlayerName(), oldRank, newRank));
-			}
-			Map<String, String> improvementsString = MapUtils.convertPlayerImprovements(improvements);
-			Messages.sendMultiPageMessage(improvementsString, "Improvement over the last seven days", channel);
+			Improvement.sendImprovementMessage(db, channel);
 			break;
 		case "randomquote":
-			RandomQuote.sendRandomQuote(event, channel);
+			RandomQuote.sendRandomQuote(event);
+			break;
+		case "chart":
+			Player storedPlayer = db.getAllStoredPlayers().stream().filter(p -> p.getDiscordUserId() == event.getAuthor().getIdLong()).findFirst().orElseGet(null);
+			if (storedPlayer == null) {
+				Messages.sendMessage("You are not registered. Try \"ru help\".", channel);
+			}
+			PlayerChart.sendChartImage(storedPlayer, event, (msgParts.size() >= 3 ? msgParts.get(2) : null));
+			break;
+		case "chartall":
+			List<Player> storedPlayers = db.getAllStoredPlayers();
+			PlayerChart.sendChartImage(storedPlayers, event, (msgParts.size() >= 3 ? msgParts.get(2) : null));
+			break;
+		case "playlist": {
+			if (msgParts.size() < 3) {
+				Messages.sendMessage("Please provide at least one key.", channel);
+				break;
+			}
+			List<String> values = new LinkedList<>(Arrays.asList(msgParts.get(2).split(" ")));
+			String playlistTitle = values.get(0);
+			values.remove(playlistTitle);
+
+			bs.sendPlaylistInChannel(values, playlistTitle, channel);
+			break;
+		}
+		case "rplaylist":
+			if (msgParts.size() < 3) {
+				Messages.sendMessage("Please provide at least one key.", channel);
+				break;
+			}
+			List<String> values = new LinkedList<>(Arrays.asList(msgParts.get(2).split(" ")));
+			String playlistTitle = values.get(0);
+			values.remove(playlistTitle);
+
+			bs.sendRecruitingPlaylistInChannel(values, playlistTitle, event);
 			break;
 		case "seal":
 			Messages.sendImage(BotConstants.sealImageUrl, "Cute seal.jpg", channel);
 			break;
 		case "say":
-			System.out.println(event.getAuthor() + " said: " + msgParts.get(2));
+			String phrase = msgParts.size() >= 3 ? msgParts.get(2) : "🤡";
+			System.out.println(event.getAuthor() + " said: " + phrase);
 			try {
 				event.getMessage().delete().queue();
 			} catch (Exception e) {
 				System.out.println("Could not delete message because of lacking permissions.");
 			}
-			Messages.sendPlainMessage(msgParts.get(2), channel);
+			Messages.sendPlainMessage(phrase, channel);
+			break;
+		case "deletethat":
+			List<Message> latestMessages = event.getChannel().getHistory().retrievePast(100).complete();
+			latestMessages = latestMessages.stream().filter(message -> message.getAuthor().getIdLong() == event.getJDA().getSelfUser().getIdLong()).collect(Collectors.toList());
+
+			if (!latestMessages.isEmpty()) {
+				Message latestMessage = latestMessages.get(0);
+				latestMessage.delete().queue();
+				Messages.sendTempMessage("Message deleted.", 4, channel);
+			} else {
+				Messages.sendTempMessage("I could not find my latest message...", 4, channel);
+			}
+			break;
+		case "youdidnotseethat":
+			event.getMessage().delete().queue();
+			String filler = Format.bold(Format.bold(" ")) + "\n";
+			Messages.sendPlainMessage(StringUtils.repeat(filler, 40), channel);
 			break;
 		case "help":
 			Messages.sendMessageStringMap(BotConstants.getCommands(), channel);
@@ -274,6 +235,45 @@ public class BeatSaberBot extends ListenerAdapter {
 			Messages.sendMessage("Sorry, i don't speak wrong. 🤡  Try \"ru help\".", channel);
 		}
 		System.gc();
+	}
+
+	@Override
+	public void onGuildMemberLeave(GuildMemberLeaveEvent event) {
+		long userId = event.getUser().getIdLong();
+		db.deletePlayerByDiscordUserId(userId);
+	}
+
+	private Player getPlayerDependingOnCommand(List<String> msgParts, MessageReceivedEvent event) {
+		TextChannel channel = event.getTextChannel();
+		List<String> commandsWithPlayerInfo = BotConstants.getCommandsWithPlayerInfo();
+
+		Player player = null;
+		String command = msgParts.get(1);
+		if (commandsWithPlayerInfo.contains(command)) {
+			if (msgParts.size() == 3) {
+				String urlOrPlayerName = msgParts.get(2);
+				if (Format.isUrl(urlOrPlayerName)) {
+					try {
+						player = getScoreSaberPlayerFromUrl(msgParts.get(2));
+						player.setDiscordUserId(event.getAuthor().getIdLong());
+					} catch (FileNotFoundException e) {
+						Messages.sendMessage(e.getMessage(), channel);
+					}
+				} else if (commandDoesntRequireUrl(command)) {
+					player = new Player();
+					player.setPlayerName(urlOrPlayerName);
+				} else {
+					Messages.sendMessage("Could not find player \"" + urlOrPlayerName + "\".", channel);
+				}
+			} else {
+				Messages.sendMessage("Player URL or name is missing. Please try again. Try \"ru help\" for more info.", channel);
+			}
+		}
+		return player;
+	}
+
+	private boolean commandDoesntRequireUrl(String command) {
+		return !command.equals("register");
 	}
 
 	@Override

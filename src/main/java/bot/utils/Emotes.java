@@ -12,7 +12,7 @@ public class Emotes {
 	public static final String ARROW_RIGHT = "➡️";
 	
 	public static Emote getEmoteByRank(int rank, List<Emote> emotes) {
-		int milestone = RoleManager.findMilestoneForRank(rank);
+		int milestone = ListValueUtils.findMilestoneForRank(rank);
 		int milestoneIndex = Arrays.asList(BotConstants.rankMilestones).indexOf(milestone);
 
 		String emoteName = BotConstants.rankEmotes[milestoneIndex];

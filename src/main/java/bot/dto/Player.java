@@ -1,4 +1,4 @@
-package bot.foaa.dto;
+package bot.dto;
 
 import java.io.Serializable;
 import java.util.List;

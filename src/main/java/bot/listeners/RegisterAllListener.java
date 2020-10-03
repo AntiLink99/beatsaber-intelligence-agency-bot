@@ -5,7 +5,7 @@ import java.util.List;
 import bot.api.ApiConstants;
 import bot.api.ScoreSaber;
 import bot.db.DatabaseManager;
-import bot.foaa.dto.Player;
+import bot.dto.Player;
 import bot.utils.Messages;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.MessageChannel;
@@ -65,7 +65,6 @@ public class RegisterAllListener extends ListenerAdapter {
 					return;
 				}
 			} else if (progressionState == RegisterAllState.AWAIT_SS_URL) {
-
 				if (content.toLowerCase().equals("skip")) {
 					nextMember(channel, event);
 					return;

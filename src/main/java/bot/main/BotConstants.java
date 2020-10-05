@@ -1,22 +1,49 @@
 package bot.main;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Base64;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.collections4.map.LinkedMap;
+import org.apache.commons.io.FileUtils;
+
+import bot.utils.Format;
 
 public class BotConstants {
 
 	public static final String PLAYING = "with AntiLink's emotions 👨‍💻";
-	
+
 	public static final String sealImageUrl = "https://i.imgur.com/LcCzrxx.jpg";
 	public static final long foaaServerId = Long.valueOf(System.getenv("server_id"));
 
 	public static final Integer[] rankMilestones = { 50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000, 2000, 3000, 4000, 5000 };
 	public static final String[] rankEmotes = { "kekw", "pepela", "monkaspeed", "raphtaliapats", "hehe", "giggle", "ayaya", "umarud", "yumyum", "happyotaku", "peepohappy", "tohkahappy", "senkowhat", "smilew", "weirdchamp" };
 	public static final String rolePrefix = "Top ";
+
+	public static Integer[] ppRoleMilestones = { 300, 350, 400, 450, 500 };
+	public static final String[] ppRoles = { "smol pp", "average pp", "big pp", "huge pp", "jumbo pp" };
+	public static final String ppRoleSuffix = " PP";
+
 	public static final int milestoneEmoteCount = 10;
 	public static String defaultEmote = ":boom:";
-	public final static int entriesPerReactionPage = 5;	
+
+	public static String[] playlistDifficultyEmotes = {"🟩","🟦","🟧","🟥","🟪"};
+	public static int improvementReactionMinTimeDiff = 400000000;
+
+	public static String[] allowedRecruitingCommands = {"rplaylist", "playlist", "deletethat"};
+
+	public final static int entriesPerReactionPage = 5;
+
+	public static final int chartWidth = 2000;
+
+	public static final String playlistImage = getImageBase64("foaa.png");
+	public static final String playlistAuthor = "AntiLink#1337";
+
+	public static final long recruitingServerId = 719966895754969208L;
+	public static final long recruitRoleId = 720746400614187079L;
 
 	public static Map<String, String> getCommands() {
 		Map<String, String> commands = new LinkedMap<String, String>();
@@ -26,10 +53,36 @@ public class BotConstants {
 		commands.put("ru update <ScoreSaber URL or name>", "Updates the player's role manually if a new milestone was reached.");
 		commands.put("ru improvement", "Lists the rank difference between the last seven days for all players.");
 		commands.put("ru list", "Lists all players that are being tracked and updated.");
+		commands.put("ru claimpp", "Assigns a pp role to you depending on your top play.");
 		commands.put("ru randomquote", "Print out a random quote from the #quotes channel.");
+		commands.put("ru chart", "Displays a chart with your rank change over the last couple of days.");
+		commands.put("ru chartall (optional: <highest> <lowest>)", "Displays a chart with the rank changes of all players over the last couple of days. Default range is #1 - #2000.");
+		commands.put("ru playlist <filename> <map keys>", "Automatically creates a playlist with the given map keys and name.");
+		commands.put("ru rplaylist <filename> <map keys>", "Creates a playlist just like \"ru playlist\" but asks for specific difficulties. An embed is shown afterwards with the given information and download links for all the maps.");
+		commands.put("ru deletethat", "Deletes the latest message from the bot in the channel.");
+		commands.put("ru youdidnotseethat", "You did "+Format.underline("not")+" see that.");
 		commands.put("ru say <anything>", "Repeats the given phrase and deletes the message of the sender.");
 		commands.put("ru seal", "Cute seal.");
 		commands.put("ru help", "Lists all commands, duh.");
 		return commands;
+	}
+
+	public static List<String> getCommandsWithPlayerInfo() {
+		List<String> commandsWithPlayerInfo = new ArrayList<String>();
+		commandsWithPlayerInfo.add("register");
+		commandsWithPlayerInfo.add("unregister");
+		commandsWithPlayerInfo.add("update");
+		return commandsWithPlayerInfo;
+	}
+
+	private static String getImageBase64(String imageName) {
+		byte[] imageBytes = null;
+		try {
+			imageBytes = FileUtils.readFileToByteArray(new File("src/main/resources/" + imageName));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		String base64 = Base64.getEncoder().encodeToString(imageBytes);
+		return "data:image/png;base64," + base64;
 	}
 }

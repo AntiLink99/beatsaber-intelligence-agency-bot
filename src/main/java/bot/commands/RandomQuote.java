@@ -1,4 +1,4 @@
-package bot.main;
+package bot.commands;
 
 import java.io.File;
 import java.io.IOException;
@@ -6,20 +6,21 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
+import bot.main.BotConstants;
 import bot.utils.Messages;
 import bot.utils.RandomUtils;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.Message.Attachment;
 import net.dv8tion.jda.api.entities.TextChannel;
-import net.dv8tion.jda.api.events.Event;
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
 public class RandomQuote {
 
-	public static void sendRandomQuote(Event event, TextChannel channel) {
+	public static void sendRandomQuote(MessageReceivedEvent event) {
 		Guild foaaGuild = event.getJDA().getGuildById(BotConstants.foaaServerId);
 		if (foaaGuild == null) {
-			Messages.sendMessage("Could not find guild which contains the quote channel.", channel);
+			Messages.sendMessage("Could not find guild which contains the quote channel.", event.getChannel());
 			return;
 		}
 		TextChannel quoteChannel = foaaGuild.getTextChannels().stream().filter(c -> c.getName().equals("quotes")).findFirst().orElse(null);
@@ -33,14 +34,14 @@ public class RandomQuote {
 				if (!resourcesFolder.exists()) {
 					resourcesFolder.mkdirs();
 				}
-				
+
 				String filePath = resourcesFolder.getAbsolutePath() + randomImage.getFileName();
 				File image = new File(filePath);
 				if (!image.exists()) {
 					image.createNewFile();
 					image = randomImage.downloadToFile(filePath).join();
 				}
-				Messages.sendImage(image, image.getName(), channel);
+				Messages.sendImage(image, image.getName(), event.getTextChannel());
 				image.deleteOnExit();
 			}
 		} catch (InterruptedException e) {

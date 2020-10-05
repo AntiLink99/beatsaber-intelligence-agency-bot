@@ -1,5 +1,7 @@
 package bot.utils;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.text.DecimalFormat;
 
 import org.apache.commons.lang3.StringUtils;
@@ -44,5 +46,18 @@ public class Format {
 
 	public static String blueCode(String msg) {
 		return "```CSS\n" + msg + "\n```";
+	}
+
+	public static String foaaRole(String role) {
+		return "[ " + role + " ]";
+	}
+
+	public static boolean isUrl(String str) {
+		try {
+			new URI(str);
+			return true;
+		} catch (URISyntaxException e) {
+			return false;
+		}
 	}
 }

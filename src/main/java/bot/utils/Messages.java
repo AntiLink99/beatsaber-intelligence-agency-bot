@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.io.FileUtils;
 
-import bot.foaa.dto.Player;
+import bot.dto.Player;
 import bot.listeners.EmbedReactionListener;
 import bot.main.BotConstants;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -36,13 +36,23 @@ public class Messages {
 		}
 	}
 
-	public static void sendMessageStringMap(Map<String, String> values, TextChannel channel) {
+	public static void sendMessageStringMapWithTitle(Map<String, String> values, String title, TextChannel channel) {
 		EmbedBuilder builder = new EmbedBuilder();
 		for (String key : values.keySet()) {
 			builder.addField(key, values.get(key), false);
 		}
 		builder.setColor(embedColor);
+		builder.setTitle(title);
 		channel.sendMessage(builder.build()).queue();
+	}
+	
+	public static Message sendMessageStringMap(Map<String, String> values, TextChannel channel) {
+		EmbedBuilder builder = new EmbedBuilder();
+		for (String key : values.keySet()) {
+			builder.addField(key, values.get(key), false);
+		}
+		builder.setColor(embedColor);
+		return channel.sendMessage(builder.build()).complete();
 	}
 
 	public static void sendMessage(List<String> values, MessageChannel channel) {
@@ -86,7 +96,7 @@ public class Messages {
 			String emoteLine = Emotes.getMessageWithMultipleEmotes(emote);
 
 			sendPlainMessage(emoteLine, channel);
-			sendMessage(player.getPlayerName() + "'s milestone role was updated! " + Format.bold("(Top " + String.valueOf(RoleManager.findMilestoneForRank(player.getRank())) + ")"), channel);
+			sendMessage(player.getPlayerName() + "'s milestone role was updated! " + Format.bold("(Top " + String.valueOf(ListValueUtils.findMilestoneForRank(player.getRank())) + ")"), channel);
 			sendPlainMessage(emoteLine, channel);
 			sendPlainMessage(Format.ping(String.valueOf(player.getDiscordUserId())), channel);
 		} catch (Exception e) {
@@ -114,5 +124,27 @@ public class Messages {
 		builder.setTitle(title);
 		builder.setFooter(footer);
 		channel.editMessageById(messageId, builder.build()).queue();
+	}
+
+	public static void sendTempMessage(String msg, int deleteAfterSecs, MessageChannel channel) {
+		try {
+			EmbedBuilder builder = new EmbedBuilder();
+			builder.setDescription(msg);
+			builder.setColor(embedColor);
+			Message message = channel.sendMessage(builder.build()).complete();
+
+			new java.util.Timer().schedule(new java.util.TimerTask() {
+				@Override
+				public void run() {
+					message.delete().queue();
+				}
+			}, deleteAfterSecs * 1000);
+		} catch (Exception e) {
+
+		}
+	}
+
+	public static void sendFile(File file, String fileName, MessageChannel channel) {
+		channel.sendFile(file, fileName).queue();
 	}
 }

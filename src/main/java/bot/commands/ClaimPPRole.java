@@ -22,7 +22,7 @@ public class ClaimPPRole {
 	public static void validateAndAssignRole(Member member, DatabaseManager db, ScoreSaber ss, MessageChannel channel, boolean showMessages) {
 
 		long discordUserId = member.getUser().getIdLong();
-		long playerId = db.getPlayerIdByDiscordId(discordUserId);
+		long playerId = Long.parseLong(db.getPlayerByDiscordId(discordUserId).getPlayerId());
 		if (playerId == -1) {
 			Messages.sendMessage("You are not registered. Use \"ru help\".", channel);
 			return;
@@ -53,7 +53,6 @@ public class ClaimPPRole {
 		List<Player> storedPlayers = db.getAllStoredPlayers();
 		for (Player player : storedPlayers) {
 			Member member = event.getGuild().getMemberById(player.getDiscordUserId());
-			System.out.println(member.getEffectiveName());
 			if (member != null) {
 				validateAndAssignRole(member, db, ss, event.getTextChannel(), false);
 			}

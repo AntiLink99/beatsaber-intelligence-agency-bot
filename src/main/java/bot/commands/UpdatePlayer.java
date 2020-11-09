@@ -30,12 +30,11 @@ public class UpdatePlayer {
 
 		final long playerDiscordId = storedPlayer.getDiscordUserId();
 		ssPlayer.setDiscordUserId(playerDiscordId);
-		Member member = channel.getMembers().stream().filter(m -> m.getIdLong() == playerDiscordId).findFirst().orElse(null);
-
+		Member member = channel.getGuild().getMembers().stream().filter(m -> m.getUser().getIdLong() == playerDiscordId).findFirst().orElse(null);
 		if (RoleManager.isNewMilestone(ssPlayer.getRank(), member)) {
 			db.deletePlayer(storedPlayer);
 			db.savePlayer(ssPlayer);
-			RoleManager.removeMemberRolesByName(member, BotConstants.rolePrefix);
+			RoleManager.removeMemberRolesByName(member, BotConstants.topRolePrefix);
 			RoleManager.assignMilestoneRole(ssPlayer.getRank(), member);
 			Messages.sendMilestoneMessage(ssPlayer, channel);
 		} else {
@@ -54,16 +53,25 @@ public class UpdatePlayer {
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
-				boolean successDelete = db.deletePlayer(storedPlayer);
-				if (!successDelete) {
-					Messages.sendMessage("The player \"" + storedPlayer.getPlayerName() + "\" could not be removed from the database.", channel);
-					break;
-				}
-
-				boolean successSave = db.savePlayer(ssPlayer);
-				if (!successSave) {
-					Messages.sendMessage("The player \"" + storedPlayer.getPlayerName() + "\" is already registered! Use \"ru unregister <URL / Username>\" to remove the player from the database.", channel);
-					break;
+				
+				final long playerDiscordId = storedPlayer.getDiscordUserId();
+				ssPlayer.setDiscordUserId(playerDiscordId);
+				Member member = channel.getGuild().getMembers().stream().filter(m -> m.getIdLong() == playerDiscordId).findFirst().orElse(null);
+				if (RoleManager.isNewMilestone(ssPlayer.getRank(), member)) {
+					boolean successDelete = db.deletePlayer(storedPlayer);
+					if (!successDelete) {
+						Messages.sendMessage("The player \"" + storedPlayer.getPlayerName() + "\" could not be removed from the database.", channel);
+						break;
+					}
+	
+					boolean successSave = db.savePlayer(ssPlayer);
+					if (!successSave) {
+						Messages.sendMessage("The player \"" + storedPlayer.getPlayerName() + "\" is already registered! Use \"ru unregister <URL / Username>\" to remove the player from the database.", channel);
+						break;
+					}
+					RoleManager.removeMemberRolesByName(member, BotConstants.topRolePrefix);
+					RoleManager.assignMilestoneRole(ssPlayer.getRank(), member);
+					Messages.sendMilestoneMessage(ssPlayer, channel);
 				}
 			}
 			Messages.sendMessage("All players were updated successfully.", channel);

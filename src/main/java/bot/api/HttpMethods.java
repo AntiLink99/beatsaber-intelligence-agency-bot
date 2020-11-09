@@ -23,7 +23,7 @@ public class HttpMethods {
 
 	public HttpMethods() {
 		http = new HttpClient();
-		http.getParams().setSoTimeout(5000);
+		http.getParams().setSoTimeout(10000);
 		http.getParams().setConnectionManagerTimeout(5000);
 		http.getParams().setParameter(HttpClientParams.COOKIE_POLICY, CookiePolicy.BROWSER_COMPATIBILITY);
 	}
@@ -59,6 +59,7 @@ public class HttpMethods {
 
 	public JsonObject fetchJson(String url) {
 		try {
+			System.out.println("Fetching "+url+"...");
 			return JsonParser.parseString(IOUtils.toString(get(url), "UTF-8")).getAsJsonObject();
 		} catch (IOException e) {
 			return null;

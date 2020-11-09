@@ -12,20 +12,25 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import bot.dto.Player;
+import bot.dto.PlayerSkills;
 
 public class DatabaseManager {
 	private Connection con;
 
 	public void connectToDatabase(String database) {
-
-		if (con == null) {
-			try {
+		try {
+			if (con == null || con.isClosed()) {
 				Class.forName("com.mysql.cj.jdbc.Driver");
 				con = DriverManager.getConnection("jdbc:mysql://localhost:3306/" + DBConstants.DB_NAME + "?autoReconnect=true&serverTimezone=UTC&useUnicode=yes&characterEncoding=UTF-8", DBConstants.DB_USERNAME, DBConstants.DB_PASSWORD);
-			} catch (Exception e) {
-				e.printStackTrace();
-				System.out.println(e);
-
+			}
+		} catch (Exception e) {
+			System.out.println(e);
+			try {
+				if (!con.isClosed()) {
+					con.close();
+				}
+			} catch (SQLException e1) {
+				System.out.println(e1);
 			}
 		}
 	}
@@ -80,7 +85,7 @@ public class DatabaseManager {
 		}
 		return false;
 	}
-	
+
 	public List<Player> getAllStoredPlayers() {
 		List<Player> players = new ArrayList<Player>();
 		try {
@@ -132,19 +137,28 @@ public class DatabaseManager {
 		return null;
 	}
 
-	public long getPlayerIdByDiscordId(long discordUserId) {
+	public Player getPlayerByDiscordId(long discordUserId) {
 		try {
-			PreparedStatement stmt = con.prepareStatement(DBConstants.SELECT_PLAYER_ID_BY_DISCORD_ID_STMT);
+			PreparedStatement stmt = con.prepareStatement(DBConstants.SELECT_PLAYER_BY_DISCORD_ID_STMT);
 			stmt.setLong(1, discordUserId);
 
 			ResultSet rs = stmt.executeQuery();
 			if (rs != null && rs.next()) {
-				return rs.getLong("player_id");
+				Player player = new Player();
+				player.setPlayerId(rs.getString("player_id"));
+				player.setPlayerName(rs.getString("player_name"));
+				player.setAvatar(rs.getString("player_avatar"));
+				player.setRank(rs.getInt("player_rank"));
+				player.setCountryRank(rs.getInt("player_rank"));
+				player.setPp(rs.getFloat("player_pp"));
+				player.setCountry(rs.getString("player_country"));
+				player.setDiscordUserId(rs.getLong("discord_user_id"));
+				return player;
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		return -1;
+		return null;
 	}
 
 	public long getDiscordIdByPlayerId(String playerId) {
@@ -159,6 +173,56 @@ public class DatabaseManager {
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
+		return -1;
+	}
+
+	public PlayerSkills getPlayerSkillsByDiscordId(long discordId) {
+		try {
+			PreparedStatement stmt = con.prepareStatement(DBConstants.SELECT_SKILLS_BY_DISCORD_ID);
+			stmt.setLong(1, discordId);
+
+			ResultSet rs = stmt.executeQuery();
+			if (rs != null && rs.next()) {
+				PlayerSkills skills = new PlayerSkills();
+				skills.setAccuracy(rs.getInt("accuracy"));
+				skills.setSpeed(rs.getInt("speed"));
+				skills.setStamina(rs.getInt("stamina"));
+				skills.setReading(rs.getInt("reading"));
+				skills.setPlayerName(rs.getString("player_name"));
+				return skills;
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+	public int setSkill(long idLong, String skill, int newValue) {
+		String stmtToUse = null;
+		PreparedStatement selectStmt;
+		try {
+			selectStmt = con.prepareStatement(DBConstants.SELECT_SKILLS_BY_DISCORD_ID);
+			selectStmt.setLong(1, idLong);
+			ResultSet rs = selectStmt.executeQuery();
+			stmtToUse = rs != null && rs.next() ? DBConstants.getUpdateSkillStatement(skill) : DBConstants.getInsertSkillStatement(skill);
+		} catch (SQLException e) {
+			return -1;
+		}
+		if (stmtToUse != null) {
+			try {
+				PreparedStatement stmt = con.prepareStatement(stmtToUse);
+				stmt.setInt(1, newValue);
+				stmt.setLong(2, idLong);
+				if (stmtToUse.equals(DBConstants.getInsertSkillStatement(skill))) {
+
+					stmt.setString(3, getPlayerByDiscordId(idLong).getPlayerName());
+				}
+				return stmt.executeUpdate();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+
 		return -1;
 	}
 }

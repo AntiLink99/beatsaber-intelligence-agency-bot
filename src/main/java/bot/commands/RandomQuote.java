@@ -35,7 +35,7 @@ public class RandomQuote {
 					resourcesFolder.mkdirs();
 				}
 
-				String filePath = resourcesFolder.getAbsolutePath() + randomImage.getFileName();
+				String filePath = resourcesFolder.getAbsolutePath() + "/" + randomImage.getFileName();
 				File image = new File(filePath);
 				if (!image.exists()) {
 					image.createNewFile();

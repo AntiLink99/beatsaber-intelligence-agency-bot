@@ -8,8 +8,8 @@ import java.util.Map;
 import bot.api.ApiConstants;
 import bot.api.BeatSaver;
 import bot.dto.Playlist;
-import bot.dto.PlaylistSong;
-import bot.dto.PlaylistSongDifficulties;
+import bot.dto.Song;
+import bot.dto.SongDifficulties;
 import bot.main.BotConstants;
 import bot.utils.Format;
 import bot.utils.Messages;
@@ -23,7 +23,7 @@ public class PlaylistDifficultyListener extends ListenerAdapter {
 
 	final long authorId;
 	Playlist playlist;
-	PlaylistSong currentSong;
+	Song currentSong;
 	TextChannel channel;
 	BeatSaver bs;
 	Message newestMessage;
@@ -45,14 +45,14 @@ public class PlaylistDifficultyListener extends ListenerAdapter {
 		}, 300 * 1000);
 	}
 
-	private void askForSongDifficulty(PlaylistSong song) {
+	private void askForSongDifficulty(Song song) {
 		HashMap<String, String> result = new HashMap<>();
 		result.put("Please react with the difficulty for this song:", Format.bold(song.getSongName()));
 		newestMessage = Messages.sendMessageStringMap(result, channel);
 		reactWithDifficultiesOnMessage(newestMessage, song.getDifficulties());
 	}
 
-	private void reactWithDifficultiesOnMessage(Message message, PlaylistSongDifficulties difficulties) {
+	private void reactWithDifficultiesOnMessage(Message message, SongDifficulties difficulties) {
 		if (difficulties.isEasy()) {
 			message.addReaction(BotConstants.playlistDifficultyEmotes[0]).queue();
 		}
@@ -89,7 +89,7 @@ public class PlaylistDifficultyListener extends ListenerAdapter {
 		}
 	}
 
-	private void addSongDifficultyByEmote(PlaylistSong song, String emoji) {
+	private void addSongDifficultyByEmote(Song song, String emoji) {
 		resultMessage.put(song.getSongName(), getDifficultyNameByEmote(emoji) + "\n" + ApiConstants.BS_DOWNLOAD_URL + song.getSongKey());
 	}
 
@@ -109,11 +109,11 @@ public class PlaylistDifficultyListener extends ListenerAdapter {
 			return "???";
 	}
 
-	private boolean hasNextSong(Playlist playlist, PlaylistSong currentSong) {
+	private boolean hasNextSong(Playlist playlist, Song currentSong) {
 		return playlist.getSongs().indexOf(currentSong) < playlist.getSongs().size() - 1;
 	}
 
-	private PlaylistSong getNextSong(PlaylistSong currentSong) {
+	private Song getNextSong(Song currentSong) {
 		return playlist.getSongs().get(playlist.getSongs().indexOf(currentSong) + 1);
 	}
 

@@ -1,16 +1,30 @@
 package bot.dto;
 
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.util.Locale;
+
 public class SongScore {
 	private int rank;
 	private long scoreId;
 	private long score;
 	private float pp;
 	private float weight;
+	private int maxScore;
+	private int difficulty;
+	private String songHash;
 	private String songName;
 	private String songSubName;
 	private String songAuthorName;
 	private String levelAuthorName;
-	long maxScore;
+	private String coverURL;
+
+	private transient DecimalFormat format;
+
+	public SongScore() {
+		format = new DecimalFormat("###.##");
+		format.setDecimalFormatSymbols(DecimalFormatSymbols.getInstance(Locale.ENGLISH));
+	}
 
 	public int getRank() {
 		return rank;
@@ -48,8 +62,16 @@ public class SongScore {
 		return weight;
 	}
 
+	public String getPpString() {
+		return format.format(getPp()) + "PP";
+	}
+
 	public void setWeight(float weight) {
 		this.weight = weight;
+	}
+
+	public String getWeightPpString() {
+		return "("+format.format(getPp() * getWeight()) + "PP)";
 	}
 
 	public String getSongName() {
@@ -82,5 +104,62 @@ public class SongScore {
 
 	public void setLevelAuthorName(String levelAuthorName) {
 		this.levelAuthorName = levelAuthorName;
+	}
+
+	public String getCoverURL() {
+		return coverURL;
+	}
+
+	public void setCoverURL(String coverURL) {
+		this.coverURL = coverURL;
+	}
+
+	public String getSongHash() {
+		return songHash;
+	}
+
+	public void setSongHash(String songHash) {
+		this.songHash = songHash;
+	}
+
+	public int getMaxScore() {
+		return maxScore;
+	}
+
+	public void setMaxScore(int maxScore) {
+		this.maxScore = maxScore;
+	}
+
+	public double getAccuracy() {
+		return Double.valueOf(score) / Double.valueOf(maxScore);
+	}
+
+	public String getAccuracyString() {
+		return format.format(getAccuracy() * 100d) + "%";
+	}
+
+	public int getDifficulty() {
+		return difficulty;
+	}
+
+	public void setDifficulty(int difficulty) {
+		this.difficulty = difficulty;
+	}
+
+	public String getDifficultyName() {
+		switch (difficulty) {
+		case 1:
+			return "Easy";
+		case 3:
+			return "Normal";
+		case 5:
+			return "Hard";
+		case 7:
+			return "Expert";
+		case 9:
+			return "Expert+";
+		default:
+			return "???";
+		}
 	}
 }

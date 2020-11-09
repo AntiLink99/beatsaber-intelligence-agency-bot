@@ -15,14 +15,14 @@ public class RoleManager {
 			return false;
 		}
 		int milestone = ListValueUtils.findMilestoneForRank(rank);
-		Role milestoneRole = member.getRoles().stream().filter(role -> role.getName().equals(BotConstants.rolePrefix + milestone)).findFirst().orElse(null);
-		List<Role> milestoneRoles = getMemberRolesByName(member, BotConstants.rolePrefix);
+		Role milestoneRole = member.getRoles().stream().filter(role -> role.getName().equals(BotConstants.topRolePrefix + milestone)).findFirst().orElse(null);
+		List<Role> milestoneRoles = getMemberRolesByName(member, BotConstants.topRolePrefix);
 		return milestoneRole == null || milestoneRoles.size() > 1;
 	}
 
 	public static void assignMilestoneRole(int newRank, Member member) {
 		int milestone = ListValueUtils.findMilestoneForRank(newRank);
-		assignRole(member, BotConstants.rolePrefix + milestone);
+		assignRole(member, BotConstants.topRolePrefix + milestone);
 	}
 
 	public static void removeMemberRolesByName(Member member, String name) {

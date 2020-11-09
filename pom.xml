@@ -16,7 +16,7 @@
 		<dependency>
 			<groupId>net.dv8tion</groupId>
 			<artifactId>JDA</artifactId>
-			<version>4.1.1_101</version>
+			<version>4.2.0_168</version>
 		</dependency>
 		<dependency>
 			<groupId>org.json</groupId>
@@ -62,6 +62,11 @@
 			<groupId>org.knowm.xchart</groupId>
 			<artifactId>xchart</artifactId>
 			<version>3.6.5</version>
+		</dependency>
+		<dependency>
+			<groupId>org.openjfx</groupId>
+			<artifactId>javafx-controls</artifactId>
+			<version>12.0.2</version>
 		</dependency>
 	</dependencies>
 	<repositories>

@@ -1,5 +1,8 @@
 package bot.utils;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import bot.main.BotConstants;
 
 public class ListValueUtils {
@@ -32,5 +35,11 @@ public class ListValueUtils {
 			}
 		}
 		return -1;
+	}
+
+	public static List<Integer> addElementReturnList(List<Integer> list, int elem) {
+		List<Integer> newList = new ArrayList<>(list);
+		newList.add(elem);
+		return newList;
 	}
 }

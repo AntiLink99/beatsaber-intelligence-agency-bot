@@ -29,7 +29,6 @@ import bot.commands.RecentSongs;
 import bot.commands.RegisterAll;
 import bot.commands.SetSkill;
 import bot.commands.UpdatePlayer;
-import bot.db.DBConstants;
 import bot.db.DatabaseManager;
 import bot.dto.Player;
 import bot.dto.PlayerSkills;
@@ -83,8 +82,8 @@ public class BeatSaberBot extends ListenerAdapter {
 			TextChannel botChannel = jda.getTextChannelById(Long.valueOf(System.getenv("channel_id")));
 			Runnable runnable = new Runnable() {
 				public void run() {
+					db.connectToDatabase();
 					System.out.println("----- Starting User Refresh... [" + LocalTime.now().getHour() + ":" + LocalTime.now().getMinute() + "]");
-					db.connectToDatabase(DBConstants.DB_HOST);
 					try {
 						List<Player> players = db.getAllStoredPlayers();
 						for (Player storedPlayer : players) {
@@ -149,7 +148,7 @@ public class BeatSaberBot extends ListenerAdapter {
 		}
 		//
 		Player player = getPlayerDependingOnCommand(msgParts, event);
-		db.connectToDatabase(DBConstants.DB_HOST);
+		db.connectToDatabase();
 		switch (msgParts.get(1).toLowerCase()) {
 		case "register":
 			boolean success = HandlePlayerRegisteration.registerPlayer(player, db, channel);

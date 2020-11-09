@@ -1,5 +1,6 @@
 package bot.utils;
 
+import java.math.RoundingMode;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.text.DecimalFormat;
@@ -59,5 +60,11 @@ public class Format {
 		} catch (URISyntaxException e) {
 			return false;
 		}
+	}
+	
+	public static int roundDouble(double d) {
+		DecimalFormat df = new DecimalFormat("#.####");
+		df.setRoundingMode(RoundingMode.HALF_UP);
+		return Integer.parseInt(df.format(d));
 	}
 }

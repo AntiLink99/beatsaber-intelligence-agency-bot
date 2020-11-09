@@ -22,16 +22,20 @@ public class HandlePlayerRegisteration {
 	}
 
 	public static void unregisterPlayer(Player player, DatabaseManager db, MessageReceivedEvent event) {
+		long discordUserId = db.getDiscordIdByPlayerId(player.getPlayerId());
+		Member member = event.getGuild().getMemberById(discordUserId);
+		if (member == null) {
+			Messages.sendMessage("Member for player \"" + player.getPlayerName() + "\" could not be found.", event.getChannel());
+			return;
+		}
+		RoleManager.removeMemberRolesByName(member, BotConstants.topRolePrefix);
+		RoleManager.removeMemberRolesByName(member, BotConstants.ppRoleSuffix);
+		
 		boolean successDelete = db.deletePlayer(player);
 		if (!successDelete) {
 			Messages.sendMessage("The player \"" + player.getPlayerName() + "\" is already not registered.", event.getChannel());
 			return;
 		}
-		// MEMBER BY PLAYer
-		long discordUserId = db.getDiscordIdByPlayerId(player.getPlayerId());
-		Member member = event.getGuild().getMemberById(discordUserId);
-		RoleManager.removeMemberRolesByName(member, BotConstants.rolePrefix);
-		RoleManager.removeMemberRolesByName(member, BotConstants.ppRoleSuffix);
 		Messages.sendMessage("Player \"" + player.getPlayerName() + "\" was unregistered successfully.", event.getChannel());
 	}
 

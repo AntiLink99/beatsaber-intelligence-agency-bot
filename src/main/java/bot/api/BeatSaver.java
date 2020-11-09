@@ -12,8 +12,8 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 
 import bot.dto.Playlist;
-import bot.dto.PlaylistSong;
-import bot.dto.PlaylistSongDifficulties;
+import bot.dto.Song;
+import bot.dto.SongDifficulties;
 import bot.listeners.PlaylistDifficultyListener;
 import bot.main.BotConstants;
 import bot.utils.Messages;
@@ -30,25 +30,6 @@ public class BeatSaver {
 		http = new HttpMethods();
 		gson = new Gson();
 	}
-
-//	public File downloadMap(String mapKey) {
-//		String downloadUrl = ApiConstants.BS_DOWNLOAD_URL + mapKey;
-//
-//		try {
-//			File resourcesFolder = new File("src/main/resources/");
-//			if (!resourcesFolder.exists()) {
-//				resourcesFolder.mkdirs();
-//			}
-//
-//			String filePath = resourcesFolder.getAbsolutePath() + mapKey + ".zip";
-//			File mapZip = http.downloadFileFromUrl(downloadUrl, filePath);
-//
-//			return mapZip;
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//			return null;
-//		}
-//	}
 
 	public void sendPlaylistInChannel(List<String> mapKeys, String playlistTitle, MessageChannel channel) {
 		Playlist playlist;
@@ -79,7 +60,7 @@ public class BeatSaver {
 	}
 
 	private Playlist buildPlaylist(List<String> mapKeys, String playlistTitle) {
-		LinkedList<PlaylistSong> songs = mapKeys.stream().map(key -> fetchPlaylistSongByKey(key)).collect(Collectors.toCollection(LinkedList::new));
+		LinkedList<Song> songs = mapKeys.stream().map(key -> fetchSongByKey(key)).collect(Collectors.toCollection(LinkedList::new));
 		if (songs == null || songs.contains(null)) {
 			throw new IllegalArgumentException("At least one the given keys is invalid.");
 		} else if (songs.size() == 0) {
@@ -108,31 +89,42 @@ public class BeatSaver {
 		playlistFile.delete();
 	}
 
-	private PlaylistSong fetchPlaylistSongByKey(String key) {
+	private Song fetchSongByKey(String key) {
 		String infoUrl = ApiConstants.BS_MAP_DETAILS_URL + key;
 		JsonObject response = http.fetchJson(infoUrl);
-		try {
-			String hash = response.get("hash").getAsString();
-			String songName = response.get("metadata").getAsJsonObject().get("songName").getAsString();
-			String songKey = response.get("key").getAsString();
-			JsonObject diffJson = response.get("metadata").getAsJsonObject().get("difficulties").getAsJsonObject();
+		return getSongFromJson(response);
+	}
 
-			PlaylistSongDifficulties difficulties = new PlaylistSongDifficulties();
+	public Song fetchSongByHash(String hash) {
+		String infoUrl = ApiConstants.BS_MAP_BY_HASH_URL + hash;
+		JsonObject response = http.fetchJson(infoUrl);
+		return getSongFromJson(response);
+	}
+
+	private Song getSongFromJson(JsonObject json) {
+		try {
+			String hash = json.get("hash").getAsString();
+			String songName = json.get("metadata").getAsJsonObject().get("songName").getAsString();
+			String songKey = json.get("key").getAsString();
+			String coverURL = ApiConstants.BS_PRE_URL + json.get("coverURL").getAsString();
+			JsonObject diffJson = json.get("metadata").getAsJsonObject().get("difficulties").getAsJsonObject();
+
+			SongDifficulties difficulties = new SongDifficulties();
 			difficulties.setEasy(diffJson.get("easy").getAsBoolean());
 			difficulties.setNormal(diffJson.get("normal").getAsBoolean());
 			difficulties.setHard(diffJson.get("hard").getAsBoolean());
 			difficulties.setExpert(diffJson.get("expert").getAsBoolean());
 			difficulties.setExpertPlus(diffJson.get("expertPlus").getAsBoolean());
 
-			return new PlaylistSong(hash, songName, songKey, difficulties);
+			Song song = new Song();
+			song.setHash(hash);
+			song.setSongName(songName);
+			song.setSongKey(songKey);
+			song.setDifficulties(difficulties);
+			song.setCoverURL(coverURL);
+			return song;
 		} catch (NullPointerException e) {
 			return null;
 		}
 	}
-
-//	public void sendMapInChannel(String mapKey, MessageChannel channel) {
-//		File mapZip = downloadMap(mapKey);
-//		Messages.sendFile(mapZip, mapZip.getName(), channel); //Too large
-//		mapZip.delete();
-//	}
 }

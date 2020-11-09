@@ -46,4 +46,13 @@ public class ScoreSaber {
 		Type listType = new TypeToken<List<SongScore>>() {}.getType();
 		return gson.fromJson(topScores.toString(), listType);
 	}
+	
+	public List<SongScore> getRecentScoresByPlayerId(long playerId) {
+		String recentScoresUrl = ApiConstants.SS_PLAYER_PRE_URL + playerId + ApiConstants.SS_PLAYER_RECENT_SCORES_POST_URL;
+		JsonObject response = http.fetchJson(recentScoresUrl);
+		JsonArray topScores = response.getAsJsonArray("scores");
+
+		Type listType = new TypeToken<List<SongScore>>() {}.getType();
+		return gson.fromJson(topScores.toString(), listType);
+	}
 }

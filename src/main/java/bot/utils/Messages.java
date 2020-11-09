@@ -17,8 +17,11 @@ import bot.listeners.EmbedReactionListener;
 import bot.main.BotConstants;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Emote;
+import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
+import net.dv8tion.jda.api.entities.PrivateChannel;
+import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.TextChannel;
 
 public class Messages {
@@ -45,7 +48,7 @@ public class Messages {
 		builder.setTitle(title);
 		channel.sendMessage(builder.build()).queue();
 	}
-	
+
 	public static Message sendMessageStringMap(Map<String, String> values, TextChannel channel) {
 		EmbedBuilder builder = new EmbedBuilder();
 		for (String key : values.keySet()) {
@@ -64,6 +67,26 @@ public class Messages {
 		channel.sendMessage(builder.build()).queue();
 	}
 
+	public static void sendImageEmbed(String imagePath, String title, MessageChannel channel) {
+		EmbedBuilder builder = new EmbedBuilder();
+		builder.setTitle(Format.bold(Format.underline(title)));
+		builder.setColor(embedColor);
+		String format = imagePath.substring(imagePath.length() - 4);
+		builder.setImage("attachment://image" + format);
+		File imageFile = new File("src/main/resources" + title + format);
+		try {
+			FileUtils.copyURLToFile(new URL(imagePath), imageFile);
+		} catch (MalformedURLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		channel.sendFile(imageFile, "image" + format).embed(builder.build()).queue();
+		imageFile.delete();
+	}
+
 	public static void sendImage(String imagePath, String title, TextChannel channel) {
 		File imageFile = new File(title);
 		try {
@@ -73,7 +96,7 @@ public class Messages {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		channel.sendFile(imageFile, title).queue();
+		channel.sendFile(imageFile, title + imagePath.substring(imagePath.length() - 4)).queue();
 		imageFile.delete();
 	}
 
@@ -92,11 +115,18 @@ public class Messages {
 
 	public static void sendMilestoneMessage(Player player, TextChannel channel) {
 		try {
+			String roleName = BotConstants.topRolePrefix + String.valueOf(ListValueUtils.findMilestoneForRank(player.getRank()));
+			List<Role> roles = channel.getGuild().getRolesByName(roleName, true);
+			if (roles == null || roles.size() <= 0) {
+				System.out.println("Could not find role \"" + roleName + "\".");
+				return;
+			}
+
 			Emote emote = Emotes.getEmoteByRank(player.getRank(), channel.getGuild().getEmotes());
 			String emoteLine = Emotes.getMessageWithMultipleEmotes(emote);
 
 			sendPlainMessage(emoteLine, channel);
-			sendMessage(player.getPlayerName() + "'s milestone role was updated! " + Format.bold("(Top " + String.valueOf(ListValueUtils.findMilestoneForRank(player.getRank())) + ")"), channel);
+			sendMessage(Format.bold(player.getPlayerName() + "'s milestone role was updated! " + roles.get(0).getAsMention()), channel);
 			sendPlainMessage(emoteLine, channel);
 			sendPlainMessage(Format.ping(String.valueOf(player.getDiscordUserId())), channel);
 		} catch (Exception e) {
@@ -146,5 +176,10 @@ public class Messages {
 
 	public static void sendFile(File file, String fileName, MessageChannel channel) {
 		channel.sendFile(file, fileName).queue();
+	}
+
+	public static void sendPrivateMessage(String msg, Member member) {
+		PrivateChannel channel = member.getUser().openPrivateChannel().complete();
+		channel.sendMessage(msg).queue();
 	}
 }

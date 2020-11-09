@@ -17,11 +17,17 @@ import bot.dto.PlayerSkills;
 public class DatabaseManager {
 	private Connection con;
 
-	public void connectToDatabase(String database) {
+	public void connectToDatabase() {
 		try {
 			if (con == null || con.isClosed()) {
 				Class.forName("com.mysql.cj.jdbc.Driver");
-				con = DriverManager.getConnection("jdbc:mysql://localhost:3306/" + DBConstants.DB_NAME + "?autoReconnect=true&serverTimezone=UTC&useUnicode=yes&characterEncoding=UTF-8", DBConstants.DB_USERNAME, DBConstants.DB_PASSWORD);
+				String connectionUrl = "mysql://" + DBConstants.DB_HOST + ":" + DBConstants.DB_PORT + "/" + DBConstants.DB_DATABASE;
+				String herokuUrl = System.getenv("JAWSDB_URL");
+				if (herokuUrl != null) {
+					connectionUrl = herokuUrl;
+				}
+				con = DriverManager.getConnection("jdbc:" + connectionUrl + "?autoReconnect=true&serverTimezone=UTC&useUnicode=yes&characterEncoding=UTF-8", DBConstants.DB_USERNAME, DBConstants.DB_PASSWORD);
+				System.out.println("*** Connected to database: "+con.getMetaData().getDatabaseProductName());
 			}
 		} catch (Exception e) {
 			System.out.println(e);

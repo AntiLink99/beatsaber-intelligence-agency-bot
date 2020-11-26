@@ -1,6 +1,5 @@
 package bot.main;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -9,7 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.collections4.map.LinkedMap;
-import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 
 import bot.utils.Format;
 
@@ -96,7 +95,7 @@ public class BotConstants {
 	private static String getImageBase64(String imageName) {
 		byte[] imageBytes = null;
 		try {
-			imageBytes = FileUtils.readFileToByteArray(new File("src/main/resources/" + imageName));
+			imageBytes = IOUtils.toByteArray(BotConstants.class.getClassLoader().getResourceAsStream(imageName));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

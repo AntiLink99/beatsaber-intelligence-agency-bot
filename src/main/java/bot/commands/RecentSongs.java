@@ -1,5 +1,6 @@
 package bot.commands;
 
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.HashMap;
 import java.util.List;
@@ -33,25 +34,32 @@ public class RecentSongs {
 	private static void sendScoresImage(List<SongScore> scores, ScoreSaber ss, BeatSaver bs, MessageReceivedEvent event) {
 		Map<String, String> coversByHash = JsonUtils.getCoverByHashList();
 		HashMap<String, String> alreadyFetchedURLs = new HashMap<>();
+		HashMap<String, BufferedImage> alreadyFetchedCovers = new HashMap<>();
 		for (SongScore score : scores) {
 			if (coversByHash != null && coversByHash.containsKey(score.getSongHash())) {
 				score.setCoverURL(coversByHash.get(score.getSongHash()));
+				BufferedImage coverImage = score.fetchCover();
+				alreadyFetchedCovers.put(score.getSongHash(), coverImage);
 			} else if (!alreadyFetchedURLs.containsKey(score.getSongHash())) {
 				Song song = bs.fetchSongByHash(score.getSongHash());
 				if (song != null) {
 					score.setCoverURL(song.getCoverURL());
+					BufferedImage coverImage = score.fetchCover();
 					alreadyFetchedURLs.put(score.getSongHash(), song.getCoverURL());
+					alreadyFetchedCovers.put(score.getSongHash(), coverImage);
 				}
 			} else {
 				score.setCoverURL(alreadyFetchedURLs.get(score.getSongHash()));
+				score.setFetchedCover(alreadyFetchedCovers.get(score.getSongHash()));
 			}
+
 		}
 		JsonUtils.addToCoversByHash(alreadyFetchedURLs);
 		SongsFrame frame = new SongsFrame(scores);
-		String outputPath = "src/main/resources/recentSongs.png";
+		String outputPath = "recentSongs.png";
 		File outputFile = GraphicsUtils.saveFrameScreenshot(frame, outputPath);
 		frame.setVisible(false);
-		frame.dispose();
 		Messages.sendImage(outputFile, outputPath, event.getTextChannel());
+		frame.dispose();
 	}
 }

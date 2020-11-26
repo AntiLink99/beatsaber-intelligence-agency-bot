@@ -1,8 +1,14 @@
 package bot.dto;
 
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.Locale;
+
+import javax.imageio.ImageIO;
 
 public class SongScore {
 	private int rank;
@@ -18,6 +24,7 @@ public class SongScore {
 	private String songAuthorName;
 	private String levelAuthorName;
 	private String coverURL;
+	private BufferedImage fetchedCover;
 
 	private transient DecimalFormat format;
 
@@ -71,7 +78,7 @@ public class SongScore {
 	}
 
 	public String getWeightPpString() {
-		return "("+format.format(getPp() * getWeight()) + "PP)";
+		return "(" + format.format(getPp() * getWeight()) + "PP)";
 	}
 
 	public String getSongName() {
@@ -161,5 +168,32 @@ public class SongScore {
 		default:
 			return "???";
 		}
+	}
+
+	public BufferedImage fetchCover() {
+		try {
+			if (coverURL == null) {
+				return null;
+			}
+			System.out.println("Fetching cover "+coverURL);
+			URL url = new URL(coverURL);
+			final HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+			connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_7_5) AppleWebKit/537.31 (KHTML, like Gecko) Chrome/26.0.1410.65 Safari/537.31");
+			BufferedImage image = ImageIO.read(connection.getInputStream());
+			setFetchedCover(image);
+			connection.disconnect();
+			return image;
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+	public BufferedImage getFetchedCover() {
+		return fetchedCover;
+	}
+
+	public void setFetchedCover(BufferedImage fetchedCover) {
+		this.fetchedCover = fetchedCover;
 	}
 }

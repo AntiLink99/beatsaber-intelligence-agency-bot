@@ -30,9 +30,9 @@ public class JsonUtils {
 	private static String coversByHashFilePath = "src/main/resources/coversByHash.json";
 
 	public static ScrapedMapData getMapByHash(String hash) {
-		Entry<String, ScrapedMapData> entry = entries.stream().filter(e -> e.getKey().equals(hash)).findFirst().orElseGet(null);
-		if (entry != null) {
-			return entry.getValue();
+		List<Entry<String, ScrapedMapData>> hashEntries = entries.stream().filter(e -> e.getKey().equals(hash)).collect(Collectors.toList());
+		if (hashEntries.size() > 0) {
+			return hashEntries.get(0).getValue();
 		}
 		return null;
 	}

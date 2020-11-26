@@ -1,6 +1,5 @@
 package bot.utils;
 
-import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.GraphicsDevice;
@@ -10,9 +9,6 @@ import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.util.HashMap;
 import java.util.List;
 
 import javax.imageio.ImageIO;
@@ -31,36 +27,21 @@ public class GraphicsUtils {
 		if (gd.isWindowTranslucencySupported(WindowTranslucency.TRANSLUCENT)) {
 			g2d.setBackground(Color.LIGHT_GRAY);
 		}
-		
-		HashMap<String, BufferedImage> alreadyFetchedImages = new HashMap<>();
+		BufferedImage rectangleTemplate = null;
+		try {
+			rectangleTemplate = ImageIO.read(ClassLoader.getSystemResource("recentSongs.png"));
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		};
 		for (int i = 0; scores.size() > i; i++) {
 			SongScore score = scores.get(i);
-			String coverURL = score.getCoverURL();
-			BufferedImage image = null;
-			if (!alreadyFetchedImages.containsKey(coverURL)) {
-				try {
-					if (coverURL == null) {
-						continue;
-					}
-					URL url = new URL(coverURL);
-					final HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-					connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_7_5) AppleWebKit/537.31 (KHTML, like Gecko) Chrome/26.0.1410.65 Safari/537.31");
-					image = ImageIO.read(connection.getInputStream());
-					alreadyFetchedImages.put(coverURL, image);
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			} else {
-				image = alreadyFetchedImages.get(coverURL);
-			}
+			BufferedImage image = score.getFetchedCover();
 			if (image == null) {
 				System.out.println("NULL");
 				continue;
 			}
 			int relativeY = y + (BotConstants.songRectHeight + BotConstants.songRectYOffset) * i;
-
-			g2d.setPaint(FontUtils.gradient(new Color(40, 40, 40), new Color(75, 75, 75)));
-			g2d.fillRoundRect(x, relativeY, BotConstants.songRectWidth, BotConstants.songRectHeight, 25, 25);
+			g2d.drawImage(rectangleTemplate.getScaledInstance(rectangleTemplate.getWidth(), rectangleTemplate.getHeight(), Image.SCALE_SMOOTH), x, relativeY, null);
 
 			g2d.setFont(FontUtils.consolas(55));
 
@@ -144,20 +125,16 @@ public class GraphicsUtils {
 				g2d.fillPolygon(xStarCoords, yStarCoords, 11);
 
 			}
-			// Outline
-			g2d.setColor(new Color(25, 25, 25));
-			g2d.setStroke(new BasicStroke(10f));
-			g2d.drawRoundRect(x, relativeY, BotConstants.songRectWidth, BotConstants.songRectHeight, 25, 25);
 		}
 		return g2d;
 	}
 
 	public static File saveFrameScreenshot(JFrame frame, String filePath) {
+		System.out.println("Saving Screenshot");
 		BufferedImage img = new BufferedImage(frame.getWidth(), frame.getHeight(), BufferedImage.TYPE_INT_ARGB);
 		Graphics2D g2d = img.createGraphics();
 		frame.printAll(g2d);
 		g2d.dispose();
-
 		File outputFile = new File(filePath);
 		try {
 			ImageIO.write(img, "png", outputFile);

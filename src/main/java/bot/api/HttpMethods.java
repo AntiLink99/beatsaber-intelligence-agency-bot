@@ -15,8 +15,6 @@ import org.apache.commons.io.IOUtils;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
-import net.dv8tion.jda.api.exceptions.HttpException;
-
 public class HttpMethods {
 
 	HttpClient http;
@@ -34,7 +32,8 @@ public class HttpMethods {
 
 		int statusCode = http.executeMethod(get);
 		if (statusCode != 200) {
-			throw new HttpException("Data could not be fetched. Statuscode: " + statusCode);
+			System.out.println("Data could not be fetched. Statuscode: " + statusCode);
+			return null;
 		}
 
 		InputStream response = null;
@@ -59,8 +58,12 @@ public class HttpMethods {
 
 	public JsonObject fetchJson(String url) {
 		try {
-			System.out.println("Fetching "+url+"...");
-			return JsonParser.parseString(IOUtils.toString(get(url), "UTF-8")).getAsJsonObject();
+			System.out.println("Fetching " + url + "...");
+			InputStream fetchedStream = get(url);
+			if (fetchedStream == null) {
+				return null;
+			}
+			return JsonParser.parseString(IOUtils.toString(fetchedStream, "UTF-8")).getAsJsonObject();
 		} catch (IOException e) {
 			return null;
 		}

@@ -22,12 +22,13 @@ public class DatabaseManager {
 			if (con == null || con.isClosed()) {
 				Class.forName("com.mysql.cj.jdbc.Driver");
 				String connectionUrl = "mysql://" + DBConstants.DB_HOST + ":" + DBConstants.DB_PORT + "/" + DBConstants.DB_DATABASE;
+				System.out.println("*** " + connectionUrl);
 				String herokuUrl = System.getenv("JAWSDB_URL");
 				if (herokuUrl != null) {
 					connectionUrl = herokuUrl;
 				}
 				con = DriverManager.getConnection("jdbc:" + connectionUrl + "?autoReconnect=true&serverTimezone=UTC&useUnicode=yes&characterEncoding=UTF-8", DBConstants.DB_USERNAME, DBConstants.DB_PASSWORD);
-				System.out.println("*** Connected to database: "+con.getMetaData().getDatabaseProductName());
+				System.out.println("*** Connected to database: " + con.getMetaData().getDatabaseProductName());
 			}
 		} catch (Exception e) {
 			System.out.println(e);

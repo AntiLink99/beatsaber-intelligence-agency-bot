@@ -17,6 +17,8 @@ public class ApiConstants {
 	public static String BS_DOWNLOAD_URL = BS_API_PRE_URL + "download/key/";
 	public static String BS_MAP_DETAILS_URL = BS_API_PRE_URL + "maps/detail/";
 	public static String BS_MAP_BY_HASH_URL = BS_API_PRE_URL + "maps/by-hash/";
+	
+	public static String BS_DEFAULT_MAP_URL = BS_PRE_URL + "/beatmap/";
 
 	// Meme API
 	public static String MEME_URL = "https://meme-api.herokuapp.com/gimme";

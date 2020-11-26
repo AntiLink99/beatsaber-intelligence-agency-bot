@@ -19,8 +19,9 @@ public class SongsFrame extends JFrame {
 		this.setUndecorated(true);
 		this.setBackground(FontUtils.translucent());
 		this.setEnabled(false);
-		this.setSize(BotConstants.songRectWidth + 20, BotConstants.songRectHeight * scores.size() + 200);
+		this.setSize(BotConstants.songRectWidth + 20, BotConstants.songRectHeight * scores.size() + 182);
 		this.setDefaultCloseOperation(EXIT_ON_CLOSE);
+		
 		SongRectanglesPanel graphics = new SongRectanglesPanel();
 		graphics.setScores(scores);
 		this.add(graphics);

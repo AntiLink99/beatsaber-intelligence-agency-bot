@@ -25,7 +25,6 @@ import bot.commands.Improvement;
 import bot.commands.ListPlayers;
 import bot.commands.RandomMeme;
 import bot.commands.RandomQuote;
-import bot.commands.RecentSongs;
 import bot.commands.RegisterAll;
 import bot.commands.SetSkill;
 import bot.commands.UpdatePlayer;
@@ -34,7 +33,6 @@ import bot.dto.Player;
 import bot.dto.PlayerSkills;
 import bot.utils.DiscordUtils;
 import bot.utils.Format;
-import bot.utils.JsonUtils;
 import bot.utils.ListValueUtils;
 import bot.utils.Messages;
 import bot.utils.RoleManager;
@@ -62,12 +60,12 @@ public class BeatSaberBot extends ListenerAdapter {
 	public static void main(String[] args) {
 		DatabaseManager db = new DatabaseManager();
 		ScoreSaber ss = new ScoreSaber();
-		
-		System.out.println("Downloading new map data...");
-		JsonUtils.downloadJsonMapFile();
-		System.out.println("Reading map data...");
-		JsonUtils.loadJsonMapFile();
-		System.out.println("Done loading!");
+
+//		System.out.println("Downloading new map data...");
+//		JsonUtils.downloadJsonMapFile();
+//		System.out.println("Reading map data...");
+//		JsonUtils.loadJsonMapFile();
+//		System.out.println("Done loading!");
 		try {
 			JDABuilder builder = JDABuilder.createDefault(System.getenv("bot_token")).setMemberCachePolicy(MemberCachePolicy.ALL).enableIntents(GatewayIntent.GUILD_MEMBERS).setChunkingFilter(ChunkingFilter.ALL).addEventListeners(new BeatSaberBot())
 					.setActivity(Activity.playing(BotConstants.PLAYING));
@@ -85,6 +83,7 @@ public class BeatSaberBot extends ListenerAdapter {
 					db.connectToDatabase();
 					System.out.println("----- Starting User Refresh... [" + LocalTime.now().getHour() + ":" + LocalTime.now().getMinute() + "]");
 					try {
+						int fetchCounter = 0;
 						List<Player> players = db.getAllStoredPlayers();
 						for (Player storedPlayer : players) {
 							Player ssPlayer = ss.getPlayerById(storedPlayer.getPlayerId());
@@ -108,6 +107,12 @@ public class BeatSaberBot extends ListenerAdapter {
 								TimeUnit.MILLISECONDS.sleep(100);
 							} catch (InterruptedException e) {
 								e.printStackTrace();
+							}
+							fetchCounter++;
+							
+							if (fetchCounter % 80 == 0) {
+								System.out.println("Waiting one minute...");
+								TimeUnit.MINUTES.sleep(1);
 							}
 						}
 					} catch (Exception e) {
@@ -136,17 +141,6 @@ public class BeatSaberBot extends ListenerAdapter {
 
 		List<String> msgParts = Arrays.asList(msg.split(" ", 3));
 
-		// Recruiting Server
-		if (event.getGuild().getIdLong() == BotConstants.recruitingServerId) {
-			if (!Arrays.asList(BotConstants.allowedRecruitingCommands).contains(msgParts.get(1).toLowerCase())) {
-				Messages.sendMessage("Sorry, i can only do that in the main server.", channel);
-				return;
-			} else if (event.getMember().getRoles().stream().anyMatch(role -> role.getIdLong() == BotConstants.recruitRoleId)) {
-				Messages.sendMessage("Sorry, only FOAA members can do that.", channel);
-				return;
-			}
-		}
-		//
 		Player player = getPlayerDependingOnCommand(msgParts, event);
 		db.connectToDatabase();
 		switch (msgParts.get(1).toLowerCase()) {
@@ -183,7 +177,11 @@ public class BeatSaberBot extends ListenerAdapter {
 			Improvement.sendImprovementMessage(db, channel);
 			break;
 		case "randomquote":
-			RandomQuote.sendRandomQuote(event);
+			if (isFOAAMember(event.getMember())) {
+				RandomQuote.sendRandomQuote(event);
+			} else {
+				Messages.sendMessage("Sorry, only FOAA members can do that.", channel);
+			}
 			break;
 		case "chart": {
 			List<Player> storedPlayers = db.getAllStoredPlayers().stream().filter(p -> p.getDiscordUserId() == event.getAuthor().getIdLong()).collect(Collectors.toList());
@@ -246,40 +244,44 @@ public class BeatSaberBot extends ListenerAdapter {
 			RandomMeme.sendRandomMeme(channel);
 			break;
 		case "recentsongs": {
-			long memberId = event.getAuthor().getIdLong();
-			if (msgParts.size() == 3) {
-				try {
-					memberId = Long.parseLong(msgParts.get(2).replaceAll("[^0-9]", ""));
-				} catch (NumberFormatException e) {
-					Messages.sendMessage("Invalid user specified.", channel);
-					return;
-				}
-			}
-			Player storedPlayer = db.getPlayerByDiscordId(memberId);
-			if (storedPlayer == null) {
-				Messages.sendMessage("Player could not be found. Please check if the user has linked his account.", channel);
-				return;
-			}
-			RecentSongs.sendRecentSongsImage(storedPlayer, ss, bs, event);
-			break;
+			Messages.sendMessage("This command is temporarily disabled, sorry.", channel);
+			return;
+//			long memberId = event.getAuthor().getIdLong();
+//			if (msgParts.size() == 3) {
+//				try {
+//					memberId = Long.parseLong(msgParts.get(2).replaceAll("[^0-9]", ""));
+//				} catch (NumberFormatException e) {
+//					Messages.sendMessage("Invalid user specified.", channel);
+//					return;
+//				}
+//			}
+//			Player storedPlayer = db.getPlayerByDiscordId(memberId);
+//			if (storedPlayer == null) {
+//				Messages.sendMessage("Player could not be found. Please check if the user has linked his account.", channel);
+//				return;
+//			}
+//			RecentSongs.sendRecentSongsImage(storedPlayer, ss, bs, event);
+//			break;
 		}
 		case "topsongs": {
-			long memberId = event.getAuthor().getIdLong();
-			if (msgParts.size() == 3) {
-				try {
-					memberId = Long.parseLong(msgParts.get(2).replaceAll("[^0-9]", ""));
-				} catch (NumberFormatException e) {
-					Messages.sendMessage("Invalid user specified.", channel);
-					return;
-				}
-			}
-			Player storedPlayer = db.getPlayerByDiscordId(memberId);
-			if (storedPlayer == null) {
-				Messages.sendMessage("Player could not be found. Please check if the user has linked his account.", channel);
-				return;
-			}
-			RecentSongs.sendTopSongsImage(storedPlayer, ss, bs, event);
-			break;
+			Messages.sendMessage("This command is temporarily disabled, sorry.", channel);
+			return;
+//			long memberId = event.getAuthor().getIdLong();
+//			if (msgParts.size() == 3) {
+//				try {
+//					memberId = Long.parseLong(msgParts.get(2).replaceAll("[^0-9]", ""));
+//				} catch (NumberFormatException e) {
+//					Messages.sendMessage("Invalid user specified.", channel);
+//					return;
+//				}
+//			}
+//			Player storedPlayer = db.getPlayerByDiscordId(memberId);
+//			if (storedPlayer == null) {
+//				Messages.sendMessage("Player could not be found. Please check if the user has linked his account.", channel);
+//				return;
+//			}
+//			RecentSongs.sendTopSongsImage(storedPlayer, ss, bs, event);
+//			break;
 		}
 		case "seal":
 			Messages.sendImage(BotConstants.sealImageUrl, "Cute seal.jpg", channel);
@@ -322,7 +324,7 @@ public class BeatSaberBot extends ListenerAdapter {
 
 	@Override
 	public void onGuildMemberRemove(GuildMemberRemoveEvent event) {
-		System.out.println("DELETING USER: "+event.getUser().getName());
+		System.out.println("DELETING USER: " + event.getUser().getName());
 		long userId = event.getUser().getIdLong();
 		db.deletePlayerByDiscordUserId(userId);
 	}
@@ -381,5 +383,9 @@ public class BeatSaberBot extends ListenerAdapter {
 			throw new FileNotFoundException("Player could not be found!");
 		}
 		return player;
+	}
+
+	private boolean isFOAAMember(Member member) {
+		return RoleManager.getMemberRolesByName(member, "FOAA").size() > 0;
 	}
 }

@@ -17,8 +17,10 @@ public class SongRectanglesPanel extends JPanel {
 
 	public void paintComponent(Graphics g) {
 		super.paintComponent(g);
-		GraphicsUtils.drawSongRectangles((Graphics2D) g, 5, 0, scores);
 		this.setBackground(FontUtils.translucent());
+		if (scores != null && scores.size() > 0) {
+			GraphicsUtils.drawSongRectangles((Graphics2D) g, 5, 0, scores);
+		}
 	}
 
 	public List<SongScore> getScores() {

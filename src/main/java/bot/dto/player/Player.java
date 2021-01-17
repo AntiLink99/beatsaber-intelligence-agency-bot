@@ -1,4 +1,4 @@
-package bot.dto;
+package bot.dto.player;
 
 import java.io.Serializable;
 import java.util.List;

@@ -31,10 +31,21 @@ public class BeatSaver {
 		gson = new Gson();
 	}
 
-	public void sendPlaylistInChannel(List<String> mapKeys, String playlistTitle, MessageChannel channel) {
+	public void sendPlaylistInChannelByKeys(List<String> mapKeys, String playlistTitle, String playlistImageBase64, MessageChannel channel) {
 		Playlist playlist;
 		try {
-			playlist = buildPlaylist(mapKeys, playlistTitle);
+			playlist = buildPlaylistByKeys(mapKeys, playlistImageBase64, playlistTitle);
+		} catch (IllegalArgumentException e) {
+			Messages.sendTempMessage(e.getMessage(), 10, channel);
+			return;
+		}
+		createAndSendPlaylistFile(playlist, channel);
+	}
+	
+	public void sendPlaylistInChannelBySongs(List<Song> songs, String playlistTitle, String playlistImageBase64, MessageChannel channel) {
+		Playlist playlist;
+		try {
+			playlist = buildPlaylist(songs, playlistImageBase64, playlistTitle);
 		} catch (IllegalArgumentException e) {
 			Messages.sendTempMessage(e.getMessage(), 10, channel);
 			return;
@@ -42,11 +53,11 @@ public class BeatSaver {
 		createAndSendPlaylistFile(playlist, channel);
 	}
 
-	public void sendRecruitingPlaylistInChannel(List<String> mapKeys, String playlistTitle, MessageReceivedEvent event) {
+	public void sendRecruitingPlaylistInChannel(List<String> mapKeys, String playlistTitle, String playlistImageBase64, MessageReceivedEvent event) {
 		TextChannel channel = event.getTextChannel();
 		Playlist playlist;
 		try {
-			playlist = buildPlaylist(mapKeys, playlistTitle);
+			playlist = buildPlaylistByKeys(mapKeys, playlistImageBase64, playlistTitle);
 		} catch (IllegalArgumentException e) {
 			Messages.sendTempMessage(e.getMessage(), 10, channel);
 			return;
@@ -59,8 +70,12 @@ public class BeatSaver {
 		event.getJDA().addEventListener(new PlaylistDifficultyListener(playlist, event, this));
 	}
 
-	private Playlist buildPlaylist(List<String> mapKeys, String playlistTitle) {
+	private Playlist buildPlaylistByKeys(List<String> mapKeys, String image, String playlistTitle) {
 		LinkedList<Song> songs = mapKeys.stream().map(key -> fetchSongByKey(key)).collect(Collectors.toCollection(LinkedList::new));
+		return buildPlaylist(songs, image, playlistTitle);
+	}
+	
+	private Playlist buildPlaylist(List<Song> songs, String image, String playlistTitle) {
 		if (songs == null || songs.contains(null)) {
 			throw new IllegalArgumentException("At least one the given keys is invalid.");
 		} else if (songs.size() == 0) {
@@ -69,7 +84,7 @@ public class BeatSaver {
 
 		Playlist playlist = new Playlist();
 		playlist.setPlaylistAuthor(BotConstants.playlistAuthor);
-		playlist.setImage(BotConstants.playlistImage);
+		playlist.setImage(image);
 		playlist.setPlaylistTitle(playlistTitle);
 		playlist.setSongs(songs);
 		return playlist;
@@ -91,13 +106,13 @@ public class BeatSaver {
 
 	private Song fetchSongByKey(String key) {
 		String infoUrl = ApiConstants.BS_MAP_DETAILS_URL + key;
-		JsonObject response = http.fetchJson(infoUrl);
+		JsonObject response = http.fetchJsonObject(infoUrl);
 		return getSongFromJson(response);
 	}
 
 	public Song fetchSongByHash(String hash) {
 		String infoUrl = ApiConstants.BS_MAP_BY_HASH_URL + hash;
-		JsonObject response = http.fetchJson(infoUrl);
+		JsonObject response = http.fetchJsonObject(infoUrl);
 		return getSongFromJson(response);
 	}
 
@@ -116,9 +131,7 @@ public class BeatSaver {
 			difficulties.setExpert(diffJson.get("expert").getAsBoolean());
 			difficulties.setExpertPlus(diffJson.get("expertPlus").getAsBoolean());
 
-			Song song = new Song();
-			song.setHash(hash);
-			song.setSongName(songName);
+			Song song = new Song(hash,songName);
 			song.setSongKey(songKey);
 			song.setDifficulties(difficulties);
 			song.setCoverURL(coverURL);

@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.io.FileUtils;
 
-import bot.dto.Player;
+import bot.dto.player.Player;
 import bot.listeners.EmbedReactionListener;
 import bot.main.BotConstants;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -35,7 +35,7 @@ public class Messages {
 			builder.setColor(embedColor);
 			channel.sendMessage(builder.build()).queue();
 		} catch (Exception e) {
-			System.out.println("Could not send message because of lacking permissions.");
+			System.out.println("Could not send message because of lacking permissions: " + e.getMessage());
 		}
 	}
 
@@ -49,22 +49,20 @@ public class Messages {
 		channel.sendMessage(builder.build()).queue();
 	}
 
-	public static Message sendMessageStringMap(Map<String, String> values, TextChannel channel) {
+	public static Message sendMessageStringMap(Map<String, String> values, String title, TextChannel channel) {
 		EmbedBuilder builder = new EmbedBuilder();
 		for (String key : values.keySet()) {
 			builder.addField(key, values.get(key), false);
 		}
 		builder.setColor(embedColor);
+		if (title != null) {
+			builder.setTitle(title);
+		}
 		return channel.sendMessage(builder.build()).complete();
 	}
 
 	public static void sendMessage(List<String> values, MessageChannel channel) {
-		EmbedBuilder builder = new EmbedBuilder();
-		for (String value : values) {
-			builder.addField(value, " ", true);
-		}
-		builder.setColor(embedColor);
-		channel.sendMessage(builder.build()).queue();
+
 	}
 
 	public static void sendImageEmbed(String imagePath, String title, MessageChannel channel) {
@@ -181,5 +179,15 @@ public class Messages {
 	public static void sendPrivateMessage(String msg, Member member) {
 		PrivateChannel channel = member.getUser().openPrivateChannel().complete();
 		channel.sendMessage(msg).queue();
+	}
+
+	public static void sendMessageWithImagesAndTexts(String msg, String title, String titleUrl, String imageUrl, String topImageUrl, String footerText, TextChannel channel) {
+		EmbedBuilder builder = new EmbedBuilder();
+		builder.setDescription(msg);
+		builder.setColor(embedColor);
+		builder.setAuthor(title, titleUrl, topImageUrl);
+		builder.setImage(imageUrl);
+		builder.setFooter(footerText);
+		channel.sendMessage(builder.build()).queue();
 	}
 }

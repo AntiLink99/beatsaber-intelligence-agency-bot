@@ -12,10 +12,9 @@ import org.apache.commons.httpclient.params.HttpClientParams;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-
-import net.dv8tion.jda.api.exceptions.HttpException;
 
 public class HttpMethods {
 
@@ -34,7 +33,8 @@ public class HttpMethods {
 
 		int statusCode = http.executeMethod(get);
 		if (statusCode != 200) {
-			throw new HttpException("Data could not be fetched. Statuscode: " + statusCode);
+			System.out.println("Data could not be fetched. Statuscode: " + statusCode);
+			return null;
 		}
 
 		InputStream response = null;
@@ -57,16 +57,37 @@ public class HttpMethods {
 		return file;
 	}
 
-	public JsonObject fetchJson(String url) {
+	public JsonObject fetchJsonObject(String url) {
 		try {
-			System.out.println("Fetching "+url+"...");
-			return JsonParser.parseString(IOUtils.toString(get(url), "UTF-8")).getAsJsonObject();
+			System.out.println("Fetching " + url + "...");
+			InputStream fetchedStream = get(url);
+			if (fetchedStream == null) {
+				return null;
+			}
+			return JsonParser.parseString(IOUtils.toString(fetchedStream, "UTF-8")).getAsJsonObject();
+		} catch (IOException e) {
+			return null;
+		}
+	}
+	
+	public JsonArray fetchJsonArray(String url) {
+		try {
+			System.out.println("Fetching " + url + "...");
+			InputStream fetchedStream = get(url);
+			if (fetchedStream == null) {
+				return null;
+			}
+			return JsonParser.parseString(IOUtils.toString(fetchedStream, "UTF-8")).getAsJsonArray();
 		} catch (IOException e) {
 			return null;
 		}
 	}
 
+
 	private void setAgent(HttpMethod method) {
 		method.setRequestHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.95 Safari/537.11");
+		method.setRequestHeader("Accept-Language","de-DE,de;q=0.9,en-US;q=0.8,en;q=0.7");
+		method.setRequestHeader("Cookie","__cfduid=de1f9ce53366f28f39d9f3907233af7e41606754887");
+		method.setRequestHeader("Accept","*/*");
 	}
 }

@@ -10,7 +10,7 @@ import org.knowm.xchart.style.RadarStyler;
 import org.knowm.xchart.style.Styler.LegendLayout;
 import org.knowm.xchart.style.Styler.LegendPosition;
 
-import bot.dto.PlayerSkills;
+import bot.dto.player.PlayerSkills;
 import bot.main.BotConstants;
 import bot.utils.ChartUtils;
 import bot.utils.Messages;

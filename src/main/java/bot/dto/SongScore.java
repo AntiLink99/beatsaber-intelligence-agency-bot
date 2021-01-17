@@ -2,7 +2,13 @@ package bot.dto;
 
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.util.Date;
 import java.util.Locale;
+
+import org.ocpsoft.prettytime.PrettyTime;
 
 public class SongScore {
 	private int rank;
@@ -10,6 +16,8 @@ public class SongScore {
 	private long score;
 	private float pp;
 	private float weight;
+	private String timeSet;
+	private long leaderboardId;
 	private int maxScore;
 	private int difficulty;
 	private String songHash;
@@ -71,7 +79,7 @@ public class SongScore {
 	}
 
 	public String getWeightPpString() {
-		return "("+format.format(getPp() * getWeight()) + "PP)";
+		return "(" + format.format(getPp() * getWeight()) + "PP)";
 	}
 
 	public String getSongName() {
@@ -161,5 +169,30 @@ public class SongScore {
 		default:
 			return "???";
 		}
+	}
+
+	public long getLeaderboardId() {
+		return leaderboardId;
+	}
+
+	public void setLeaderboardId(long leaderboardId) {
+		this.leaderboardId = leaderboardId;
+	}
+
+	public String getTimeSet() {
+		return timeSet;
+	}
+
+	public void setTimeSet(String timeSet) {
+		this.timeSet = timeSet;
+	}
+	
+	public LocalDateTime getTimeSetLocalDateTime() {
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+		return LocalDateTime.parse(timeSet, formatter);
+	}
+	
+	public String getRelativeTimeString() {
+		return new PrettyTime(Locale.ENGLISH).format(Date.from(getTimeSetLocalDateTime().atZone(ZoneId.systemDefault()).toInstant()));
 	}
 }

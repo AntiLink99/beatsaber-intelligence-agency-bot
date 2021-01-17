@@ -32,7 +32,7 @@ public class RoleManager {
 		}
 	}
 
-	private static List<Role> getMemberRolesByName(Member member, String name) {
+	public static List<Role> getMemberRolesByName(Member member, String name) {
 		return member.getRoles().stream().filter(role -> role.getName().toLowerCase().contains(name.toLowerCase())).collect(Collectors.toList());
 	}
 

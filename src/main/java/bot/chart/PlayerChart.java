@@ -18,7 +18,7 @@ import org.knowm.xchart.style.Styler.LegendPosition;
 import org.knowm.xchart.style.XYStyler;
 import org.knowm.xchart.style.markers.SeriesMarkers;
 
-import bot.dto.Player;
+import bot.dto.player.Player;
 import bot.main.BotConstants;
 import bot.utils.ChartUtils;
 import bot.utils.ListValueUtils;

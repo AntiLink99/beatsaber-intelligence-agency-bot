@@ -11,7 +11,7 @@ public class RandomMeme {
 
 	public static void sendRandomMeme(TextChannel channel) {
 		HttpMethods http = new HttpMethods();
-		JsonObject json = http.fetchJson(ApiConstants.MEME_URL);
+		JsonObject json = http.fetchJsonObject(ApiConstants.MEME_URL);
 		String title = json.get("title").getAsString();
 		String url = json.get("url").getAsString();		
 		Messages.sendImageEmbed(url, title, channel);

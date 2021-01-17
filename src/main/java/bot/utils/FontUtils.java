@@ -3,11 +3,7 @@ package bot.utils;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.FontFormatException;
-import java.awt.GradientPaint;
-import java.awt.Paint;
 import java.io.IOException;
-
-import bot.main.BotConstants;
 
 public class FontUtils {
 
@@ -24,25 +20,7 @@ public class FontUtils {
 		}
 		return null;
 	}
-
-	public static Font consolasBold(int size) {
-		try {
-			Font font = Font.createFont(Font.PLAIN, FontUtils.class.getClassLoader().getResourceAsStream("ConsolasBold.ttf"));
-			return font.deriveFont(Float.valueOf(size));
-		} catch (FontFormatException e) {
-			// TODO Auto-generated catch block
-			System.out.println("Bold");
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return null;
-	}
-
-	public static Paint gradient(Color c1, Color c2) {
-		return new GradientPaint(0f, 0f, c1, BotConstants.songRectWidth, BotConstants.songRectHeight, c2);
-	}
-
+	
 	public static Color getDiffColor(int difficulty) {
 		switch (difficulty) {
 		case 1:
@@ -58,9 +36,5 @@ public class FontUtils {
 		default:
 			return Color.WHITE;
 		}
-	}
-
-	public static Color translucent() {
-		return new Color(1.0f, 1.0f, 1.0f, 0f);
 	}
 }

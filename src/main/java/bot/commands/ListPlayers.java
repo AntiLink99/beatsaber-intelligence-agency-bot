@@ -6,7 +6,7 @@ import java.util.TreeMap;
 
 import bot.api.ApiConstants;
 import bot.db.DatabaseManager;
-import bot.dto.Player;
+import bot.dto.player.Player;
 import bot.utils.DiscordUtils;
 import bot.utils.Format;
 import bot.utils.Messages;
@@ -28,12 +28,12 @@ public class ListPlayers {
 
 		for (int index = 0; index < storedPlayers.size(); index++) {
 			if (index % 25 == 0 && index != 0) {
-				Messages.sendMessageStringMap(nameWithUrl, channel);
+				Messages.sendMessageStringMap(nameWithUrl, nameWithUrl.size()+" players found.", channel);
 				nameWithUrl.clear();
 			}
 			Player listPlayer = storedPlayers.get(index);
 			nameWithUrl.put(Format.bold(DiscordUtils.getMemberNameFromId(allMembers, listPlayer.getDiscordUserId())), ApiConstants.USER_PRE_URL + listPlayer.getPlayerId());
 		}
-		Messages.sendMessageStringMap(nameWithUrl, channel);
+		Messages.sendMessageStringMap(nameWithUrl, nameWithUrl.size()+" players found.", channel);
 	}
 }

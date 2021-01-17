@@ -1,4 +1,4 @@
-package bot.dto;
+package bot.dto.player;
 
 public class PlayerSkills {
 

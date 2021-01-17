@@ -7,6 +7,11 @@ public class Song {
 	private transient SongDifficulties difficulties;
 	private transient String coverURL;
 
+	public Song(String hash, String songName)  {
+		this.hash = hash;
+		this.songName = songName;
+	}
+	
 	public String getHash() {
 		return hash;
 	}

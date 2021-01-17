@@ -5,7 +5,7 @@ import java.util.concurrent.TimeUnit;
 
 import bot.api.ScoreSaber;
 import bot.db.DatabaseManager;
-import bot.dto.Player;
+import bot.dto.player.Player;
 import bot.main.BotConstants;
 import bot.utils.ListValueUtils;
 import bot.utils.Messages;
@@ -32,8 +32,7 @@ public class UpdatePlayer {
 		ssPlayer.setDiscordUserId(playerDiscordId);
 		Member member = channel.getGuild().getMembers().stream().filter(m -> m.getUser().getIdLong() == playerDiscordId).findFirst().orElse(null);
 		if (RoleManager.isNewMilestone(ssPlayer.getRank(), member)) {
-			db.deletePlayer(storedPlayer);
-			db.savePlayer(ssPlayer);
+			db.updatePlayer(ssPlayer);
 			RoleManager.removeMemberRolesByName(member, BotConstants.topRolePrefix);
 			RoleManager.assignMilestoneRole(ssPlayer.getRank(), member);
 			Messages.sendMilestoneMessage(ssPlayer, channel);

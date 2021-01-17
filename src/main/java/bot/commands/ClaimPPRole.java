@@ -6,8 +6,8 @@ import java.util.concurrent.TimeUnit;
 
 import bot.api.ScoreSaber;
 import bot.db.DatabaseManager;
-import bot.dto.Player;
 import bot.dto.SongScore;
+import bot.dto.player.Player;
 import bot.main.BotConstants;
 import bot.utils.Format;
 import bot.utils.ListValueUtils;

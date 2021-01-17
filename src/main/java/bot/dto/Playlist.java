@@ -1,13 +1,13 @@
 package bot.dto;
 
-import java.util.LinkedList;
+import java.util.List;
 
 public class Playlist {
 
 	private String playlistTitle;
 	private String playlistAuthor;
 	private String image;
-	private LinkedList<Song> songs;
+	private List<Song> songs;
 
 	public String getPlaylistTitle() {
 		return playlistTitle;
@@ -33,11 +33,11 @@ public class Playlist {
 		this.image = image;
 	}
 
-	public LinkedList<Song> getSongs() {
+	public List<Song> getSongs() {
 		return songs;
 	}
 
-	public void setSongs(LinkedList<Song> songs) {
+	public void setSongs(List<Song> songs) {
 		this.songs = songs;
 	}
 }

@@ -11,8 +11,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import bot.dto.Player;
-import bot.dto.PlayerSkills;
+import bot.dto.player.Player;
+import bot.dto.player.PlayerSkills;
 
 public class DatabaseManager {
 	private Connection con;
@@ -22,12 +22,13 @@ public class DatabaseManager {
 			if (con == null || con.isClosed()) {
 				Class.forName("com.mysql.cj.jdbc.Driver");
 				String connectionUrl = "mysql://" + DBConstants.DB_HOST + ":" + DBConstants.DB_PORT + "/" + DBConstants.DB_DATABASE;
+				System.out.println("*** " + connectionUrl);
 				String herokuUrl = System.getenv("JAWSDB_URL");
 				if (herokuUrl != null) {
 					connectionUrl = herokuUrl;
 				}
 				con = DriverManager.getConnection("jdbc:" + connectionUrl + "?autoReconnect=true&serverTimezone=UTC&useUnicode=yes&characterEncoding=UTF-8", DBConstants.DB_USERNAME, DBConstants.DB_PASSWORD);
-				System.out.println("*** Connected to database: "+con.getMetaData().getDatabaseProductName());
+				System.out.println("*** Connected to database: " + con.getMetaData().getDatabaseProductName());
 			}
 		} catch (Exception e) {
 			System.out.println(e);
@@ -92,6 +93,30 @@ public class DatabaseManager {
 		return false;
 	}
 
+	public boolean updatePlayer(Player newPlayer) {
+		String stmtToUse = DBConstants.UPDATE_PLAYER_BY_PLAYER_ID_STMT;
+		try {
+			PreparedStatement stmt = con.prepareStatement(stmtToUse);
+			stmt.setString(1, newPlayer.getPlayerId());
+			stmt.setString(2, newPlayer.getPlayerName());
+			stmt.setString(3, newPlayer.getAvatar());
+			stmt.setInt(4, newPlayer.getRank());
+			stmt.setInt(5, newPlayer.getCountryRank());
+			stmt.setFloat(6, newPlayer.getPp());
+			stmt.setString(7, newPlayer.getCountry());
+			stmt.setLong(8, newPlayer.getDiscordUserId());
+			stmt.setString(9, newPlayer.getHistory());
+			stmt.setString(10, newPlayer.getPlayerId());
+			return stmt.executeUpdate() == 1;
+		} catch (SQLIntegrityConstraintViolationException e) {
+			e.printStackTrace();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return false;
+	}
+	
 	public List<Player> getAllStoredPlayers() {
 		List<Player> players = new ArrayList<Player>();
 		try {

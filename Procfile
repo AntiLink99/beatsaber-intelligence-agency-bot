@@ -1,1 +1,0 @@
-web: java -cp beatsaberbot-1.0-SNAPSHOT.jar bot.main.BeatSaberBot

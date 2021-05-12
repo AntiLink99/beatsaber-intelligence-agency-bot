@@ -13,34 +13,46 @@ import java.util.stream.Collectors;
 import javax.security.auth.login.LoginException;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 
 import bot.api.ApiConstants;
 import bot.api.BeatSaver;
+import bot.api.BeatSaviour;
 import bot.api.ScoreSaber;
 import bot.chart.PlayerChart;
 import bot.chart.RadarStatsChart;
+import bot.commands.AccGridImage;
 import bot.commands.ClaimPPRole;
+import bot.commands.DownloadQuotes;
 import bot.commands.HandlePlayerRegisteration;
 import bot.commands.Improvement;
 import bot.commands.ListPlayers;
+import bot.commands.Qualified;
 import bot.commands.RandomMeme;
 import bot.commands.RandomQuote;
-import bot.commands.RecentSongs;
+import bot.commands.Ranked;
+import bot.commands.RecentSong;
 import bot.commands.RegisterAll;
 import bot.commands.SetSkill;
+import bot.commands.SongsCommands;
 import bot.commands.UpdatePlayer;
 import bot.db.DatabaseManager;
-import bot.dto.Player;
-import bot.dto.PlayerSkills;
+import bot.dto.RandomQuotesContainer;
+import bot.dto.beatsaviour.RankedMaps;
+import bot.dto.beatsaviour.RankedMapsFilterRequest;
+import bot.dto.player.Player;
+import bot.dto.player.PlayerSkills;
 import bot.utils.DiscordUtils;
 import bot.utils.Format;
-import bot.utils.JsonUtils;
 import bot.utils.ListValueUtils;
 import bot.utils.Messages;
+import bot.utils.NumberValidation;
 import bot.utils.RoleManager;
+import javafx.application.Platform;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Activity;
+import net.dv8tion.jda.api.entities.Category;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.TextChannel;
@@ -57,17 +69,16 @@ public class BeatSaberBot extends ListenerAdapter {
 
 	ScoreSaber ss = new ScoreSaber();
 	BeatSaver bs = new BeatSaver();
+	BeatSaviour bsaviour = new BeatSaviour();
 	DatabaseManager db = new DatabaseManager();
+	RankedMaps ranked = new RankedMaps();
+	RandomQuotesContainer randomQuotes = new RandomQuotesContainer();
 
 	public static void main(String[] args) {
 		DatabaseManager db = new DatabaseManager();
 		ScoreSaber ss = new ScoreSaber();
-		
-		System.out.println("Downloading new map data...");
-		JsonUtils.downloadJsonMapFile();
-		System.out.println("Reading map data...");
-		JsonUtils.loadJsonMapFile();
-		System.out.println("Done loading!");
+		Platform.setImplicitExit(false);
+
 		try {
 			JDABuilder builder = JDABuilder.createDefault(System.getenv("bot_token")).setMemberCachePolicy(MemberCachePolicy.ALL).enableIntents(GatewayIntent.GUILD_MEMBERS).setChunkingFilter(ChunkingFilter.ALL).addEventListeners(new BeatSaberBot())
 					.setActivity(Activity.playing(BotConstants.PLAYING));
@@ -78,13 +89,13 @@ public class BeatSaberBot extends ListenerAdapter {
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
-
-			TextChannel botChannel = jda.getTextChannelById(Long.valueOf(System.getenv("channel_id")));
+			TextChannel botChannel = jda.getTextChannelById(BotConstants.outputChannelId);
 			Runnable runnable = new Runnable() {
 				public void run() {
 					db.connectToDatabase();
 					System.out.println("----- Starting User Refresh... [" + LocalTime.now().getHour() + ":" + LocalTime.now().getMinute() + "]");
 					try {
+						int fetchCounter = 0;
 						List<Player> players = db.getAllStoredPlayers();
 						for (Player storedPlayer : players) {
 							Player ssPlayer = ss.getPlayerById(storedPlayer.getPlayerId());
@@ -92,9 +103,12 @@ public class BeatSaberBot extends ListenerAdapter {
 								continue;
 							}
 							ssPlayer.setDiscordUserId(storedPlayer.getDiscordUserId());
+							ssPlayer.setCustomAccGridImage(storedPlayer.getCustomAccGridImage());
 							if (ssPlayer.getRank() != storedPlayer.getRank() && ssPlayer.getRank() != 0) {
-								db.deletePlayer(storedPlayer);
-								db.savePlayer(ssPlayer);
+								db.updatePlayer(ssPlayer);
+								if (botChannel.getGuild().getMemberById(storedPlayer.getDiscordUserId()) == null) {
+									continue;
+								}
 								Member member = botChannel.getGuild().getMembers().stream().filter(m -> m.getUser().getIdLong() == ssPlayer.getDiscordUserId()).findFirst().orElse(null);
 								if (RoleManager.isNewMilestone(ssPlayer.getRank(), member)) {
 									System.out.println("Changed role: " + ssPlayer.getPlayerName() + " New Rank: " + ssPlayer.getRank() + " - Old Rank: " + storedPlayer.getRank() + "   " + "(Top " + String.valueOf(ListValueUtils.findMilestoneForRank(ssPlayer.getRank()) + ")"));
@@ -109,6 +123,12 @@ public class BeatSaberBot extends ListenerAdapter {
 							} catch (InterruptedException e) {
 								e.printStackTrace();
 							}
+							fetchCounter++;
+
+							if (fetchCounter % 40 == 0) {
+								System.out.println("Waiting one minute...");
+								TimeUnit.MINUTES.sleep(1);
+							}
 						}
 					} catch (Exception e) {
 						e.printStackTrace();
@@ -120,33 +140,39 @@ public class BeatSaberBot extends ListenerAdapter {
 			};
 
 			ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor();
-			service.scheduleAtFixedRate(runnable, 0, 15, TimeUnit.MINUTES);
+			service.scheduleAtFixedRate(runnable, 0, 20, TimeUnit.MINUTES);
 		} catch (LoginException e) {
 			e.printStackTrace();
 		}
 	}
 
 	public void onMessageReceived(MessageReceivedEvent event) {
-		String msg = event.getMessage().getContentRaw();
-		if (!msg.toLowerCase().startsWith("ru ") || event.getAuthor().isBot() && !event.isFromGuild()) {
+		TextChannel channel = event.getTextChannel();
+		if (event.getGuild().getIdLong() == BotConstants.foaaServerId && channel.getName() != null && channel.getName().equals("quotes")) {
+			if (randomQuotes.getRandomQuoteImages() == null) {
+				TextChannel quotesChannel = getChannelByName(event, "quotes");
+				randomQuotes.initialize(quotesChannel);
+			}
+			randomQuotes.addRandomQuoteImages(event.getMessage());
 			return;
 		}
-		TextChannel channel = event.getTextChannel();
+
+		String msg = event.getMessage().getContentRaw();
+		if (!msg.toLowerCase().startsWith("ru ") || event.getAuthor().isBot() || !event.isFromGuild()) {
+			return;
+		}
+
+		ranked = bsaviour.getCachedRankedMaps();
+		if (ranked == null && System.getenv("disableRankedRequests") == null) {
+			Messages.sendTempMessage("First command after startup, fetching ranked maps. Please wait... 🕒", 10, channel);
+			RankedMapsFilterRequest request = new RankedMapsFilterRequest(0, 14, "date", "");
+			ranked = bsaviour.fetchAllRankedMaps(request);
+		}
+
 		channel.sendTyping().queue();
 
 		List<String> msgParts = Arrays.asList(msg.split(" ", 3));
 
-		// Recruiting Server
-		if (event.getGuild().getIdLong() == BotConstants.recruitingServerId) {
-			if (!Arrays.asList(BotConstants.allowedRecruitingCommands).contains(msgParts.get(1).toLowerCase())) {
-				Messages.sendMessage("Sorry, i can only do that in the main server.", channel);
-				return;
-			} else if (event.getMember().getRoles().stream().anyMatch(role -> role.getIdLong() == BotConstants.recruitRoleId)) {
-				Messages.sendMessage("Sorry, only FOAA members can do that.", channel);
-				return;
-			}
-		}
-		//
 		Player player = getPlayerDependingOnCommand(msgParts, event);
 		db.connectToDatabase();
 		switch (msgParts.get(1).toLowerCase()) {
@@ -158,7 +184,9 @@ public class BeatSaberBot extends ListenerAdapter {
 		case "update":
 			UpdatePlayer.updatePlayer(player, db, ss, channel);
 		case "claimpp":
-			ClaimPPRole.validateAndAssignRole(event.getMember(), db, ss, channel, true);
+			if (event.getGuild().getIdLong() == BotConstants.foaaServerId) {
+				ClaimPPRole.validateAndAssignRole(event.getMember(), db, ss, channel, true);
+			}
 			break;
 		case "claimppall":
 			if (DiscordUtils.isAdmin(event.getAuthor())) {
@@ -183,7 +211,12 @@ public class BeatSaberBot extends ListenerAdapter {
 			Improvement.sendImprovementMessage(db, channel);
 			break;
 		case "randomquote":
-			RandomQuote.sendRandomQuote(event);
+			if (isFOAACategory(event.getTextChannel().getParent())) {
+				initRandomQuotesIfNonExistant(event);
+				RandomQuote.sendRandomQuote(randomQuotes, event);
+			} else {
+				Messages.sendMessage("Sorry, this command is only allowed in FOAA channels.", channel);
+			}
 			break;
 		case "chart": {
 			List<Player> storedPlayers = db.getAllStoredPlayers().stream().filter(p -> p.getDiscordUserId() == event.getAuthor().getIdLong()).collect(Collectors.toList());
@@ -196,6 +229,7 @@ public class BeatSaberBot extends ListenerAdapter {
 		}
 		case "chartall":
 			List<Player> storedPlayers = db.getAllStoredPlayers();
+			storedPlayers.removeIf(p -> channel.getGuild().getMemberById(p.getDiscordUserId()) == null);
 			PlayerChart.sendChartImage(storedPlayers, event, (msgParts.size() >= 3 ? msgParts.get(2) : null));
 			break;
 		case "stand": {
@@ -228,7 +262,7 @@ public class BeatSaberBot extends ListenerAdapter {
 			String playlistTitle = values.get(0);
 			values.remove(playlistTitle);
 
-			bs.sendPlaylistInChannel(values, playlistTitle, channel);
+			bs.sendPlaylistInChannelByKeys(values, playlistTitle, BotConstants.playlistImageFOAA, channel);
 			break;
 		}
 		case "rplaylist":
@@ -240,19 +274,61 @@ public class BeatSaberBot extends ListenerAdapter {
 			String playlistTitle = values.get(0);
 			values.remove(playlistTitle);
 
-			bs.sendRecruitingPlaylistInChannel(values, playlistTitle, event);
+			bs.sendRecruitingPlaylistInChannel(values, playlistTitle, BotConstants.playlistImageFOAA, event);
+			break;
+		case "qualified":
+			Qualified.sendQualifiedPlaylist(event, ss, bs);
+			break;
+		case "ranked":
+			if (msgParts.size() < 3) {
+				Messages.sendMessage("Please provide at least one parameter.", channel);
+				break;
+			}
+			String[] inputValues = msgParts.get(2).split(" ");
+			if (inputValues.length == 1) {
+				if (!NumberValidation.isInteger(inputValues[0])) {
+					Messages.sendMessage("The entered value has to be an integer.", channel);
+					return;
+				}
+				Ranked.sendRecentRankedPlaylist(ranked, Integer.parseInt(inputValues[0]), bs, event);
+			} else if (inputValues.length == 2) {
+				String minString = inputValues[0].replaceAll(",", ".");
+				String maxString = inputValues[1].replaceAll(",", ".");
+				if (!NumberUtils.isNumber(minString) || !NumberUtils.isNumber(maxString)) {
+					Messages.sendMessage("At least one of the entered values is not a number.", channel);
+					return;
+				}
+				float min = Float.parseFloat(minString);
+				float max = Float.parseFloat(maxString);
+				if (max < min) {
+					Messages.sendMessage("The min value has to be smaller than the max value.", channel);
+					return;
+				}
+				Ranked.sendStarRangeRankedPlaylist(ranked, min, max, bs, event);
+			} else {
+				Messages.sendMessage("Invalid number of parameters.", channel);
+			}
 			break;
 		case "randommeme":
 			RandomMeme.sendRandomMeme(channel);
 			break;
-		case "recentsongs": {
+		case "recentsong": {
 			long memberId = event.getAuthor().getIdLong();
+			int index = 1;
 			if (msgParts.size() == 3) {
-				try {
-					memberId = Long.parseLong(msgParts.get(2).replaceAll("[^0-9]", ""));
-				} catch (NumberFormatException e) {
-					Messages.sendMessage("Invalid user specified.", channel);
-					return;
+				String[] arguments = msgParts.get(2).split(" ");
+				String indexOrMemberMention = arguments[0];
+				if (NumberUtils.isNumber(indexOrMemberMention)) {
+					index = Integer.parseInt(indexOrMemberMention);
+				}
+				String lastArgument = arguments[arguments.length - 1];
+				if (lastArgument.contains("@")) { // Mention
+					try {
+						memberId = Long.parseLong(lastArgument.replaceAll("[^0-9]", ""));
+					} catch (NumberFormatException e) {
+						Messages.sendMessage("Invalid user specified.", channel);
+						return;
+					}
 				}
 			}
 			Player storedPlayer = db.getPlayerByDiscordId(memberId);
@@ -260,17 +336,55 @@ public class BeatSaberBot extends ListenerAdapter {
 				Messages.sendMessage("Player could not be found. Please check if the user has linked his account.", channel);
 				return;
 			}
-			RecentSongs.sendRecentSongsImage(storedPlayer, ss, bs, event);
-			break;
+			if (storedPlayer != null) {
+				RecentSong.sendRecentSong(storedPlayer, ranked, index, db, ss, bs, event);
+			}
+			return;
+		}
+		case "recentsongs": {
+			long memberId = event.getAuthor().getIdLong();
+			int index = 1;
+			if (msgParts.size() == 3) {
+				String[] arguments = msgParts.get(2).split(" ");
+				String indexOrMemberMention = arguments[0];
+				if (NumberUtils.isNumber(indexOrMemberMention)) {
+					index = Integer.parseInt(indexOrMemberMention);
+				}
+				String lastArgument = arguments[arguments.length - 1];
+				if (lastArgument.contains("@")) { // Mention
+					try {
+						memberId = Long.parseLong(lastArgument.replaceAll("[^0-9]", ""));
+					} catch (NumberFormatException e) {
+						Messages.sendMessage("Invalid user specified.", channel);
+						return;
+					}
+				}
+			}
+			Player storedPlayer = db.getPlayerByDiscordId(memberId);
+			if (storedPlayer == null) {
+				Messages.sendMessage("Player could not be found. Please check if the user has linked his account.", channel);
+				return;
+			}
+			SongsCommands.sendRecentSongs(storedPlayer, ranked, index, db, ss, bs, event);
+			return;
 		}
 		case "topsongs": {
 			long memberId = event.getAuthor().getIdLong();
+			int index = 1;
 			if (msgParts.size() == 3) {
-				try {
-					memberId = Long.parseLong(msgParts.get(2).replaceAll("[^0-9]", ""));
-				} catch (NumberFormatException e) {
-					Messages.sendMessage("Invalid user specified.", channel);
-					return;
+				String[] arguments = msgParts.get(2).split(" ");
+				String indexOrMemberMention = arguments[0];
+				if (NumberUtils.isNumber(indexOrMemberMention)) {
+					index = Integer.parseInt(indexOrMemberMention);
+				}
+				String lastArgument = arguments[arguments.length - 1];
+				if (lastArgument.contains("@")) { // Mention
+					try {
+						memberId = Long.parseLong(lastArgument.replaceAll("[^0-9]", ""));
+					} catch (NumberFormatException e) {
+						Messages.sendMessage("Invalid user specified.", channel);
+						return;
+					}
 				}
 			}
 			Player storedPlayer = db.getPlayerByDiscordId(memberId);
@@ -278,7 +392,21 @@ public class BeatSaberBot extends ListenerAdapter {
 				Messages.sendMessage("Player could not be found. Please check if the user has linked his account.", channel);
 				return;
 			}
-			RecentSongs.sendTopSongsImage(storedPlayer, ss, bs, event);
+			SongsCommands.sendTopSongs(storedPlayer, ranked, index, db, ss, bs, event);
+			return;
+		}
+		case "setgridimage": {
+			if (msgParts.size() < 3) {
+				AccGridImage.resetImage(db, event);
+				return;
+			}
+			String urlString = msgParts.get(2);
+			List<String> allowedFormats = Arrays.asList(".jpeg", ".jpg", ".png");
+			if (!Format.isUrl(urlString) || !allowedFormats.stream().anyMatch(format -> urlString.toLowerCase().contains(format))) {
+				Messages.sendMessage("The given parameter is not an image URL. (Has to contain .png, .jpg or .jpeg)", channel);
+				return;
+			}
+			AccGridImage.sendAccGridImage(urlString, db, event);
 			break;
 		}
 		case "seal":
@@ -286,6 +414,7 @@ public class BeatSaberBot extends ListenerAdapter {
 			break;
 		case "say":
 			String phrase = msgParts.size() >= 3 ? msgParts.get(2) : "🤡";
+			phrase = StringUtils.replaceChars(phrase, "<!>", "");
 			System.out.println(event.getAuthor() + " said: " + phrase);
 			try {
 				event.getMessage().delete().queue();
@@ -294,6 +423,21 @@ public class BeatSaberBot extends ListenerAdapter {
 			}
 			Messages.sendPlainMessage(phrase, channel);
 			break;
+		case "downloadquotes":
+			if (DiscordUtils.isAdmin(event.getAuthor())) {
+				if (randomQuotes.getRandomQuoteImages() == null) {
+					TextChannel quotesChannel = getChannelByName(event, "quotes");
+					randomQuotes.initialize(quotesChannel);
+				}
+				DownloadQuotes.downloadQuotes(randomQuotes, event);
+			}
+			break;
+		case "setstatus":
+			if (DiscordUtils.isAdmin(event.getAuthor())) {
+				String status = msgParts.size() >= 3 ? msgParts.get(2) : "🤡";
+				event.getJDA().getPresence().setActivity(Activity.playing(status));
+				Messages.sendTempMessage("Status updated to: \""+status+"\".", 10, channel);
+			}
 		case "deletethat":
 			List<Message> latestMessages = event.getChannel().getHistory().retrievePast(100).complete();
 			latestMessages = latestMessages.stream().filter(message -> message.getAuthor().getIdLong() == event.getJDA().getSelfUser().getIdLong()).collect(Collectors.toList());
@@ -312,17 +456,23 @@ public class BeatSaberBot extends ListenerAdapter {
 			Messages.sendPlainMessage(StringUtils.repeat(filler, 40), channel);
 			break;
 		case "help":
-			Messages.sendMultiPageMessage(BotConstants.getCommands(), "🔨 Bot commands 🔨", channel);
+			boolean isFOAA = event.getGuild().getIdLong() == BotConstants.foaaServerId;
+			Messages.sendMultiPageMessage(BotConstants.getCommands(isFOAA), "🔨 Bot commands 🔨", channel);
 			break;
 		default:
 			Messages.sendMessage("Sorry, i don't speak wrong. 🤡  Try \"ru help\".", channel);
 		}
 		System.gc();
+
+	}
+
+	private boolean isFOAACategory(Category parent) {
+		return parent != null && parent.getIdLong() == BotConstants.foaaCategoryId;
 	}
 
 	@Override
 	public void onGuildMemberRemove(GuildMemberRemoveEvent event) {
-		System.out.println("DELETING USER: "+event.getUser().getName());
+		System.out.println("DELETING USER: " + event.getUser().getName());
 		long userId = event.getUser().getIdLong();
 		db.deletePlayerByDiscordUserId(userId);
 	}
@@ -381,5 +531,22 @@ public class BeatSaberBot extends ListenerAdapter {
 			throw new FileNotFoundException("Player could not be found!");
 		}
 		return player;
+	}
+
+//	private boolean isFOAAMember(Member member) {
+//		return RoleManager.getMemberRolesByName(member, "FOAA").size() > 0;
+//	}
+
+	private void initRandomQuotesIfNonExistant(MessageReceivedEvent event) {
+		if (randomQuotes.getRandomQuoteImages() == null || randomQuotes.getRandomQuoteImages().size() == 0) {
+			Messages.sendTempMessage("Loading quotes from channel...", 15, event.getChannel());
+			TextChannel quotesChannel = getChannelByName(event, "quotes");
+			randomQuotes.initialize(quotesChannel);
+			Messages.sendTempMessage(Format.bold(randomQuotes.getRandomQuoteImages().size() + " quotes loaded!"), 15, event.getChannel());
+		}
+	}
+
+	private TextChannel getChannelByName(MessageReceivedEvent event, String name) {
+		return event.getGuild().getTextChannels().stream().filter(c -> c.getName().equals(name)).findFirst().orElse(null);
 	}
 }

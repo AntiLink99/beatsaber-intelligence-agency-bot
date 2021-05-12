@@ -18,7 +18,7 @@ import org.knowm.xchart.style.Styler.LegendPosition;
 import org.knowm.xchart.style.XYStyler;
 import org.knowm.xchart.style.markers.SeriesMarkers;
 
-import bot.dto.Player;
+import bot.dto.player.Player;
 import bot.main.BotConstants;
 import bot.utils.ChartUtils;
 import bot.utils.ListValueUtils;
@@ -28,6 +28,10 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 public class PlayerChart {
 
 	public static void sendChartImage(Player player, MessageReceivedEvent event, String input) {
+		if (player.getHistoryValues() == null) {
+			Messages.sendMessage("Could not find history values for user. Please update the user with \"ru updated <ScoreSaber URL>\".", event.getChannel());
+			return;
+		}
 		List<Integer> rankValues = ListValueUtils.addElementReturnList(player.getHistoryValues(), player.getRank());
 		double max = Collections.min(rankValues), min = Collections.max(rankValues);
 
@@ -37,7 +41,7 @@ public class PlayerChart {
 				max = Double.valueOf(values[0]);
 				min = Double.valueOf(values[1]);
 			} catch (NullPointerException | NumberFormatException e) {
-				Messages.sendMessage("Wrong syntax. Check out ru \"help\".", event.getChannel());
+				Messages.sendMessage("Wrong syntax. Check out \"ru help\".", event.getChannel());
 				return;
 			}
 
@@ -139,7 +143,7 @@ public class PlayerChart {
 			// Series
 			List<Integer> history = ListValueUtils.addElementReturnList(player.getHistoryValues(), player.getRank()).stream().map(h -> -h).collect(Collectors.toList());
 			List<Integer> time = IntStream.rangeClosed(-history.size() + 1, 0).boxed().collect(Collectors.toList());
-			XYSeries series = chart.addSeries(player.getPlayerName(), time, history);
+			XYSeries series = chart.addSeries(player.getPlayerName() + (players.indexOf(player) % 5 == 0 ? "\n" : ""), time, history);
 			series.setLineWidth(players.size() == 1 ? 10 : 5);
 			series.setMarker(SeriesMarkers.NONE);
 		}

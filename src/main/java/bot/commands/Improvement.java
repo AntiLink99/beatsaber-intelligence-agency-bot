@@ -5,8 +5,8 @@ import java.util.List;
 import java.util.Map;
 
 import bot.db.DatabaseManager;
-import bot.dto.Player;
-import bot.dto.PlayerImprovement;
+import bot.dto.player.Player;
+import bot.dto.player.PlayerImprovement;
 import bot.utils.MapUtils;
 import bot.utils.Messages;
 import net.dv8tion.jda.api.entities.TextChannel;

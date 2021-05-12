@@ -5,7 +5,7 @@ import java.util.concurrent.TimeUnit;
 
 import bot.api.ScoreSaber;
 import bot.db.DatabaseManager;
-import bot.dto.Player;
+import bot.dto.player.Player;
 import bot.main.BotConstants;
 import bot.utils.ListValueUtils;
 import bot.utils.Messages;
@@ -30,10 +30,10 @@ public class UpdatePlayer {
 
 		final long playerDiscordId = storedPlayer.getDiscordUserId();
 		ssPlayer.setDiscordUserId(playerDiscordId);
+		ssPlayer.setCustomAccGridImage(storedPlayer.getCustomAccGridImage());
 		Member member = channel.getGuild().getMembers().stream().filter(m -> m.getUser().getIdLong() == playerDiscordId).findFirst().orElse(null);
 		if (RoleManager.isNewMilestone(ssPlayer.getRank(), member)) {
-			db.deletePlayer(storedPlayer);
-			db.savePlayer(ssPlayer);
+			db.updatePlayer(ssPlayer);
 			RoleManager.removeMemberRolesByName(member, BotConstants.topRolePrefix);
 			RoleManager.assignMilestoneRole(ssPlayer.getRank(), member);
 			Messages.sendMilestoneMessage(ssPlayer, channel);
@@ -48,6 +48,7 @@ public class UpdatePlayer {
 			for (Player storedPlayer : storedPlayers) {
 				Player ssPlayer = ss.getPlayerById(storedPlayer.getPlayerId());
 				ssPlayer.setDiscordUserId(storedPlayer.getDiscordUserId());
+				ssPlayer.setCustomAccGridImage(storedPlayer.getCustomAccGridImage());
 				try {
 					TimeUnit.MILLISECONDS.sleep(125);
 				} catch (InterruptedException e) {

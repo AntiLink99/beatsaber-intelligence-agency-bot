@@ -2,7 +2,13 @@ package bot.dto;
 
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
+import java.util.Date;
 import java.util.Locale;
+
+import org.ocpsoft.prettytime.PrettyTime;
 
 public class SongScore {
 	private int rank;
@@ -10,6 +16,9 @@ public class SongScore {
 	private long score;
 	private float pp;
 	private float weight;
+	private double accuracy = -1;
+	private String timeSet;
+	private long leaderboardId;
 	private int maxScore;
 	private int difficulty;
 	private String songHash;
@@ -17,12 +26,13 @@ public class SongScore {
 	private String songSubName;
 	private String songAuthorName;
 	private String levelAuthorName;
-	private String coverURL;
+	private String coverURL; //manually set
+	private float songStars; //manually set
 
 	private transient DecimalFormat format;
 
 	public SongScore() {
-		format = new DecimalFormat("###.##");
+		format = new DecimalFormat("##0.00");
 		format.setDecimalFormatSymbols(DecimalFormatSymbols.getInstance(Locale.ENGLISH));
 	}
 
@@ -71,7 +81,7 @@ public class SongScore {
 	}
 
 	public String getWeightPpString() {
-		return "("+format.format(getPp() * getWeight()) + "PP)";
+		return "(" + format.format(getPp() * getWeight()) + "PP)";
 	}
 
 	public String getSongName() {
@@ -131,11 +141,17 @@ public class SongScore {
 	}
 
 	public double getAccuracy() {
+		if (accuracy != -1) {
+			return accuracy;
+		}
 		return Double.valueOf(score) / Double.valueOf(maxScore);
 	}
 
 	public String getAccuracyString() {
-		return format.format(getAccuracy() * 100d) + "%";
+		if (!Double.isInfinite(getAccuracy())) {
+			return format.format(getAccuracy() * 100d) + "%";
+		}
+		return "";
 	}
 
 	public int getDifficulty() {
@@ -161,5 +177,42 @@ public class SongScore {
 		default:
 			return "???";
 		}
+	}
+
+	public long getLeaderboardId() {
+		return leaderboardId;
+	}
+
+	public void setLeaderboardId(long leaderboardId) {
+		this.leaderboardId = leaderboardId;
+	}
+
+	public String getTimeSet() {
+		return timeSet;
+	}
+
+	public void setTimeSet(String timeSet) {
+		this.timeSet = timeSet;
+	}
+	
+	public LocalDateTime getTimeSetLocalDateTime() {
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+		return LocalDateTime.parse(timeSet, formatter);
+	}
+	
+	public String getRelativeTimeString() {
+		return new PrettyTime(Locale.ENGLISH).format(Date.from(getTimeSetLocalDateTime().atZone(ZoneOffset.UTC).toInstant()));
+	}
+
+	public float getSongStars() {
+		return songStars;
+	}
+
+	public void setSongStars(float songStars) {
+		this.songStars = songStars;
+	}
+
+	public void setAccuracy(float accuracy) {
+		this.accuracy = accuracy;
 	}
 }

@@ -5,7 +5,7 @@ import java.util.List;
 import bot.api.ApiConstants;
 import bot.api.ScoreSaber;
 import bot.db.DatabaseManager;
-import bot.dto.Player;
+import bot.dto.player.Player;
 import bot.utils.Messages;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.MessageChannel;

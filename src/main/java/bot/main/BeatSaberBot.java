@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import javax.security.auth.login.LoginException;
@@ -432,8 +434,12 @@ public class BeatSaberBot extends ListenerAdapter {
 		System.out.println("Ready!");
 	}
 
+	Pattern scoreSaberIDPattern = Pattern.compile(ApiConstants.USER_ID_REGEX);
+
 	private Player getScoreSaberPlayerFromUrl(String profileUrl) throws FileNotFoundException {
-		String playerId = profileUrl.replace(ApiConstants.USER_PRE_URL, "");
+		Matcher matcher = scoreSaberIDPattern.matcher(profileUrl);
+		if(!matcher.find()) throw new FileNotFoundException("Player could not be found, invalid link!");
+		String playerId = matcher.group(1);
 		Player player = ss.getPlayerById(playerId);
 		if (player == null) {
 			throw new FileNotFoundException("Player could not be found!");

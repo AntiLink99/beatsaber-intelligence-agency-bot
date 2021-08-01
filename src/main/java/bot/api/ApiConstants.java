@@ -4,6 +4,7 @@ public class ApiConstants {
 
 	// ScoreSaber
 	public static String USER_PRE_URL = "https://scoresaber.com/u/";
+	public static final String USER_ID_REGEX = "scoresaber\\.com\\/u\\/(\\d+)";
 
 	public static String SS_PRE_URL = "https://new.scoresaber.com";
 	public static String SS_PLAYER_PRE_URL = SS_PRE_URL + "/api/player/";

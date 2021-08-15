@@ -64,22 +64,6 @@ public class DatabaseManager {
 		return false;
 	}
 
-	public boolean deletePlayer(Player player) {
-		String stmtToUse = player.getPlayerId() == null ? DBConstants.DELETE_PLAYER_BY_NAME_STMT : DBConstants.DELETE_PLAYER_BY_ID_STMT;
-		String playerNameOrId = player.getPlayerId() == null ? player.getPlayerName() : player.getPlayerId();
-		try {
-			PreparedStatement stmt = con.prepareStatement(stmtToUse);
-			stmt.setString(1, playerNameOrId);
-			return stmt.executeUpdate() == 1;
-		} catch (SQLIntegrityConstraintViolationException e) {
-			e.printStackTrace();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
-		return false;
-	}
-
 	public boolean deletePlayerByDiscordUserId(long userId) {
 		try {
 			PreparedStatement stmt = con.prepareStatement(DBConstants.DELETE_PLAYER_BY_DISCORD_ID);
@@ -106,7 +90,8 @@ public class DatabaseManager {
 			stmt.setString(7, newPlayer.getCountry());
 			stmt.setLong(8, newPlayer.getDiscordUserId());
 			stmt.setString(9, newPlayer.getHistory());
-			stmt.setString(10, newPlayer.getPlayerId());
+			stmt.setString(10, newPlayer.getCustomAccGridImage());
+			stmt.setString(11, newPlayer.getPlayerId()); // Always last!
 			return stmt.executeUpdate() == 1;
 		} catch (SQLIntegrityConstraintViolationException e) {
 			e.printStackTrace();
@@ -136,6 +121,7 @@ public class DatabaseManager {
 				if (player.getHistory() != null) {
 					player.setHistoryValues(Arrays.asList(player.getHistory().split(",")).stream().map(val -> Integer.parseInt(val)).collect(Collectors.toList()));
 				}
+				player.setCustomAccGridImage(rs.getString("user_customAccGridImage"));
 				players.add(player);
 			}
 		} catch (SQLException e) {
@@ -160,6 +146,7 @@ public class DatabaseManager {
 				player.setPp(rs.getFloat("player_pp"));
 				player.setCountry(rs.getString("player_country"));
 				player.setDiscordUserId(rs.getLong("discord_user_id"));
+				player.setCustomAccGridImage(rs.getString("user_customAccGridImage"));
 				return player;
 			}
 		} catch (SQLException e) {
@@ -183,7 +170,12 @@ public class DatabaseManager {
 				player.setCountryRank(rs.getInt("player_rank"));
 				player.setPp(rs.getFloat("player_pp"));
 				player.setCountry(rs.getString("player_country"));
+				player.setHistory(rs.getString("player_history"));
+				if (player.getHistory() != null) {
+					player.setHistoryValues(Arrays.asList(player.getHistory().split(",")).stream().map(val -> Integer.parseInt(val)).collect(Collectors.toList()));
+				}
 				player.setDiscordUserId(rs.getLong("discord_user_id"));
+				player.setCustomAccGridImage(rs.getString("user_customAccGridImage"));
 				return player;
 			}
 		} catch (SQLException e) {

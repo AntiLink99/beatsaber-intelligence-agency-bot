@@ -7,7 +7,7 @@ public class Playlist {
 	private String playlistTitle;
 	private String playlistAuthor;
 	private String image;
-	private List<Song> songs;
+	private List<PlaylistSong> songs;
 
 	public String getPlaylistTitle() {
 		return playlistTitle;
@@ -33,11 +33,11 @@ public class Playlist {
 		this.image = image;
 	}
 
-	public List<Song> getSongs() {
+	public List<PlaylistSong> getSongs() {
 		return songs;
 	}
 
-	public void setSongs(List<Song> songs) {
+	public void setSongs(List<PlaylistSong> songs) {
 		this.songs = songs;
 	}
 }

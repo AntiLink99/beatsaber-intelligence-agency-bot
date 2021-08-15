@@ -5,14 +5,14 @@ import java.util.LinkedList;
 import java.util.List;
 
 import bot.db.DatabaseManager;
+import bot.dto.MessageEventDTO;
 import bot.main.BotConstants;
 import bot.utils.Messages;
 import net.dv8tion.jda.api.entities.MessageChannel;
-import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
 public class SetSkill {
 
-	public static void setSkill(List<String> msgParts, DatabaseManager db, MessageReceivedEvent event) {
+	public static void setSkill(List<String> msgParts, DatabaseManager db, MessageEventDTO event) {
 		MessageChannel channel = event.getChannel();
 		if (msgParts.size() >= 3) {
 			
@@ -33,7 +33,7 @@ public class SetSkill {
 			if (BotConstants.validSkills.contains(skill)) {
 				int rowsChanged = db.setSkill(event.getAuthor().getIdLong(), skill, newValue);
 				if (rowsChanged != 0) {
-					Messages.sendTempMessage("Skill \"" + skill + "\" updated for " + event.getAuthor().getName() + ": " + newValue, 6, channel);
+					Messages.sendTempMessage("Skill \"" + skill + "\" updated for " + event.getAuthor().getUser().getName() + ": " + newValue, 6, channel);
 				}
 			} else {
 				Messages.sendMessage("Sorry, i do not know that skill.", channel);

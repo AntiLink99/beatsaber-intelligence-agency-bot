@@ -16,6 +16,10 @@ import net.dv8tion.jda.api.entities.TextChannel;
 public class UpdatePlayer {
 	// TODO make non static for less params
 	public static void updatePlayer(Player player, DatabaseManager db, ScoreSaber ss, TextChannel channel) {
+		if (player == null) {
+			Messages.sendMessage("Could not find player.", channel);
+			return;
+		}
 		Player storedPlayer = db.getPlayerByName(player.getPlayerName());
 		Player ssPlayer = player;
 
@@ -30,6 +34,7 @@ public class UpdatePlayer {
 
 		final long playerDiscordId = storedPlayer.getDiscordUserId();
 		ssPlayer.setDiscordUserId(playerDiscordId);
+		ssPlayer.setCustomAccGridImage(storedPlayer.getCustomAccGridImage());
 		Member member = channel.getGuild().getMembers().stream().filter(m -> m.getUser().getIdLong() == playerDiscordId).findFirst().orElse(null);
 		if (RoleManager.isNewMilestone(ssPlayer.getRank(), member)) {
 			db.updatePlayer(ssPlayer);
@@ -47,6 +52,7 @@ public class UpdatePlayer {
 			for (Player storedPlayer : storedPlayers) {
 				Player ssPlayer = ss.getPlayerById(storedPlayer.getPlayerId());
 				ssPlayer.setDiscordUserId(storedPlayer.getDiscordUserId());
+				ssPlayer.setCustomAccGridImage(storedPlayer.getCustomAccGridImage());
 				try {
 					TimeUnit.MILLISECONDS.sleep(125);
 				} catch (InterruptedException e) {
@@ -57,15 +63,9 @@ public class UpdatePlayer {
 				ssPlayer.setDiscordUserId(playerDiscordId);
 				Member member = channel.getGuild().getMembers().stream().filter(m -> m.getIdLong() == playerDiscordId).findFirst().orElse(null);
 				if (RoleManager.isNewMilestone(ssPlayer.getRank(), member)) {
-					boolean successDelete = db.deletePlayer(storedPlayer);
-					if (!successDelete) {
-						Messages.sendMessage("The player \"" + storedPlayer.getPlayerName() + "\" could not be removed from the database.", channel);
-						break;
-					}
-	
-					boolean successSave = db.savePlayer(ssPlayer);
-					if (!successSave) {
-						Messages.sendMessage("The player \"" + storedPlayer.getPlayerName() + "\" is already registered! Use \"ru unregister <URL / Username>\" to remove the player from the database.", channel);
+					boolean success = db.updatePlayer(ssPlayer);
+					if (!success) {
+						Messages.sendMessage("The player \"" + storedPlayer.getPlayerName() + "\" could not be updated.", channel);
 						break;
 					}
 					RoleManager.removeMemberRolesByName(member, BotConstants.topRolePrefix);

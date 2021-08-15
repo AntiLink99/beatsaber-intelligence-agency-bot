@@ -10,44 +10,45 @@ import bot.api.BeatSaviour;
 import bot.api.ScoreSaber;
 import bot.chart.AccuracyChart;
 import bot.db.DatabaseManager;
+import bot.dto.MessageEventDTO;
 import bot.dto.Song;
+import bot.dto.Song.Diff;
 import bot.dto.SongScore;
 import bot.dto.beatsaviour.BeatSaviourPlayerScore;
 import bot.dto.beatsaviour.BeatSaviourRankedMap;
-import bot.dto.beatsaviour.RankedMapRootDifficulties;
 import bot.dto.beatsaviour.RankedMaps;
 import bot.dto.player.Player;
 import bot.graphics.AccuracyGrid;
 import bot.main.BotConstants;
+import bot.utils.DiscordLogger;
 import bot.utils.Format;
+import bot.utils.JavaFXUtils;
 import bot.utils.Messages;
-import javafx.application.Application;
-import javafx.application.Platform;
-import javafx.stage.Stage;
-import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import bot.utils.RankedMapUtils;
+import bot.utils.SongUtils;
 
 public class RecentSong {
 
-	private static boolean javaFxLaunched = false;
-
-	public static void sendRecentSong(Player player, RankedMaps ranked, int index, DatabaseManager db, ScoreSaber ss, MessageReceivedEvent event) {
+	public static void sendRecentSong(Player player, RankedMaps ranked, int index, DatabaseManager db, ScoreSaber ss, BeatSaver bs, MessageEventDTO event) {
 		BeatSaviour bsaviour = new BeatSaviour();
 
-		if (index > 8 || index < 1) {
-			Messages.sendMessage("The value provided has to be an integer between 1 and 8", event.getChannel());
+		if (index > 40 || index < 1) {
+			Messages.sendMessage("The value provided has to be an integer between 1 and 40.", event.getChannel());
 			return;
 		}
 		String playerId = player.getPlayerId();
 		if (playerId != null) {
-			File gridImage = new File("src/main/resources/accGrid_" + playerId + ".png");
 
 			// ScoreSaber
-			List<SongScore> ssScores = ss.getRecentScoresByPlayerId(Long.valueOf(player.getPlayerId()));
+			int pageNr = getPageNrFromSongIndex(index);
+			index = (index - 1) % 8;
+			List<SongScore> ssScores = ss.getRecentScoresByPlayerIdAndPage(Long.valueOf(player.getPlayerId()), pageNr);
 			if (ssScores == null || ssScores.isEmpty()) {
-				Messages.sendMessage("ScoreSaber didn't respond. Please try again later.", event.getTextChannel());
+				Messages.sendMessage("ScoreSaber didn't respond. Please try again later.", event.getChannel());
 				return;
 			}
-			SongScore recentScore = ssScores.get(index - 1);
+			SongScore recentScore = ssScores.get(index);
+			File gridImage = new File("src/main/resources/accGrid_" + playerId + "_" + event.getId() + ".png");
 
 			// Saviour
 			List<BeatSaviourPlayerScore> saviourScores = bsaviour.fetchPlayerMaps(Long.valueOf(playerId)).getPlayerMaps();
@@ -55,20 +56,23 @@ public class RecentSong {
 			BeatSaviourPlayerScore saviourScore = null;
 			boolean hasBeatSaviour = saviourScores != null && !saviourScores.isEmpty();
 			if (hasBeatSaviour) {
-				saviourScore = saviourScores.stream().filter(score -> score.getSongID().equals(recentScore.getSongHash()) && score.getTrackers().getWinTracker().isWon()).sorted().findFirst().orElse(null);
+				saviourScore = saviourScores.stream().filter(score -> score.getSongID().equals(recentScore.getSongHash()) && SongUtils.matchScoreSaberAndBeatSaviourDiffname(recentScore.getDifficultyName(), score.getSongDifficulty()) && score.getTrackers().getWinTracker().isWon()).sorted()
+						.findFirst().orElse(null);
 				if (saviourScore != null) {
 					List<Float> gridAcc = saviourScore.getTrackers().getAccuracyTracker().getGridAcc();
 					List<Integer> notesCounts = saviourScore.getTrackers().getAccuracyTracker().getGridCut();
 					AccuracyGrid.setAccuracyValues(gridAcc);
 					AccuracyGrid.setNotesCounts(notesCounts);
 					AccuracyGrid.setPlayerId(playerId);
+					AccuracyGrid.setCustomImageUrl(player.getCustomAccGridImage());
+					AccuracyGrid.setMessageId(String.valueOf(event.getId()));
 
 					// Remove old acc grid file if exists
 					if (gridImage.exists()) {
 						gridImage.delete();
 					}
 
-					myLaunch(AccuracyGrid.class);
+					JavaFXUtils.launch(AccuracyGrid.class);
 				} else {
 					hasBeatSaviour = false;
 				}
@@ -79,11 +83,10 @@ public class RecentSong {
 			String coverUrl = null;
 			int rankOnPlayerLeaderboard = -1;
 			if (isRanked) {
-				BeatSaviourRankedMap rankedMap = findRankedMapBySongHash(ranked, recentScore.getSongHash());
+				BeatSaviourRankedMap rankedMap = RankedMapUtils.findRankedMapBySongHash(ranked, recentScore.getSongHash());
 				rankOnPlayerLeaderboard = Format.roundDouble((Math.log10(recentScore.getWeight()) + Math.log10(0.965)) / Math.log10(0.965));
 				if (rankedMap != null) {
-					starRating = getStarRatingForMapDiff(rankedMap, recentScore.getDifficulty());
-					coverUrl = ApiConstants.BS_PRE_URL + rankedMap.getCoverURL();
+					starRating = SongUtils.getStarRatingForMapDiff(rankedMap, recentScore.getDifficulty());
 				}
 			}
 
@@ -101,18 +104,36 @@ public class RecentSong {
 
 			String songInfo = Format.codeAutohotkey(topInfo);
 
+			Song bsMap = bs.fetchSongByHash(recentScore.getSongHash());
+			int noteCount = -1;
+			if (bsMap != null) {
+				noteCount = SongUtils.getNoteCountForBeatSaverMapDiff(bsMap, recentScore);
+				if (coverUrl == null) {
+					coverUrl = bsMap.getVersionByHash(recentScore.getSongHash()).getCoverURL();
+				}
+			}
+
 			String accuracy = null;
-			if (isRanked) {
-				accuracy = Format.fixedLength("Accuracy: " + recentScore.getAccuracyString(), lineWidth);
-				if (!hasBeatSaviour) {
-					songInfo += Format.codeProlog("\n" + accuracy);
+			if (noteCount >= 13) { // Acc can't be calculated if map has < 13 notes
+				if (isRanked) {
+					accuracy = Format.fixedLength("Accuracy: " + recentScore.getAccuracyString(), lineWidth);
+					if (!hasBeatSaviour) {
+						songInfo += Format.codeProlog("\n" + accuracy);
+					}
+				} else {
+					int maxScore = noteCount * 920 - 7245;
+					float accuracyValue = Float.valueOf(recentScore.getScore()) / Float.valueOf(maxScore) * 100f;
+					accuracy = Format.fixedLength("Accuracy: " + Format.decimal(accuracyValue) + "%", lineWidth);
+					if (!hasBeatSaviour) {
+						songInfo += Format.codeProlog("\n" + accuracy);
+					}
 				}
 			}
 			if (hasBeatSaviour) {
 				String hitAccuracy = Format.fixedLength("Hit Accuracy: ", lineWidth) + Format.decimal(saviourScore.getTrackers().getAccuracyTracker().getAverageAcc());
 				String leftHandAccuracy = Format.fixedLength("Left Hand Hit Accuracy: ", lineWidth) + Format.decimal(saviourScore.getTrackers().getAccuracyTracker().getAccLeft());
 				String rightHandAccuracy = Format.fixedLength("Right Hand Hit Accuracy: ", lineWidth) + Format.decimal(saviourScore.getTrackers().getAccuracyTracker().getAccRight());
-				songInfo += Format.codeProlog("\n" + (isRanked ? accuracy + "\n" : "") + hitAccuracy + "\n" + leftHandAccuracy + "\n" + rightHandAccuracy);
+				songInfo += Format.codeProlog("\n" + (accuracy != null ? accuracy + "\n" : "") + hitAccuracy + "\n" + leftHandAccuracy + "\n" + rightHandAccuracy);
 
 				boolean hasSwingData = saviourScore.getTrackers().getAccuracyTracker().getAveragePreswing() != 0;
 				if (hasSwingData) {
@@ -139,135 +160,72 @@ public class RecentSong {
 				songInfo += Format.codeProlog("\n" + rawPP + "\n" + weightPP + "\n" + stars);
 			}
 			if (coverUrl == null) {
-				Song song = new BeatSaver().fetchSongByHash(recentScore.getSongHash());
+				Song song = bs.fetchSongByHash(recentScore.getSongHash());
 				if (song != null) {
-					coverUrl = song.getCoverURL();
+					coverUrl = song.getVersionByHash(recentScore.getSongHash()).getCoverURL();
 				} else {
 					coverUrl = BotConstants.notOnBeatSaverImageUrl;
 				}
 			}
-			String diffImageUrl = getDiffImageUrl(recentScore.getDifficulty());
-			String songName = recentScore.getSongName();
+			String diffImageUrl = SongUtils.getDiffImageUrl(recentScore.getDifficulty());
+			String songName = recentScore.getSongName() + " - " + getDurationStringFromMap(bsMap, recentScore.getSongHash());
 			String songUrl = ApiConstants.SS_LEADERBOARD_PRE_URL + recentScore.getLeaderboardId();
 			String footerText = "Mapped by " + recentScore.getLevelAuthorName();
 
-			Messages.sendMessageWithImagesAndTexts(songInfo, songName, songUrl, coverUrl, diffImageUrl, footerText, event.getTextChannel());
+			Messages.sendMessageWithImagesAndTexts(songInfo, songName, songUrl, coverUrl, diffImageUrl, footerText, event.getChannel());
 			if (hasBeatSaviour) {
 				AccuracyChart.sendChartImage(saviourScore, player.getPlayerName(), recentScore.getDifficultyName(), event);
 				int gridWaitingCounter = 0;
-				long fileSizeInKB = gridImage.length() / 1024;
-				while ((!gridImage.exists() && gridWaitingCounter < 8) || fileSizeInKB < 1) {
-					System.out.println("Waiting for image... " + gridWaitingCounter);
+				while (!AccuracyGrid.isFinished()) {
+					if (gridWaitingCounter > 8) {
+						break;
+					}
 					try {
 						TimeUnit.SECONDS.sleep(1);
 					} catch (InterruptedException e) {
 						e.printStackTrace();
 					}
-					fileSizeInKB = gridImage.length() / 1024;
 					gridWaitingCounter++;
 				}
 				if (gridImage.exists()) {
-					Messages.sendImage(gridImage, "accGrid_" + playerId + "_" + recentScore.getSongHash() + ".png", event.getTextChannel());
+					Messages.sendImage(gridImage, "accGrid_" + playerId + "_" + event.getId() + ".png", event.getChannel());
 					gridImage.delete();
 				} else {
-					System.out.println("Image wasnt generated.");
+					DiscordLogger.sendLogInChannel("Image wasnt generated. accGrid_" + playerId + "_" + event.getId() + ".png", DiscordLogger.ERRORS);
 				}
 
 			} else {
-				Messages.sendPlainMessage(Format.italic("It seems like you don't have the BeatSaviourData mod installed yet.\nGet it to receive more information about your plays.\nhttps://github.com/Mystogan98/BeatSaviorData/releases"), event.getTextChannel());
+				Messages.sendPlainMessage(Format.italic("No BeatSaviour data was found for this score.\nMaybe it was set too far in the past or you don't have the mod installed."), event.getChannel());
 			}
 		}
 	}
 
-	public static void myLaunch(Class<? extends Application> applicationClass) {
-		if (!javaFxLaunched) { // First time
-			Platform.setImplicitExit(false);
-			new Thread(() -> Application.launch(applicationClass)).start();
-			javaFxLaunched = true;
-		} else { // Next times
-			Platform.runLater(() -> {
-				try {
-					Application application = applicationClass.getDeclaredConstructor().newInstance();
-					Stage primaryStage = new Stage();
-					application.start(primaryStage);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			});
+	private static String getDurationStringFromMap(Song bsMap, String versionHash) {
+		if (bsMap == null || bsMap.getVersionByHash(versionHash) == null || bsMap.getVersionByHash(versionHash).getDiffs() == null) {
+			return "[?:??]";
 		}
-	}
-
-	private static float getStarRatingForMapDiff(BeatSaviourRankedMap rankedMap, int difficulty) {
-		if (rankedMap == null || rankedMap.getDiffs() == null || rankedMap.getDiffs().getDifficultiesAsList().isEmpty()) {
-			return -1;
-		}
-		RankedMapRootDifficulties diffs = rankedMap.getDiffs();
-		switch (difficulty) {
-		case 1:
-			return diffs.getEasy().getStars();
-		case 3:
-			return diffs.getNormal().getStars();
-		case 5:
-			return diffs.getHard().getStars();
-		case 7:
-			return diffs.getExpert().getStars();
-		case 9:
-			return diffs.getExpertPlus().getStars();
-		default:
-			return -1;
-		}
-	}
-
-	private static String getDiffImageUrl(int difficulty) {
-		switch (difficulty) {
-		case 1:
-			return BotConstants.imageUrlDiffEasy;
-		case 3:
-			return BotConstants.imageUrlDiffNormal;
-		case 5:
-			return BotConstants.imageUrlDiffHard;
-		case 7:
-			return BotConstants.imageUrlDiffExpert;
-		case 9:
-			return BotConstants.imageUrlDiffExpertPlus;
-		default:
+		List<Diff> diffs = bsMap.getVersionByHash(versionHash).getDiffs();
+		if (diffs == null || diffs.size() == 0) {
 			return "";
 		}
+
+		double durationSeconds = bsMap.getVersionByHash(versionHash).getDiffs().get(0).getLength();
+		int minutes = (int) (durationSeconds / 60);
+		int seconds = (int) durationSeconds % 60;
+		return "[" + minutes + ":" + (seconds < 10 ? "0" + seconds : seconds) + "]";
 	}
 
-	private static BeatSaviourRankedMap findRankedMapBySongHash(RankedMaps ranked, String songHash) {
-		for (BeatSaviourRankedMap map : ranked.getRankedMaps()) {
-			try {
-				if (map.getHash().toUpperCase().equals(songHash.toUpperCase())) {
-					return map;
-				}
-			} catch (NullPointerException e) {
-				System.out.println("Null Pointer at ranked maps");
-				System.out.println("SongHash: " + songHash);
-				System.out.println("Map: " + map);
-				System.out.println("RankedMaps: " + ranked.getRankedMaps().size());
-			}
-		}
-		return null;
-	}
-
-	private static String getSuffix(final int n) {
-		String[] sufixes = new String[] { "th", "st", "nd", "rd", "th", "th", "th", "th", "th", "th" };
-		switch (n % 100) {
-		case 11:
-		case 12:
-		case 13:
-			return "th";
-		default:
-			return sufixes[n % 10];
-		}
+	private static int getPageNrFromSongIndex(int index) {
+		int withoutDigits = ((int) index / 8);
+		float decimal = index / 8f - withoutDigits;
+		return decimal > 0 ? withoutDigits + 1 : withoutDigits;
 	}
 
 	private static String getScoreMessage(int rankOnPlayerLeaderboard) {
 		if (rankOnPlayerLeaderboard == 1) {
-			return "🔥 Top play 🔥";
+			return "🔥 Top Play 🔥";
 		}
-		String suffix = getSuffix(rankOnPlayerLeaderboard);
+		String suffix = Format.getSuffix(rankOnPlayerLeaderboard);
 		return rankOnPlayerLeaderboard + suffix + " Best Play";
 	}
 }

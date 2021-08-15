@@ -3,13 +3,13 @@ package bot.dto.beatsaviour;
 import java.util.List;
 
 public class RankedMaps {
-	private List<BeatSaviourRankedMap> rankedMaps;
+	private List<BeatSaviourRankedMap> maps;
 
 	public List<BeatSaviourRankedMap> getRankedMaps() {
-		return rankedMaps;
+		return maps;
 	}
 
-	public void setRankedMaps(List<BeatSaviourRankedMap> rankedMaps) {
-		this.rankedMaps = rankedMaps;
+	public void setRankedMaps(List<BeatSaviourRankedMap> maps) {
+		this.maps = maps;
 	}
 }

@@ -5,7 +5,7 @@ public class ApiConstants {
 	// ScoreSaber
 	public static String USER_PRE_URL = "https://scoresaber.com/u/";
 	public static final String USER_ID_REGEX = "scoresaber\\.com\\/u\\/(\\d+)";
-
+	
 	public static String SS_PRE_URL = "https://new.scoresaber.com";
 	public static String SS_PLAYER_PRE_URL = SS_PRE_URL + "/api/player/";
 	public static String SS_PLAYER_POST_URL = "/full";
@@ -16,14 +16,13 @@ public class ApiConstants {
 	public static String QUALIFIED_URL = "http://scoresaber.com/api.php?function=get-leaderboards&cat=5&limit=100&page=1&unique=1&qualified=1";
 
 	// Beat Saver
-	public static String BS_PRE_URL = "https://beatsaver.com";
-	public static String BS_API_PRE_URL = BS_PRE_URL + "/api/";
+	public static String BS_PRE_URL = "https://cdn.beatsaver.com";
+	public static String BS_API_PRE_URL = "https://api.beatsaver.com";
 
-	public static String BS_DOWNLOAD_URL = BS_API_PRE_URL + "download/key/";
-	public static String BS_MAP_DETAILS_URL = BS_API_PRE_URL + "maps/detail/";
-	public static String BS_MAP_BY_HASH_URL = BS_API_PRE_URL + "maps/by-hash/";
-
-	public static String BS_DEFAULT_MAP_URL = BS_PRE_URL + "/beatmap/";
+	public static String BS_MAP_BY_KEY = BS_API_PRE_URL + "/maps/id/";
+	public static String BS_MAP_BY_HASH_URL = BS_API_PRE_URL + "/maps/hash/";
+ 
+	public static String BS_DEFAULT_MAP_URL = BS_PRE_URL + "/maps/";
 
 	// Beat Saviour
 	public static String BSAVIOUR_PRE_URL = "https://www.beatsavior.io";

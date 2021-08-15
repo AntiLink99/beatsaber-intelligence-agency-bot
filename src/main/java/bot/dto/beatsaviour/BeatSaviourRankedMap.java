@@ -2,8 +2,6 @@ package bot.dto.beatsaviour;
 
 import java.util.List;
 
-import bot.dto.SongDifficulties;
-
 public class BeatSaviourRankedMap {
 
 	String _id;
@@ -23,11 +21,12 @@ public class BeatSaviourRankedMap {
 	String songSubName;
 	String songAuthorName;
 	String levelAuthorName;
+	private List<Float> stars;
 	RankedMapRootDifficulties diffs;
 	double bpm;
 	int playedCount;
 	int upvotes;
-	int downvotes;
+	int downvotes;	
 	boolean ranked;
 	long timestamp;
 
@@ -224,6 +223,14 @@ public class BeatSaviourRankedMap {
 
 	public void setTimestamp(long timestamp) {
 		this.timestamp = timestamp;
+	}
+
+	public List<Float> getStars() {
+		return stars;
+	}
+
+	public void setStars(List<Float> stars) {
+		this.stars = stars;
 	}
 
 	public class RankedMapMetadata {

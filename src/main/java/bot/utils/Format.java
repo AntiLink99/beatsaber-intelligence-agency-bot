@@ -29,7 +29,7 @@ public class Format {
 	public static String decimal(float num) {
 		DecimalFormatSymbols symbols = new DecimalFormatSymbols();
 		symbols.setDecimalSeparator('.');
-		DecimalFormat sep = new DecimalFormat("0.##");
+		DecimalFormat sep = new DecimalFormat("0.00");
 		sep.setDecimalFormatSymbols(symbols);
 		return sep.format(num);
 	}
@@ -79,5 +79,17 @@ public class Format {
 		DecimalFormat df = new DecimalFormat("#.####");
 		df.setRoundingMode(RoundingMode.HALF_UP);
 		return Integer.parseInt(df.format(d));
+	}
+	
+	public static String getSuffix(final int n) {
+		String[] suffixes = new String[] { "th", "st", "nd", "rd", "th", "th", "th", "th", "th", "th" };
+		switch (n % 100) {
+		case 11:
+		case 12:
+		case 13:
+			return "th";
+		default:
+			return suffixes[n % 10];
+		}
 	}
 }

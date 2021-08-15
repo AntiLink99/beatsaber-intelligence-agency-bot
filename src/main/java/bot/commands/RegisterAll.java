@@ -4,17 +4,17 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import bot.db.DatabaseManager;
+import bot.dto.MessageEventDTO;
 import bot.listeners.RegisterAllListener;
 import bot.utils.Format;
 import bot.utils.Messages;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.TextChannel;
-import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
 public class RegisterAll {
 
-	public static void registerAllMembers(DatabaseManager db, MessageReceivedEvent event) {
-		TextChannel channel = event.getTextChannel();
+	public static void registerAllMembers(DatabaseManager db, MessageEventDTO event) {
+		TextChannel channel = event.getChannel();
 		List<Member> guildMembers = channel.getGuild().getMembers();
 		List<Long> storedUserIds = db.getAllStoredPlayers().stream().map(p -> p.getDiscordUserId()).collect(Collectors.toList());
 
@@ -25,7 +25,7 @@ public class RegisterAll {
 			String message = Format.bold(missingMemberNames.size() + " members are not registered yet:\n\n");
 			message = message.concat(String.join("\n", missingMemberNames));
 			Messages.sendMessage(message, channel);
-			event.getJDA().addEventListener(new RegisterAllListener(channel, event.getAuthor(), missingMembers, db));
+			event.getJDA().addEventListener(new RegisterAllListener(channel, event.getAuthor().getUser(), missingMembers, db));
 		} else {
 			Messages.sendMessage("All members are already registered.", channel);
 		}

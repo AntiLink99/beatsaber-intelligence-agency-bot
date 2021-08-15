@@ -3,7 +3,7 @@ package bot.dto;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.Locale;
@@ -16,6 +16,7 @@ public class SongScore {
 	private long score;
 	private float pp;
 	private float weight;
+	private double accuracy = -1;
 	private String timeSet;
 	private long leaderboardId;
 	private int maxScore;
@@ -25,12 +26,13 @@ public class SongScore {
 	private String songSubName;
 	private String songAuthorName;
 	private String levelAuthorName;
-	private String coverURL;
+	private String coverURL; //manually set
+	private float songStars; //manually set
 
 	private transient DecimalFormat format;
 
 	public SongScore() {
-		format = new DecimalFormat("###.##");
+		format = new DecimalFormat("##0.00");
 		format.setDecimalFormatSymbols(DecimalFormatSymbols.getInstance(Locale.ENGLISH));
 	}
 
@@ -139,11 +141,21 @@ public class SongScore {
 	}
 
 	public double getAccuracy() {
-		return Double.valueOf(score) / Double.valueOf(maxScore);
+		if (accuracy != -1) {
+			return accuracy;
+		}
+		if (maxScore != 0) {
+			return Double.valueOf(score) / Double.valueOf(maxScore);
+		}
+		return -1;
 	}
 
 	public String getAccuracyString() {
-		return format.format(getAccuracy() * 100d) + "%";
+		double acc = getAccuracy();
+		if (acc != -1 && !Double.isInfinite(acc)) {
+			return format.format(getAccuracy() * 100d) + "%";
+		}
+		return "";
 	}
 
 	public int getDifficulty() {
@@ -193,6 +205,18 @@ public class SongScore {
 	}
 	
 	public String getRelativeTimeString() {
-		return new PrettyTime(Locale.ENGLISH).format(Date.from(getTimeSetLocalDateTime().atZone(ZoneId.systemDefault()).toInstant()));
+		return new PrettyTime(Locale.ENGLISH).format(Date.from(getTimeSetLocalDateTime().atZone(ZoneOffset.UTC).toInstant()));
+	}
+
+	public float getSongStars() {
+		return songStars;
+	}
+
+	public void setSongStars(float songStars) {
+		this.songStars = songStars;
+	}
+
+	public void setAccuracy(float accuracy) {
+		this.accuracy = accuracy;
 	}
 }

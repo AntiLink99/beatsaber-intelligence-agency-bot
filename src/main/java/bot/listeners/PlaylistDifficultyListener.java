@@ -3,19 +3,20 @@ package bot.listeners;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import bot.api.ApiConstants;
 import bot.api.BeatSaver;
+import bot.dto.MessageEventDTO;
 import bot.dto.Playlist;
 import bot.dto.Song;
-import bot.dto.SongDifficulties;
+import bot.dto.Song.Diff;
 import bot.main.BotConstants;
 import bot.utils.Format;
 import bot.utils.Messages;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.TextChannel;
-import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 
@@ -23,19 +24,21 @@ public class PlaylistDifficultyListener extends ListenerAdapter {
 
 	final long authorId;
 	Playlist playlist;
+	List<Song> playlistSongsWithMoreAttributes;
 	Song currentSong;
 	TextChannel channel;
 	BeatSaver bs;
 	Message newestMessage;
 	Map<String, String> resultMessage = new LinkedHashMap<>();
 
-	public PlaylistDifficultyListener(Playlist playlist, MessageReceivedEvent event, BeatSaver bs) {
+	public PlaylistDifficultyListener(Playlist playlist, List<Song> playlistSongsWithMoreAttributes, MessageEventDTO event, BeatSaver bs) {
 		this.playlist = playlist;
-		this.channel = event.getTextChannel();
+		this.playlistSongsWithMoreAttributes = playlistSongsWithMoreAttributes;
+		this.channel = event.getChannel();
 		this.authorId = event.getAuthor().getIdLong();
 		this.bs = bs;
 
-		currentSong = playlist.getSongs().get(0);
+		currentSong = playlistSongsWithMoreAttributes.get(0);
 		askForSongDifficulty(currentSong);
 		new java.util.Timer().schedule(new java.util.TimerTask() {
 			@Override
@@ -47,25 +50,30 @@ public class PlaylistDifficultyListener extends ListenerAdapter {
 
 	private void askForSongDifficulty(Song song) {
 		HashMap<String, String> result = new HashMap<>();
-		result.put("Please react with the difficulty for this song:", Format.bold(song.getSongName()));
+		result.put("Please react with the difficulty for this song:", Format.bold(song.getName()));
 		newestMessage = Messages.sendMessageStringMap(result, null, channel);
-		reactWithDifficultiesOnMessage(newestMessage, song.getDifficulties());
+		reactWithDifficultiesOnMessage(newestMessage, song.getVersions().get(0).getDiffs());
 	}
 
-	private void reactWithDifficultiesOnMessage(Message message, SongDifficulties difficulties) {
-		if (difficulties.isEasy()) {
+	private void reactWithDifficultiesOnMessage(Message message, List<Diff> list) {
+		boolean isEasy = list.stream().anyMatch(diff -> "Easy".equals(diff.getDifficulty()));
+		boolean isNormal = list.stream().anyMatch(diff -> "Normal".equals(diff.getDifficulty()));
+		boolean isHard = list.stream().anyMatch(diff -> "Hard".equals(diff.getDifficulty()));
+		boolean isExpert = list.stream().anyMatch(diff -> "Expert".equals(diff.getDifficulty()));
+		boolean isExpertPlus = list.stream().anyMatch(diff -> "ExpertPlus".equals(diff.getDifficulty()));
+		if (isEasy) {
 			message.addReaction(BotConstants.playlistDifficultyEmotes[0]).queue();
-		}
-		if (difficulties.isNormal()) {
+		}	
+		if (isNormal) {
 			message.addReaction(BotConstants.playlistDifficultyEmotes[1]).queue();
 		}
-		if (difficulties.isHard()) {
+		if (isHard) {
 			message.addReaction(BotConstants.playlistDifficultyEmotes[2]).queue();
 		}
-		if (difficulties.isExpert()) {
+		if (isExpert) {
 			message.addReaction(BotConstants.playlistDifficultyEmotes[3]).queue();
 		}
-		if (difficulties.isExpertPlus()) {
+		if (isExpertPlus) {
 			message.addReaction(BotConstants.playlistDifficultyEmotes[4]).queue();
 		}
 	}
@@ -81,7 +89,7 @@ public class PlaylistDifficultyListener extends ListenerAdapter {
 
 		newestMessage.delete().queue();
 		addSongDifficultyByEmote(currentSong, event.getReactionEmote().getEmoji());
-		if (hasNextSong(playlist, currentSong)) {
+		if (hasNextSong(currentSong)) {
 			currentSong = getNextSong(currentSong);
 			askForSongDifficulty(currentSong);
 		} else {
@@ -90,7 +98,7 @@ public class PlaylistDifficultyListener extends ListenerAdapter {
 	}
 
 	private void addSongDifficultyByEmote(Song song, String emoji) {
-		resultMessage.put(song.getSongName(), getDifficultyNameByEmote(emoji) + "\n" + ApiConstants.BS_DEFAULT_MAP_URL + song.getSongKey() + "\n" + ApiConstants.BS_DOWNLOAD_URL + song.getSongKey());
+		resultMessage.put(song.getName(), getDifficultyNameByEmote(emoji) + "\n" + ApiConstants.BS_DEFAULT_MAP_URL + song.getId() + "\n" + ApiConstants.BS_PRE_URL + "/" + song.getId().toLowerCase()+".zip");
 	}
 
 	private String getDifficultyNameByEmote(String emoji) {
@@ -109,12 +117,12 @@ public class PlaylistDifficultyListener extends ListenerAdapter {
 			return "???";
 	}
 
-	private boolean hasNextSong(Playlist playlist, Song currentSong) {
-		return playlist.getSongs().indexOf(currentSong) < playlist.getSongs().size() - 1;
+	private boolean hasNextSong(Song currentSong) {
+		return playlistSongsWithMoreAttributes.indexOf(currentSong) < playlist.getSongs().size() - 1;
 	}
 
 	private Song getNextSong(Song currentSong) {
-		return playlist.getSongs().get(playlist.getSongs().indexOf(currentSong) + 1);
+		return playlistSongsWithMoreAttributes.get(playlistSongsWithMoreAttributes.indexOf(currentSong) + 1);
 	}
 
 	public void finished() {

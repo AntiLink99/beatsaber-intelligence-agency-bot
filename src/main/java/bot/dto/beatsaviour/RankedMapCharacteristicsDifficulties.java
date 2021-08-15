@@ -4,11 +4,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import com.google.gson.annotations.SerializedName;
+
 public class RankedMapCharacteristicsDifficulties {
 	RankedMapCharacteristicsDifficulty easy;
 	RankedMapCharacteristicsDifficulty normal;
 	RankedMapCharacteristicsDifficulty hard;
 	RankedMapCharacteristicsDifficulty expert;
+	@SerializedName(value = "expertplus", alternate = { "expertPlus" })
 	RankedMapCharacteristicsDifficulty expertplus;
 
 	public RankedMapCharacteristicsDifficulty getEasy() {

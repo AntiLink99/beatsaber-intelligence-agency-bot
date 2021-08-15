@@ -6,6 +6,7 @@ import java.util.concurrent.TimeUnit;
 
 import bot.api.ScoreSaber;
 import bot.db.DatabaseManager;
+import bot.dto.MessageEventDTO;
 import bot.dto.SongScore;
 import bot.dto.player.Player;
 import bot.main.BotConstants;
@@ -16,7 +17,6 @@ import bot.utils.RoleManager;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.Role;
-import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
 public class ClaimPPRole {
 	public static void validateAndAssignRole(Member member, DatabaseManager db, ScoreSaber ss, MessageChannel channel, boolean showMessages) {
@@ -49,12 +49,12 @@ public class ClaimPPRole {
 		}
 	}
 
-	public static void validateAndAssignRoleForAll(MessageReceivedEvent event, DatabaseManager db, ScoreSaber ss) {
+	public static void validateAndAssignRoleForAll(MessageEventDTO event, DatabaseManager db, ScoreSaber ss) {
 		List<Player> storedPlayers = db.getAllStoredPlayers();
 		for (Player player : storedPlayers) {
 			Member member = event.getGuild().getMemberById(player.getDiscordUserId());
 			if (member != null) {
-				validateAndAssignRole(member, db, ss, event.getTextChannel(), false);
+				validateAndAssignRole(member, db, ss, event.getChannel(), false);
 			}
 			try {
 				TimeUnit.MILLISECONDS.sleep(125);

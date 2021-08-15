@@ -15,6 +15,7 @@ import org.apache.commons.io.FileUtils;
 import bot.dto.player.Player;
 import bot.listeners.EmbedReactionListener;
 import bot.main.BotConstants;
+import dto.discord.MessageAuthor;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Emote;
 import net.dv8tion.jda.api.entities.Member;
@@ -38,7 +39,7 @@ public class Messages {
 			System.out.println("Could not send message because of lacking permissions: " + e.getMessage());
 		}
 	}
-
+	
 	public static void sendMessageStringMapWithTitle(Map<String, String> values, String title, TextChannel channel) {
 		EmbedBuilder builder = new EmbedBuilder();
 		for (String key : values.keySet()) {
@@ -49,7 +50,7 @@ public class Messages {
 		channel.sendMessage(builder.build()).queue();
 	}
 
-	public static Message sendMessageStringMap(Map<String, String> values, String title, TextChannel channel) {
+	public static Message sendMessageStringMap(Map<String, String> values, String title, MessageChannel channel) {
 		EmbedBuilder builder = new EmbedBuilder();
 		for (String key : values.keySet()) {
 			builder.addField(key, values.get(key), false);
@@ -69,20 +70,8 @@ public class Messages {
 		EmbedBuilder builder = new EmbedBuilder();
 		builder.setTitle(Format.bold(Format.underline(title)));
 		builder.setColor(embedColor);
-		String format = imagePath.substring(imagePath.length() - 4);
-		builder.setImage("attachment://image" + format);
-		File imageFile = new File("src/main/resources" + title + format);
-		try {
-			FileUtils.copyURLToFile(new URL(imagePath), imageFile);
-		} catch (MalformedURLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		channel.sendFile(imageFile, "image" + format).embed(builder.build()).queue();
-		imageFile.delete();
+		builder.setImage(imagePath);
+		channel.sendMessage(builder.build()).queue();
 	}
 
 	public static void sendImage(String imagePath, String title, TextChannel channel) {
@@ -139,18 +128,35 @@ public class Messages {
 		}
 		builder.setColor(embedColor);
 		builder.setTitle(title);
+		builder.setFooter("Page 1");
 		Message reactionMessage = channel.sendMessage(builder.build()).complete();
 		channel.getJDA().addEventListener(new EmbedReactionListener(reactionMessage, title, values));
 	}
 
-	public static void editMessageStringMap(long messageId, Map<String, String> values, String title, String footer, TextChannel channel) {
+	public static void sendMultiPageMessage(Map<String, String> values, String title, MessageAuthor author, String footer, boolean isInline, int entriesPerPage, MessageChannel channel) {
 		EmbedBuilder builder = new EmbedBuilder();
-		for (String key : values.keySet()) {
-			builder.addField(key, values.get(key), false);
+		for (String key : values.keySet().stream().limit(entriesPerPage).collect(Collectors.toCollection(LinkedHashSet::new))) {
+			builder.addField(key, values.get(key), isInline);
 		}
 		builder.setColor(embedColor);
 		builder.setTitle(title);
 		builder.setFooter(footer);
+		builder.setAuthor(author.getAuthorName(), author.getHref(), author.getAvatarUrl());
+		Message reactionMessage = channel.sendMessage(builder.build()).complete();
+		channel.getJDA().addEventListener(new EmbedReactionListener(reactionMessage, title, author, footer, isInline, entriesPerPage, values));
+	}
+
+	public static void editMessageStringMap(long messageId, Map<String, String> values, String title, String footer, MessageAuthor author, boolean isInline, TextChannel channel) {
+		EmbedBuilder builder = new EmbedBuilder();
+		for (String key : values.keySet()) {
+			builder.addField(key, values.get(key), isInline);
+		}
+		builder.setColor(embedColor);
+		builder.setTitle(title);
+		builder.setFooter(footer);
+		if (author != null) {
+			builder.setAuthor(author.getAuthorName(), author.getHref(), author.getAvatarUrl());
+		}
 		channel.editMessageById(messageId, builder.build()).queue();
 	}
 

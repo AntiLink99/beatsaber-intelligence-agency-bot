@@ -16,7 +16,7 @@
 		<dependency>
 			<groupId>net.dv8tion</groupId>
 			<artifactId>JDA</artifactId>
-			<version>4.2.0_168</version>
+			<version>4.3.0_277</version>
 		</dependency>
 		<dependency>
 			<groupId>org.json</groupId>
@@ -76,12 +76,22 @@
 		<dependency>
 			<groupId>org.openjfx</groupId>
 			<artifactId>javafx-swing</artifactId>
-			<version>11-ea+24</version>
+			<version>17-ea+9</version>
 		</dependency>
 		<dependency>
 			<groupId>org.ocpsoft.prettytime</groupId>
 			<artifactId>prettytime</artifactId>
 			<version>4.0.5.Final</version>
+		</dependency>
+		<dependency>
+			<groupId>net.lingala.zip4j</groupId>
+			<artifactId>zip4j</artifactId>
+			<version>2.6.4</version>
+		</dependency>
+		<dependency>
+			<groupId>commons-validator</groupId>
+			<artifactId>commons-validator</artifactId>
+			<version>1.7</version>
 		</dependency>
 	</dependencies>
 	<repositories>
@@ -89,6 +99,11 @@
 			<id>jcenter</id>
 			<name>jcenter-bintray</name>
 			<url>https://jcenter.bintray.com</url>
+		</repository>
+		<repository>
+			<id>dv8tion</id>
+			<name>m2-dv8tion</name>
+			<url>https://m2.dv8tion.net/releases</url>
 		</repository>
 	</repositories>
 	<build>

@@ -17,6 +17,7 @@ public class Player implements Serializable {
 	private long discordUserId;
 	private List<Integer> historyValues;
 	private String history;
+	private transient String customAccGridImage;
 
 	public String getPlayerId() {
 		return playerId;
@@ -96,6 +97,14 @@ public class Player implements Serializable {
 
 	public void setHistoryValues(List<Integer> historyValues) {
 		this.historyValues = historyValues;
+	}
+
+	public String getCustomAccGridImage() {
+		return customAccGridImage;
+	}
+
+	public void setCustomAccGridImage(String customAccGridImage) {
+		this.customAccGridImage = customAccGridImage;
 	}
 
 }

@@ -14,6 +14,7 @@ import com.google.gson.reflect.TypeToken;
 import bot.dto.ScoreSaberMapData;
 import bot.dto.SongScore;
 import bot.dto.player.Player;
+import bot.utils.DiscordLogger;
 
 public class ScoreSaber {
 
@@ -30,7 +31,7 @@ public class ScoreSaber {
 		JsonObject response = http.fetchJsonObject(playerUrl);
 
 		if (response == null) {
-			System.out.println("Could not find player with url \"" + playerUrl + "\".");
+			DiscordLogger.sendLogInChannel("Could not find player with url \"" + playerUrl + "\".", DiscordLogger.HTTP_ERRORS);
 			return null;
 		}
 		JsonObject playerInfo = response.getAsJsonObject("playerInfo");
@@ -53,6 +54,18 @@ public class ScoreSaber {
 		return new ArrayList<SongScore>();
 	}
 
+	public List<SongScore> getTopScoresByPlayerIdAndPage(long playerId, int pageNr) {
+		String recentScoresUrl = ApiConstants.SS_PLAYER_PRE_URL + playerId + ApiConstants.SS_PLAYER_TOP_SCORES_POST_URL + "/" + pageNr;
+		JsonObject response = http.fetchJsonObject(recentScoresUrl);
+		if (response != null) {
+			JsonArray topScores = response.getAsJsonArray("scores");
+			Type listType = new TypeToken<List<SongScore>>() {
+			}.getType();
+			return gson.fromJson(topScores.toString(), listType);
+		}
+		return new ArrayList<SongScore>();
+	}
+
 	public List<SongScore> getRecentScoresByPlayerId(long playerId) {
 		String recentScoresUrl = ApiConstants.SS_PLAYER_PRE_URL + playerId + ApiConstants.SS_PLAYER_RECENT_SCORES_POST_URL;
 		JsonObject response = http.fetchJsonObject(recentScoresUrl);
@@ -64,7 +77,19 @@ public class ScoreSaber {
 		}
 		return new ArrayList<SongScore>();
 	}
-	
+
+	public List<SongScore> getRecentScoresByPlayerIdAndPage(long playerId, int pageNr) {
+		String recentScoresUrl = ApiConstants.SS_PLAYER_PRE_URL + playerId + ApiConstants.SS_PLAYER_RECENT_SCORES_POST_URL + "/" + pageNr;
+		JsonObject response = http.fetchJsonObject(recentScoresUrl);
+		if (response != null) {
+			JsonArray topScores = response.getAsJsonArray("scores");
+			Type listType = new TypeToken<List<SongScore>>() {
+			}.getType();
+			return gson.fromJson(topScores.toString(), listType);
+		}
+		return new ArrayList<SongScore>();
+	}
+
 	public List<ScoreSaberMapData> getQualifiedMaps() {
 		String qualifiedUrl = ApiConstants.QUALIFIED_URL;
 		JsonObject response = http.fetchJsonObject(qualifiedUrl);
@@ -72,9 +97,10 @@ public class ScoreSaber {
 			JsonArray qualifiedSongs = response.getAsJsonArray("songs");
 			Type listType = new TypeToken<List<ScoreSaberMapData>>() {
 			}.getType();
-			List<ScoreSaberMapData> qualifiedMaps = gson.fromJson(qualifiedSongs.toString(), listType);			
+			List<ScoreSaberMapData> qualifiedMaps = gson.fromJson(qualifiedSongs.toString(), listType);
 			return qualifiedMaps.stream().filter(map -> !map.isRanked()).collect(Collectors.toList());
 		}
 		return new ArrayList<ScoreSaberMapData>();
 	}
+
 }

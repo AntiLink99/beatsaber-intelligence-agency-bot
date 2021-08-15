@@ -14,10 +14,13 @@ import bot.utils.Format;
 
 public class BotConstants {
 
-	public static final String PLAYING = "with AntiLink's emotions 👨‍💻";
+	public static final String PLAYING = "-> ru help <-";
 
 	public static final String sealImageUrl = "https://i.imgur.com/LcCzrxx.jpg";
+	public static final String donateUrl = "https://donatebot.io/checkout/841834265594560584";
+	public static final String featureRequestUrl = "https://gitreports.com/issue/AntiLink99/beatsaber-intelligence-agency-bot";
 	public static final long foaaServerId = Long.valueOf(System.getenv("server_id"));
+	public static final long logServerId = Long.valueOf(System.getenv("log_server_id"));
 	public static final long outputChannelId = Long.valueOf(System.getenv("channel_id"));
 	public static final long foaaCategoryId = 775129325443612693L;
 
@@ -41,6 +44,7 @@ public class BotConstants {
 	public static final int improvementReactionMinTimeDiff = 400000000;
 	public static final String playlistImageFOAA = getImageBase64("foaa.png");
 	public static final String playlistImageQualified = getImageBase64("qualified.png");
+	public static final String playlistImageRanked = getImageBase64("ranked.png");
 	public static final String playlistAuthor = "AntiLink#1337";
 
 	public static final String[] allowedRecruitingCommands = { "rplaylist", "playlist", "deletethat" };
@@ -65,24 +69,28 @@ public class BotConstants {
 
 	public static Map<String, String> getCommands(boolean isFOAA) {
 		Map<String, String> commands = new LinkedMap<String, String>();
+		commands.put(Format.underline("Important Links"), Format.bold("[❤️  Support AntiLink#1337 and the bot ❤️](" + donateUrl + ")\n[⭐ Request features and make suggestions ⭐](" + featureRequestUrl + ")"));
 		commands.put("ru register <ScoreSaber URL>", "Registers a player that will be tracked and updated by the bot.");
-		commands.put("ru registerall", "Lets you enter the ScoreSaber profiles for all unregistered members on the server.");
-		commands.put("ru unregister <ScoreSaber URL or name>", "Removes a player from the database so that the account is not being updated anymore.");
-		commands.put("ru update <ScoreSaber URL or name>", "Updates the player's role manually if a new milestone was reached.");
-		commands.put("ru recentsong (optional: <ID>) (optional: <@member>)", "Displays a player card for the recent score set on ScoreSaber. Use the BeatSaviour mod to receive more data.");
-		commands.put("ru recentsongs (optional: <@member>)", "Displays the recently set scores of a player.");
+		commands.put("ru invite", "Shares the invite link for this bot. Feel free to invite it to other servers!");
+		commands.put("ru unregister", "Removes a player from the database so that the account is not being updated anymore.");
+		commands.put("ru update <ScoreSaber URL>", "Updates the player's role manually if a new milestone was reached.");
+		commands.put("ru recentsong (optional: <ScoreCount>) (optional: <@member>)", "Displays a player card for the recent score set on ScoreSaber. Use the BeatSaviour mod to receive more data.");
+		commands.put("ru setgridimage <Image URL>", "Sets a background image for the acc grid in 'ru recentsong'. Leave the URL empty to reset the image.");
+		commands.put("ru recentsongs (optional: <PageID>) (optional: <@member>)", "Displays the recently set scores of a player.");
+		commands.put("ru topsongs (optional: <PageID>) (optional: <@member>)", "Displays the best scores of a player.");
 		commands.put("ru improvement", "Lists the rank difference between the last seven days for all players.");
-		commands.put("ru list", "Lists all players that are being tracked and updated.");
 		if (isFOAA) {
 			commands.put("ru claimpp", "Assigns a pp role to you depending on your top play.");
 			commands.put("ru randomquote", "Print out a random quote from the #quotes channel.");
 		}
 		commands.put("ru randommeme", "Displays a random meme using the Reddit API.");
-		commands.put("ru chart", "Displays a chart with your rank change over the last couple of days.");
+		commands.put("ru chart (optional: <@member>)", "Displays a chart with your rank change over the last couple of days.");
 		commands.put("ru chartall (optional: <highest> <lowest>)", "Displays a chart with the rank changes of all players over the last couple of days. Default range is #1 - #2000.");
 		commands.put("ru playlist <filename> <map keys>", "Automatically creates a playlist with the given map keys and name.");
 		commands.put("ru rplaylist <filename> <map keys>", "Creates a playlist just like \"ru playlist\" but asks for specific difficulties. An embed is shown afterwards with the given information and download links for all the maps.");
 		commands.put("ru qualified", "Automatically creates a playlist with the current qualified maps from ScoreSaber.");
+		commands.put("ru ranked <minStars> <maxStars>", "Automatically creates a playlist with ranked maps in the specified star range.");
+		commands.put("ru ranked <amount>", "Automatically creates a playlist with the " + Format.bold("{amount}") + " latest ranked maps.");
 		commands.put("ru stand (optional: <@member>)", "Displays a radar chart of the skills the player set for himself.");
 		commands.put("ru setskill <skill> <1-10>", "Sets the skill value for the radar chart displayed with \"ru stand\".");
 		commands.put("ru deletethat", "Deletes the latest message from the bot in the channel.");
@@ -96,7 +104,6 @@ public class BotConstants {
 	public static List<String> getCommandsWithPlayerInfo() {
 		List<String> commandsWithPlayerInfo = new ArrayList<String>();
 		commandsWithPlayerInfo.add("register");
-		commandsWithPlayerInfo.add("unregister");
 		commandsWithPlayerInfo.add("update");
 		return commandsWithPlayerInfo;
 	}

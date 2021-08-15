@@ -15,21 +15,21 @@ import org.knowm.xchart.style.Styler.LegendPosition;
 import org.knowm.xchart.style.XYStyler;
 import org.knowm.xchart.style.markers.SeriesMarkers;
 
+import bot.dto.MessageEventDTO;
 import bot.dto.beatsaviour.BeatSaviourPlayerScore;
 import bot.main.BotConstants;
 import bot.utils.ChartUtils;
 import bot.utils.Messages;
-import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
 public class AccuracyChart {
-	public static void sendChartImage(BeatSaviourPlayerScore score, String playerName, String diffName, MessageReceivedEvent event) {
+	public static void sendChartImage(BeatSaviourPlayerScore score, String playerName, String diffName, MessageEventDTO event) {
 
 		XYChart chart = AccuracyChart.getAccuracyChart(score, playerName, diffName);
 		String filename = "src/main/resources/accuracyChart_" + score.getPlayerID();
 		ChartUtils.saveChart(chart, filename);
 		File image = new File(filename + ".png");
 		if (image.exists()) {
-			Messages.sendImage(image, "accuracyChart_" + score.getPlayerID() + ".png", event.getTextChannel());
+			Messages.sendImage(image, "accuracyChart_" + score.getPlayerID() + ".png", event.getChannel());
 			image.delete();
 		}
 	}

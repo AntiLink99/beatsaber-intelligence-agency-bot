@@ -18,46 +18,34 @@ import org.knowm.xchart.style.Styler.LegendPosition;
 import org.knowm.xchart.style.XYStyler;
 import org.knowm.xchart.style.markers.SeriesMarkers;
 
+import bot.dto.MessageEventDTO;
 import bot.dto.player.Player;
 import bot.main.BotConstants;
 import bot.utils.ChartUtils;
 import bot.utils.ListValueUtils;
 import bot.utils.Messages;
-import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
 public class PlayerChart {
 
-	public static void sendChartImage(Player player, MessageReceivedEvent event, String input) {
+	public static void sendChartImage(Player player, MessageEventDTO event) {
+		if (player.getHistoryValues() == null) {
+			Messages.sendMessage("Could not find history values for user. Please update the user with \"ru updated <ScoreSaber URL>\".", event.getChannel());
+			return;
+		}
 		List<Integer> rankValues = ListValueUtils.addElementReturnList(player.getHistoryValues(), player.getRank());
 		double max = Collections.min(rankValues), min = Collections.max(rankValues);
-
-		if (input != null) {
-			String[] values = input.split(" ");
-			try {
-				max = Double.valueOf(values[0]);
-				min = Double.valueOf(values[1]);
-			} catch (NullPointerException | NumberFormatException e) {
-				Messages.sendMessage("Wrong syntax. Check out ru \"help\".", event.getChannel());
-				return;
-			}
-
-			if (min < max) {
-				Messages.sendMessage("The minimum rank cannot be bigger than the maximum rank.", event.getChannel());
-				return;
-			}
-		}
 
 		XYChart chart = PlayerChart.getPlayerChart(Collections.singletonList(player), max, min);
 		String filename = "src/main/resources/" + player.getPlayerId();
 		ChartUtils.saveChart(chart, filename);
 		File image = new File(filename + ".png");
 		if (image.exists()) {
-			Messages.sendImage(image, player.getPlayerName() + ".png", event.getTextChannel());
+			Messages.sendImage(image, player.getPlayerName() + ".png", event.getChannel());
 			image.delete();
 		}
 	}
 
-	public static void sendChartImage(List<Player> players, MessageReceivedEvent event, String input) {
+	public static void sendChartImage(List<Player> players, MessageEventDTO event, String input) {
 		double max = 1, min = 2000;
 
 		if (input != null) {
@@ -82,7 +70,7 @@ public class PlayerChart {
 		ChartUtils.saveChart(chart, filename);
 		File image = new File(filename + ".png");
 		if (image.exists()) {
-			Messages.sendImage(image, "players.png", event.getTextChannel());
+			Messages.sendImage(image, "players.png", event.getChannel());
 			image.delete();
 		}
 	}
@@ -139,7 +127,7 @@ public class PlayerChart {
 			// Series
 			List<Integer> history = ListValueUtils.addElementReturnList(player.getHistoryValues(), player.getRank()).stream().map(h -> -h).collect(Collectors.toList());
 			List<Integer> time = IntStream.rangeClosed(-history.size() + 1, 0).boxed().collect(Collectors.toList());
-			XYSeries series = chart.addSeries(player.getPlayerName(), time, history);
+			XYSeries series = chart.addSeries(player.getPlayerName() + (players.indexOf(player) % 5 == 0 ? "\n" : ""), time, history);
 			series.setLineWidth(players.size() == 1 ? 10 : 5);
 			series.setMarker(SeriesMarkers.NONE);
 		}

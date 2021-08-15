@@ -28,7 +28,11 @@ public class RoleManager {
 	public static void removeMemberRolesByName(Member member, String name) {
 		List<Role> milestoneRoles = getMemberRolesByName(member, name);
 		for (Role role : milestoneRoles) {
-			member.getGuild().removeRoleFromMember(member, role).queue();
+			try {
+				member.getGuild().removeRoleFromMember(member, role).queue();
+			} catch (Exception e) {
+				//ok
+			}
 		}
 	}
 

@@ -4,17 +4,17 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
+import bot.dto.MessageEventDTO;
 import bot.dto.RandomQuotesContainer;
 import bot.main.BotConstants;
 import bot.utils.Messages;
 import bot.utils.RandomUtils;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Message.Attachment;
-import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
 public class RandomQuote {
 
-	public static void sendRandomQuote(RandomQuotesContainer quotesContainer, MessageReceivedEvent event) {
+	public static void sendRandomQuote(RandomQuotesContainer quotesContainer, MessageEventDTO event) {
 		Guild foaaGuild = event.getJDA().getGuildById(BotConstants.foaaServerId);
 		if (foaaGuild == null) {
 			Messages.sendMessage("Could not find guild which contains the quote channel.", event.getChannel());
@@ -35,7 +35,7 @@ public class RandomQuote {
 				image.createNewFile();
 				image = randomImage.downloadToFile(filePath).join();
 			}
-			Messages.sendImage(image, image.getName(), event.getTextChannel());
+			Messages.sendImage(image, image.getName(), event.getChannel());
 			image.deleteOnExit();
 
 		} catch (IOException e) {

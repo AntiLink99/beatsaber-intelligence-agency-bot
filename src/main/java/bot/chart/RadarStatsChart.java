@@ -10,14 +10,14 @@ import org.knowm.xchart.style.RadarStyler;
 import org.knowm.xchart.style.Styler.LegendLayout;
 import org.knowm.xchart.style.Styler.LegendPosition;
 
+import bot.dto.MessageEventDTO;
 import bot.dto.player.PlayerSkills;
 import bot.main.BotConstants;
 import bot.utils.ChartUtils;
 import bot.utils.Messages;
-import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
 public class RadarStatsChart {
-	public static void sendChartImage(PlayerSkills skills, long memberId, MessageReceivedEvent event) {
+	public static void sendChartImage(PlayerSkills skills, long memberId, MessageEventDTO event) {
 
 		RadarChart chart = getRadarChart(skills);
 		String filename = "src/main/resources/players";
@@ -25,7 +25,7 @@ public class RadarStatsChart {
 		ChartUtils.saveChart(chart, filename);
 		File image = new File(filename + ".png");
 		if (image.exists()) {
-			Messages.sendImage(image, "players.png", event.getTextChannel());
+			Messages.sendImage(image, "players.png", event.getChannel());
 			image.delete();
 		}
 	}

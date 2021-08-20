@@ -23,21 +23,17 @@ public class DatabaseManager {
 				Class.forName("com.mysql.cj.jdbc.Driver");
 				String connectionUrl = "mysql://" + DBConstants.DB_HOST + ":" + DBConstants.DB_PORT + "/" + DBConstants.DB_DATABASE;
 				System.out.println("*** " + connectionUrl);
-				String herokuUrl = System.getenv("JAWSDB_URL");
-				if (herokuUrl != null) {
-					connectionUrl = herokuUrl;
-				}
 				con = DriverManager.getConnection("jdbc:" + connectionUrl + "?autoReconnect=true&serverTimezone=UTC&useUnicode=yes&characterEncoding=UTF-8", DBConstants.DB_USERNAME, DBConstants.DB_PASSWORD);
 				System.out.println("*** Connected to database: " + con.getMetaData().getDatabaseProductName());
 			}
 		} catch (Exception e) {
-			System.out.println(e);
+			e.printStackTrace();
 			try {
 				if (!con.isClosed()) {
 					con.close();
 				}
 			} catch (SQLException e1) {
-				System.out.println(e1);
+				e1.printStackTrace();
 			}
 		}
 	}
@@ -69,8 +65,6 @@ public class DatabaseManager {
 			PreparedStatement stmt = con.prepareStatement(DBConstants.DELETE_PLAYER_BY_DISCORD_ID);
 			stmt.setLong(1, userId);
 			return stmt.executeUpdate() == 1;
-		} catch (SQLIntegrityConstraintViolationException e) {
-			e.printStackTrace();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -93,17 +87,14 @@ public class DatabaseManager {
 			stmt.setString(10, newPlayer.getCustomAccGridImage());
 			stmt.setString(11, newPlayer.getPlayerId()); // Always last!
 			return stmt.executeUpdate() == 1;
-		} catch (SQLIntegrityConstraintViolationException e) {
-			e.printStackTrace();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-
 		return false;
 	}
 	
 	public List<Player> getAllStoredPlayers() {
-		List<Player> players = new ArrayList<Player>();
+		List<Player> players = new ArrayList<>();
 		try {
 			PreparedStatement stmt = con.prepareStatement(DBConstants.SELECT_PLAYER_STMT);
 			ResultSet rs = stmt.executeQuery();
@@ -119,7 +110,7 @@ public class DatabaseManager {
 				player.setDiscordUserId(rs.getLong("discord_user_id"));
 				player.setHistory(rs.getString("player_history"));
 				if (player.getHistory() != null) {
-					player.setHistoryValues(Arrays.asList(player.getHistory().split(",")).stream().map(val -> Integer.parseInt(val)).collect(Collectors.toList()));
+					player.setHistoryValues(Arrays.stream(player.getHistory().split(",")).map(Integer::parseInt).collect(Collectors.toList()));
 				}
 				player.setCustomAccGridImage(rs.getString("user_customAccGridImage"));
 				players.add(player);
@@ -172,7 +163,7 @@ public class DatabaseManager {
 				player.setCountry(rs.getString("player_country"));
 				player.setHistory(rs.getString("player_history"));
 				if (player.getHistory() != null) {
-					player.setHistoryValues(Arrays.asList(player.getHistory().split(",")).stream().map(val -> Integer.parseInt(val)).collect(Collectors.toList()));
+					player.setHistoryValues(Arrays.stream(player.getHistory().split(",")).map(Integer::parseInt).collect(Collectors.toList()));
 				}
 				player.setDiscordUserId(rs.getLong("discord_user_id"));
 				player.setCustomAccGridImage(rs.getString("user_customAccGridImage"));
@@ -221,7 +212,7 @@ public class DatabaseManager {
 	}
 
 	public int setSkill(long idLong, String skill, int newValue) {
-		String stmtToUse = null;
+		String stmtToUse;
 		PreparedStatement selectStmt;
 		try {
 			selectStmt = con.prepareStatement(DBConstants.SELECT_SKILLS_BY_DISCORD_ID);
@@ -231,21 +222,17 @@ public class DatabaseManager {
 		} catch (SQLException e) {
 			return -1;
 		}
-		if (stmtToUse != null) {
-			try {
-				PreparedStatement stmt = con.prepareStatement(stmtToUse);
-				stmt.setInt(1, newValue);
-				stmt.setLong(2, idLong);
-				if (stmtToUse.equals(DBConstants.getInsertSkillStatement(skill))) {
-
-					stmt.setString(3, getPlayerByDiscordId(idLong).getPlayerName());
-				}
-				return stmt.executeUpdate();
-			} catch (SQLException e) {
-				e.printStackTrace();
+		try {
+			PreparedStatement stmt = con.prepareStatement(stmtToUse);
+			stmt.setInt(1, newValue);
+			stmt.setLong(2, idLong);
+			if (stmtToUse.equals(DBConstants.getInsertSkillStatement(skill))) {
+				stmt.setString(3, getPlayerByDiscordId(idLong).getPlayerName());
 			}
+			return stmt.executeUpdate();
+		} catch (SQLException e) {
+			e.printStackTrace();
 		}
-
 		return -1;
 	}
 }

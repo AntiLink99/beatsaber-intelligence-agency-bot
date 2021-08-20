@@ -566,7 +566,7 @@ public class BeatSaberBot extends ListenerAdapter {
 			Messages.sendMultiPageMessage(BotConstants.getCommands(isFOAA), "🔨 Bot commands 🔨", channel);
 			break;
 		default:
-			Messages.sendMessage("Sorry, i don't speak wrong. 🤡  Try \"ru help\".", channel);
+			Messages.sendMessage("Sorry, i don't speak wrong. 🤡  Try \"ru help\".\nIf you want to suggest something to the dev do it "+Format.link("here", BotConstants.featureRequestUrl)+".", channel);
 		}
 		System.gc();
 

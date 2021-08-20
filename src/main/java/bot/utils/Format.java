@@ -92,4 +92,8 @@ public class Format {
 			return suffixes[n % 10];
 		}
 	}
+
+    public static String link(String name, String url) {
+		return "["+name+"]("+url+")";
+    }
 }

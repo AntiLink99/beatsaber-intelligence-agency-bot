@@ -69,7 +69,7 @@ public class BotConstants {
 
 	public static Map<String, String> getCommands(boolean isFOAA) {
 		Map<String, String> commands = new LinkedMap<String, String>();
-		commands.put(Format.underline("Important Links"), Format.bold("[❤️  Support AntiLink#1337 and the bot ❤️](" + donateUrl + ")\n[⭐ Request features and make suggestions ⭐](" + featureRequestUrl + ")"));
+		commands.put(Format.underline("Important Links"), Format.bold(Format.link("❤️  Support AntiLink#1337 and the bot ❤️", donateUrl) + "\n"+Format.link("⭐ Request features and make suggestions ⭐",featureRequestUrl)));
 		commands.put("ru register <ScoreSaber URL>", "Registers a player that will be tracked and updated by the bot.");
 		commands.put("ru invite", "Shares the invite link for this bot. Feel free to invite it to other servers!");
 		commands.put("ru unregister", "Removes a player from the database so that the account is not being updated anymore.");

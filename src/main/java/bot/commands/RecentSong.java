@@ -104,6 +104,7 @@ public class RecentSong {
 
 			String songInfo = Format.codeAutohotkey(topInfo);
 
+			//BeatSaver
 			Song bsMap = bs.fetchSongByHash(recentScore.getSongHash());
 			int noteCount = -1;
 			if (bsMap != null) {
@@ -168,7 +169,7 @@ public class RecentSong {
 				}
 			}
 			String diffImageUrl = SongUtils.getDiffImageUrl(recentScore.getDifficulty());
-			String songName = recentScore.getSongName() + " - " + getDurationStringFromMap(bsMap, recentScore.getSongHash());
+			String songName = recentScore.getSongName() + " - " + getDurationStringFromMap(bsMap);
 			String songUrl = ApiConstants.SS_LEADERBOARD_PRE_URL + recentScore.getLeaderboardId();
 			String footerText = "Mapped by " + recentScore.getLevelAuthorName();
 
@@ -200,16 +201,11 @@ public class RecentSong {
 		}
 	}
 
-	private static String getDurationStringFromMap(Song bsMap, String versionHash) {
-		if (bsMap == null || bsMap.getVersionByHash(versionHash) == null || bsMap.getVersionByHash(versionHash).getDiffs() == null) {
+	private static String getDurationStringFromMap(Song bsMap) {
+		if (bsMap == null || bsMap.getMetadata() == null) {
 			return "[?:??]";
 		}
-		List<Diff> diffs = bsMap.getVersionByHash(versionHash).getDiffs();
-		if (diffs == null || diffs.size() == 0) {
-			return "";
-		}
-
-		double durationSeconds = bsMap.getVersionByHash(versionHash).getDiffs().get(0).getLength();
+		double durationSeconds = bsMap.getMetadata().getDuration();
 		int minutes = (int) (durationSeconds / 60);
 		int seconds = (int) durationSeconds % 60;
 		return "[" + minutes + ":" + (seconds < 10 ? "0" + seconds : seconds) + "]";

@@ -1,22 +1,22 @@
 package bot.dto.beatsaviour;
 
 public class RankedMapCharacteristics {
-	String name;
-	RankedMapCharacteristicsDifficulties difficulties;
+    String name;
+    RankedMapCharacteristicsDifficulties difficulties;
 
-	public String getName() {
-		return name;
-	}
+    public String getName() {
+        return name;
+    }
 
-	public void setName(String name) {
-		this.name = name;
-	}
+    public void setName(String name) {
+        this.name = name;
+    }
 
-	public RankedMapCharacteristicsDifficulties getDifficulties() {
-		return difficulties;
-	}
+    public RankedMapCharacteristicsDifficulties getDifficulties() {
+        return difficulties;
+    }
 
-	public void setDifficulties(RankedMapCharacteristicsDifficulties difficulties) {
-		this.difficulties = difficulties;
-	}
+    public void setDifficulties(RankedMapCharacteristicsDifficulties difficulties) {
+        this.difficulties = difficulties;
+    }
 }

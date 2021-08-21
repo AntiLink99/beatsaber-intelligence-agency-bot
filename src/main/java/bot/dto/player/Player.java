@@ -5,106 +5,109 @@ import java.util.List;
 
 public class Player implements Serializable {
 
-	private static final long serialVersionUID = 1L;
-	
-	private String playerId;
-	private String playerName;
-	private String avatar;
-	private int rank;
-	private int countryRank;
-	private float pp;
-	private String country;
-	private long discordUserId;
-	private List<Integer> historyValues;
-	private String history;
-	private transient String customAccGridImage;
+    private static final long serialVersionUID = 1L;
 
-	public String getPlayerId() {
-		return playerId;
-	}
+    private String playerId;
+    private String playerName;
+    private String avatar;
+    private int rank;
+    private int countryRank;
+    private float pp;
+    private String country;
+    private long discordUserId;
+    private List<Integer> historyValues;
+    private String history;
+    private transient String customAccGridImage;
 
-	public void setPlayerId(String playerId) {
-		this.playerId = playerId;
-	}
+    public String getPlayerId() {
+        return playerId;
+    }
 
-	public String getPlayerName() {
-		return playerName;
-	}
+    public void setPlayerId(String playerId) {
+        this.playerId = playerId;
+    }
 
-	public void setPlayerName(String playerName) {
-		this.playerName = playerName;
-	}
+    public long getPlayerIdLong() {
+        return Long.parseLong(this.playerId);
+    }
+    public String getPlayerName() {
+        return playerName;
+    }
 
-	public String getAvatar() {
-		return avatar;
-	}
+    public void setPlayerName(String playerName) {
+        this.playerName = playerName;
+    }
 
-	public void setAvatar(String avatar) {
-		this.avatar = avatar;
-	}
+    public String getAvatar() {
+        return avatar;
+    }
 
-	public int getRank() {
-		return rank;
-	}
+    public void setAvatar(String avatar) {
+        this.avatar = avatar;
+    }
 
-	public void setRank(int rank) {
-		this.rank = rank;
-	}
+    public int getRank() {
+        return rank;
+    }
 
-	public int getCountryRank() {
-		return countryRank;
-	}
+    public void setRank(int rank) {
+        this.rank = rank;
+    }
 
-	public void setCountryRank(int countryRank) {
-		this.countryRank = countryRank;
-	}
+    public int getCountryRank() {
+        return countryRank;
+    }
 
-	public String getCountry() {
-		return country;
-	}
+    public void setCountryRank(int countryRank) {
+        this.countryRank = countryRank;
+    }
 
-	public void setCountry(String country) {
-		this.country = country;
-	}
+    public String getCountry() {
+        return country;
+    }
 
-	public float getPp() {
-		return pp;
-	}
+    public void setCountry(String country) {
+        this.country = country;
+    }
 
-	public void setPp(float pp) {
-		this.pp = pp;
-	}
+    public float getPp() {
+        return pp;
+    }
 
-	public long getDiscordUserId() {
-		return discordUserId;
-	}
+    public void setPp(float pp) {
+        this.pp = pp;
+    }
 
-	public void setDiscordUserId(long discordUserId) {
-		this.discordUserId = discordUserId;
-	}
+    public long getDiscordUserId() {
+        return discordUserId;
+    }
 
-	public String getHistory() {
-		return history;
-	}
+    public void setDiscordUserId(long discordUserId) {
+        this.discordUserId = discordUserId;
+    }
 
-	public void setHistory(String history) {
-		this.history = history;
-	}
+    public String getHistory() {
+        return history;
+    }
 
-	public List<Integer> getHistoryValues() {
-		return historyValues;
-	}
+    public void setHistory(String history) {
+        this.history = history;
+    }
 
-	public void setHistoryValues(List<Integer> historyValues) {
-		this.historyValues = historyValues;
-	}
+    public List<Integer> getHistoryValues() {
+        return historyValues;
+    }
 
-	public String getCustomAccGridImage() {
-		return customAccGridImage;
-	}
+    public void setHistoryValues(List<Integer> historyValues) {
+        this.historyValues = historyValues;
+    }
 
-	public void setCustomAccGridImage(String customAccGridImage) {
-		this.customAccGridImage = customAccGridImage;
-	}
+    public String getCustomAccGridImage() {
+        return customAccGridImage;
+    }
+
+    public void setCustomAccGridImage(String customAccGridImage) {
+        this.customAccGridImage = customAccGridImage;
+    }
 
 }

@@ -2,62 +2,62 @@ package bot.dto;
 
 public class ScoreSaberMapData {
 
-	String id;
-	String name;
-	int bpm;
-	int scores_day;
-	int ranked;
-	float stars;
+    String id;
+    String name;
+    int bpm;
+    int scores_day;
+    int ranked;
+    float stars;
 
-	public String getId() {
-		return id;
-	}
+    public String getId() {
+        return id;
+    }
 
-	public void setId(String id) {
-		this.id = id;
-	}
+    public void setId(String id) {
+        this.id = id;
+    }
 
-	public String getName() {
-		return name;
-	}
+    public String getName() {
+        return name;
+    }
 
-	public void setName(String name) {
-		this.name = name;
-	}
+    public void setName(String name) {
+        this.name = name;
+    }
 
-	public int getBpm() {
-		return bpm;
-	}
+    public int getBpm() {
+        return bpm;
+    }
 
-	public void setBpm(int bpm) {
-		this.bpm = bpm;
-	}
+    public void setBpm(int bpm) {
+        this.bpm = bpm;
+    }
 
-	public int getScores_day() {
-		return scores_day;
-	}
+    public int getScores_day() {
+        return scores_day;
+    }
 
-	public void setScores_day(int scores_day) {
-		this.scores_day = scores_day;
-	}
+    public void setScores_day(int scores_day) {
+        this.scores_day = scores_day;
+    }
 
-	public int getRanked() {
-		return ranked;
-	}
-	
-	public boolean isRanked() {
-		return ranked == 1;
-	}
+    public int getRanked() {
+        return ranked;
+    }
 
-	public void setRanked(int ranked) {
-		this.ranked = ranked;
-	}
+    public boolean isRanked() {
+        return ranked == 1;
+    }
 
-	public float getStars() {
-		return stars;
-	}
+    public void setRanked(int ranked) {
+        this.ranked = ranked;
+    }
 
-	public void setStars(float stars) {
-		this.stars = stars;
-	}
+    public float getStars() {
+        return stars;
+    }
+
+    public void setStars(float stars) {
+        this.stars = stars;
+    }
 }

@@ -113,7 +113,7 @@ public class ScoreSaber {
         List<LeaderboardEntry> entries = new ArrayList<>();
         boolean searchingPlayerData = true;
         for (int i = startPage; searchingPlayerData; i++) {
-            if (i > 100) {
+            if (i > 50) {
                 return null;
             }
             String leaderboardUrl = getLeaderboardUrl(i, countryCode);

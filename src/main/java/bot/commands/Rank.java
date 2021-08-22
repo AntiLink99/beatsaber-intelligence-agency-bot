@@ -22,6 +22,7 @@ public class Rank {
 
     public void sendLocalRank(Player player, MessageEventDTO event) {
         int startPage = getPageNrFromPlayerRank(player.getCountryRank() - 2);
+        System.out.println(startPage);
         sendRank(player, startPage, 200, player.getCountry(), LeaderboardType.LOCAL, event);
     }
 
@@ -37,6 +38,10 @@ public class Rank {
     private void sendRank(Player player, int startPage, int sizeLimit, String countryCode, LeaderboardType leaderboardType, MessageEventDTO event) {
         ScoreSaber ss = new ScoreSaber();
         List<LeaderboardEntry> leaderboardEntries = ss.findLeaderboardEntriesAroundPlayer(player, countryCode, startPage, sizeLimit);
+        if (leaderboardEntries == null) {
+            Messages.sendMessage("Could not extract ScoreSaber profiles. Maybe your rank is too low or there is another error.", event.getChannel());
+            return;
+        }
         LeaderboardEntry playerEntry = leaderboardEntries.stream()
                 .filter(entry -> entry.getPlayerId() == player.getPlayerIdLong())
                 .findFirst()

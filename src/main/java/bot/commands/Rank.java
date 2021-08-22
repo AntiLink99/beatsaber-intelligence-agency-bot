@@ -22,7 +22,6 @@ public class Rank {
 
     public void sendLocalRank(Player player, MessageEventDTO event) {
         int startPage = getPageNrFromPlayerRank(player.getCountryRank() - 2);
-        System.out.println(startPage);
         sendRank(player, startPage, 200, player.getCountry(), LeaderboardType.LOCAL, event);
     }
 

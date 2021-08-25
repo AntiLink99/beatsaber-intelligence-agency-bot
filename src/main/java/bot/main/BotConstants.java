@@ -12,7 +12,7 @@ public class BotConstants {
     public static final String PLAYING = "-> ru help <-";
 
     public static final String sealImageUrl = "https://i.imgur.com/LcCzrxx.jpg";
-    public static final String donateUrl = "https://donatebot.io/checkout/841834265594560584";
+    public static final String donateUrl = "https://www.patreon.com/antilink";
     public static final String featureRequestUrl = "https://gitreports.com/issue/AntiLink99/beatsaber-intelligence-agency-bot";
     public static final long foaaServerId = Long.parseLong(System.getenv("server_id"));
     public static final long logServerId = Long.parseLong(System.getenv("log_server_id"));
@@ -31,18 +31,12 @@ public class BotConstants {
     public static final int milestoneEmoteCount = 10;
     public static final String defaultEmote = ":boom:";
 
-    // Recruiting Server
-    public static final long recruitingServerId = 719966895754969208L;
-    public static final long recruitRoleId = 720746400614187079L;
-
     public static final String[] playlistDifficultyEmotes = {"🟩", "🟦", "🟧", "🟥", "🟪"};
     public static final int improvementReactionMinTimeDiff = 400000000;
     public static final String playlistImageFOAA = getImageBase64("foaa.png");
     public static final String playlistImageQualified = getImageBase64("qualified.png");
     public static final String playlistImageRanked = getImageBase64("ranked.png");
     public static final String playlistAuthor = "AntiLink#1337";
-
-    public static final String[] allowedRecruitingCommands = {"rplaylist", "playlist", "deletethat"};
 
     public static final int entriesPerReactionPage = 5;
 

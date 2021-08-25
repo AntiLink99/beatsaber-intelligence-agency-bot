@@ -9,7 +9,7 @@ public class MapUtils {
 
     public static Map<String, String> convertPlayerImprovements(List<PlayerImprovement> improvements) {
         Collections.sort(improvements);
-        improvements.stream().forEach(i -> i.setPlayername(Format.underline(i.getPlayername()) + " - #" + (improvements.indexOf(i) + 1) + "/" + improvements.size()));
+        improvements.forEach(i -> i.setPlayername(Format.underline(i.getPlayername()) + " - #" + (improvements.indexOf(i) + 1) + "/" + improvements.size()));
         Map<String, String> playernamesWithImprovement = new LinkedMap<>();
         for (PlayerImprovement improvement : improvements) {
             playernamesWithImprovement.put(improvement.getPlayername(), improvement.getImprovementString());

@@ -1,6 +1,7 @@
 package bot.dto.beatsaviour;
 
 import bot.dto.beatsaviour.trackers.PlayerTrackers;
+import bot.dto.beatsaviour.trackers.ScoreTracker;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -132,6 +133,18 @@ public class BeatSaviourPlayerScore implements Comparable<BeatSaviourPlayerScore
 
     @Override
     public int compareTo(BeatSaviourPlayerScore otherScore) {
-        return otherScore.getTimeSetLocalDateTime().compareTo(this.getTimeSetLocalDateTime());
+        ScoreTracker otherTracker = otherScore.getTrackers().getScoreTracker();
+        ScoreTracker thisTracker = getTrackers().getScoreTracker();
+        if (otherTracker == null && thisTracker == null) {
+            return 0;
+        }
+        if (otherTracker == null) {
+            return -1;
+        }
+        if (thisTracker == null) {
+            return 1;
+        }
+        return otherTracker.getScore() > thisTracker.getScore() ? 1 : -1;
+        //return otherScore.getTimeSetLocalDateTime().compareTo(this.getTimeSetLocalDateTime());
     }
 }

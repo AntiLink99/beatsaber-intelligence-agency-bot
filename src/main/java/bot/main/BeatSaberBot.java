@@ -533,14 +533,14 @@ public class BeatSaberBot extends ListenerAdapter {
 
     @Override
     public void onGuildMemberRemove(GuildMemberRemoveEvent event) {
-        DiscordLogger.sendLogInChannel("Member " + event.getUser().getName() + " left guild " + event.getGuild().getName(), "INFO");
+        DiscordLogger.sendLogInChannel("Member " + event.getUser().getName() + " left guild " + event.getGuild().getName(),  DiscordLogger.USERS);
         long userId = event.getUser().getIdLong();
 
         List<Guild> guilds = event.getJDA().getGuilds();
         List<Member> members = guilds.stream().flatMap(guild -> guild.getMembers().stream()).collect(Collectors.toList());
         boolean memberNotOnOtherServer = members.stream().noneMatch(m -> m.getUser().getIdLong() == userId);
         if (memberNotOnOtherServer) {
-            DiscordLogger.sendLogInChannel("Deleting user if exists: " + event.getUser().getName(), DiscordLogger.INFO);
+            DiscordLogger.sendLogInChannel("Deleting user if exists: " + event.getUser().getName(), DiscordLogger.USERS);
             db.deletePlayerByDiscordUserId(userId);
         }
     }
@@ -556,12 +556,12 @@ public class BeatSaberBot extends ListenerAdapter {
 
     @Override
     public void onGuildJoin(GuildJoinEvent event) {
-        DiscordLogger.sendLogInChannel(Format.code("Joined guild \"" + event.getGuild().getName() + "\""), "guilds");
+        DiscordLogger.sendLogInChannel(Format.code("Joined guild \"" + event.getGuild().getName() + "\""), DiscordLogger.GUILDS);
     }
 
     @Override
     public void onGuildLeave(GuildLeaveEvent event) {
-        DiscordLogger.sendLogInChannel(Format.code("Left guild \"" + event.getGuild().getName() + "\""), "guilds");
+        DiscordLogger.sendLogInChannel(Format.code("Left guild \"" + event.getGuild().getName() + "\""), DiscordLogger.GUILDS);
     }
 
     private Player getPlayerDependingOnCommand(List<String> msgParts, TextChannel channel, User author) {

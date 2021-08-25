@@ -11,7 +11,6 @@ public class ApiConstants {
     public static final String SS_PLAYER_TOP_SCORES_POST_URL = "/scores/top";
     public static final String SS_PLAYER_RECENT_SCORES_POST_URL = "/scores/recent";
     public static final String SS_LEADERBOARD_PRE_URL = "https://scoresaber.com/leaderboard/";
-    public static String SS_AVATAR_PRE_URL = "https://new.scoresaber.com/api/static/avatars/";
     public static final String QUALIFIED_URL = "http://scoresaber.com/api.php?function=get-leaderboards&cat=5&limit=100&page=1&unique=1&qualified=1";
 
     // Beat Saver

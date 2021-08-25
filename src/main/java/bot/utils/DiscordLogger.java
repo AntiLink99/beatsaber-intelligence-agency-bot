@@ -11,6 +11,8 @@ public class DiscordLogger {
     public static final String ERRORS = "errors";
     public static final String HTTP_ERRORS = "http-errors";
     public static final String FOAA_REFRESH = "foaa-refresh";
+    public static final String USERS = "users";
+    public static final String GUILDS = "guilds";
 
     private static Guild guild;
 

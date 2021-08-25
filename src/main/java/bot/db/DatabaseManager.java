@@ -34,6 +34,9 @@ public class DatabaseManager {
     }
 
     public boolean savePlayer(Player player) {
+        if (con == null) {
+            return false;
+        }
         try {
             PreparedStatement stmt = con.prepareStatement(DBConstants.INSERT_PLAYER_STMT);
             stmt.setString(1, player.getPlayerId());
@@ -56,6 +59,9 @@ public class DatabaseManager {
     }
 
     public boolean deletePlayerByDiscordUserId(long userId) {
+        if (con == null) {
+            return false;
+        }
         try {
             PreparedStatement stmt = con.prepareStatement(DBConstants.DELETE_PLAYER_BY_DISCORD_ID);
             stmt.setLong(1, userId);
@@ -67,6 +73,9 @@ public class DatabaseManager {
     }
 
     public boolean updatePlayer(Player newPlayer) {
+        if (con == null) {
+            return false;
+        }
         String stmtToUse = DBConstants.UPDATE_PLAYER_BY_PLAYER_ID_STMT;
         try {
             PreparedStatement stmt = con.prepareStatement(stmtToUse);
@@ -89,6 +98,9 @@ public class DatabaseManager {
     }
 
     public List<Player> getAllStoredPlayers() {
+        if (con == null) {
+            return null;
+        }
         List<Player> players = new ArrayList<>();
         try {
             PreparedStatement stmt = con.prepareStatement(DBConstants.SELECT_PLAYER_STMT);
@@ -117,6 +129,9 @@ public class DatabaseManager {
     }
 
     public Player getPlayerByName(String playerName) {
+        if (con == null) {
+            return null;
+        }
         try {
             PreparedStatement stmt = con.prepareStatement(DBConstants.SELECT_PLAYER_BY_NAME_STMT);
             stmt.setString(1, playerName);
@@ -142,6 +157,9 @@ public class DatabaseManager {
     }
 
     public Player getPlayerByDiscordId(long discordUserId) {
+        if (con == null) {
+            return null;
+        }
         try {
             PreparedStatement stmt = con.prepareStatement(DBConstants.SELECT_PLAYER_BY_DISCORD_ID_STMT);
             stmt.setLong(1, discordUserId);
@@ -186,6 +204,9 @@ public class DatabaseManager {
     }
 
     public PlayerSkills getPlayerSkillsByDiscordId(long discordId) {
+        if (con == null) {
+            return null;
+        }
         try {
             PreparedStatement stmt = con.prepareStatement(DBConstants.SELECT_SKILLS_BY_DISCORD_ID);
             stmt.setLong(1, discordId);
@@ -207,6 +228,9 @@ public class DatabaseManager {
     }
 
     public int setSkill(long idLong, String skill, int newValue) {
+        if (con == null) {
+            return -1;
+        }
         String stmtToUse;
         PreparedStatement selectStmt;
         try {

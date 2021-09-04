@@ -34,12 +34,12 @@ public class PlayerChart {
         double max = Collections.min(rankValues), min = Collections.max(rankValues);
 
         XYChart chart = getPlayerChart(Collections.singletonList(player), max, min);
-        String filename = "src/main/resources/" + player.getPlayerId();
+        String filename = BotConstants.RESOURCES_PATH + player.getPlayerId();
         ChartUtils.saveChart(chart, filename);
         File image = new File(filename + ".png");
         if (image.exists()) {
             Messages.sendImage(image, player.getPlayerName() + ".png", event.getChannel());
-            image.delete();
+            image.deleteOnExit();
         }
     }
 
@@ -63,13 +63,13 @@ public class PlayerChart {
         }
 
         XYChart chart = getPlayerChart(players, max, min);
-        String filename = "src/main/resources/players";
+        String filename = BotConstants.RESOURCES_PATH+"players";
 
         ChartUtils.saveChart(chart, filename);
         File image = new File(filename + ".png");
         if (image.exists()) {
             Messages.sendImage(image, "players.png", event.getChannel());
-            image.delete();
+            image.deleteOnExit();
         }
     }
 

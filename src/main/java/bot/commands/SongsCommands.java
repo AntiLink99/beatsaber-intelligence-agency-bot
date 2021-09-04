@@ -10,6 +10,7 @@ import bot.dto.beatsaviour.BeatSaviourRankedMap;
 import bot.dto.beatsaviour.RankedMaps;
 import bot.dto.player.Player;
 import bot.graphics.SongsImage;
+import bot.main.BotConstants;
 import bot.utils.JavaFXUtils;
 import bot.utils.Messages;
 import bot.utils.RankedMapUtils;
@@ -73,11 +74,11 @@ public class SongsCommands {
                 score.setSongStars(starRating);
             }
         }
-        String filePath = "src/main/resources/recentSongs_" + playerId + "_" + messageId + ".png";
+        String filePath = BotConstants.RESOURCES_PATH+"recentSongs_" + playerId + "_" + messageId + ".png";
         File recentSongsImage = new File(filePath);
         // Remove old image file if exists
         if (recentSongsImage.exists()) {
-            recentSongsImage.delete();
+            recentSongsImage.deleteOnExit();
         }
 
         SongsImage.setFilePath(filePath);
@@ -100,7 +101,7 @@ public class SongsCommands {
         }
         if (recentSongsImage.exists()) {
             Messages.sendImage(recentSongsImage, "recentSongs_" + playerId + "_" + messageId + ".png", event.getChannel());
-            recentSongsImage.delete();
+            recentSongsImage.deleteOnExit();
         }
 
     }
@@ -145,11 +146,11 @@ public class SongsCommands {
                 score.setSongStars(starRating);
             }
         }
-        String filePath = "src/main/resources/topSongs_" + playerId + "_" + messageId + ".png";
+        String filePath = BotConstants.RESOURCES_PATH+"topSongs_" + playerId + "_" + messageId + ".png";
         File topSongsImage = new File(filePath);
         // Remove old image file if exists
         if (topSongsImage.exists()) {
-            topSongsImage.delete();
+            topSongsImage.deleteOnExit();
         }
 
         SongsImage.setFilePath(filePath);
@@ -172,7 +173,7 @@ public class SongsCommands {
         }
         if (topSongsImage.exists()) {
             Messages.sendImage(topSongsImage, "topSongsImage_" + playerId + "_" + messageId + ".png", event.getChannel());
-            topSongsImage.delete();
+            topSongsImage.deleteOnExit();
         }
 
     }

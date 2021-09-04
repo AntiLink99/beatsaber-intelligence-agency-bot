@@ -74,7 +74,8 @@ public class RecentSong {
                 return;
             }
             SongScore recentScore = ssScores.get(index);
-            File gridImage = new File("src/main/resources/accGrid_" + playerId + "_" + event.getId() + ".png");
+            String accGridFilePath = BotConstants.RESOURCES_PATH+"accGrid_" + playerId + "_" + event.getId() + ".png";
+            File gridImage = new File(accGridFilePath);
 
             // Saviour
             List<BeatSaviourPlayerScore> saviourScores = bsaviour.fetchPlayerMaps(Long.valueOf(playerId)).getPlayerMaps();
@@ -92,10 +93,11 @@ public class RecentSong {
                     AccuracyGrid.setPlayerId(playerId);
                     AccuracyGrid.setCustomImageUrl(player.getCustomAccGridImage());
                     AccuracyGrid.setMessageId(String.valueOf(event.getId()));
+                    AccuracyGrid.setFilePath(accGridFilePath);
 
                     // Remove old acc grid file if exists
                     if (gridImage.exists()) {
-                        gridImage.delete();
+                        gridImage.deleteOnExit();
                     }
 
                     JavaFXUtils.launch(AccuracyGrid.class);
@@ -211,7 +213,7 @@ public class RecentSong {
                 }
                 if (gridImage.exists()) {
                     Messages.sendImage(gridImage, "accGrid_" + playerId + "_" + event.getId() + ".png", event.getChannel());
-                    gridImage.delete();
+                    gridImage.deleteOnExit();
                 } else {
                     DiscordLogger.sendLogInChannel("Image wasnt generated. accGrid_" + playerId + "_" + event.getId() + ".png", DiscordLogger.ERRORS);
                 }

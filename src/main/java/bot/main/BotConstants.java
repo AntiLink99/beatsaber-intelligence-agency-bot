@@ -4,13 +4,14 @@ import bot.utils.Format;
 import org.apache.commons.collections4.map.LinkedMap;
 import org.apache.commons.io.IOUtils;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.*;
 
 public class BotConstants {
 
     public static final String PLAYING = "-> ru help <-";
-
+    public static final String RESOURCES_PATH = "src/main/resources/".replace("/", File.separator);
     public static final String sealImageUrl = "https://i.imgur.com/LcCzrxx.jpg";
     public static final String donateUrl = "https://www.patreon.com/antilink";
     public static final String featureRequestUrl = "https://gitreports.com/issue/AntiLink99/beatsaber-intelligence-agency-bot";

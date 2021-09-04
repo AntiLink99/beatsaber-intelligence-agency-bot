@@ -23,12 +23,12 @@ public class AccuracyChart {
     public static void sendChartImage(BeatSaviourPlayerScore score, String playerName, String diffName, MessageEventDTO event) {
 
         XYChart chart = AccuracyChart.getAccuracyChart(score, playerName, diffName);
-        String filename = "src/main/resources/accuracyChart_" + score.getPlayerID();
+        String filename = BotConstants.RESOURCES_PATH+"accuracyChart_" + score.getPlayerID();
         ChartUtils.saveChart(chart, filename);
         File image = new File(filename + ".png");
         if (image.exists()) {
             Messages.sendImage(image, "accuracyChart_" + score.getPlayerID() + ".png", event.getChannel());
-            image.delete();
+            image.deleteOnExit();
         }
     }
 

@@ -24,7 +24,7 @@ public class RandomQuote {
             List<Attachment> attachments = quotesContainer.getRandomQuoteImages();
             Attachment randomImage = RandomUtils.getRandomItem(attachments);
 
-            File resourcesFolder = new File("src/main/resources/");
+            File resourcesFolder = new File(BotConstants.RESOURCES_PATH);
             if (!resourcesFolder.exists()) {
                 resourcesFolder.mkdirs();
             }

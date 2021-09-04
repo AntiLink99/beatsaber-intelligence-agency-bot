@@ -4,6 +4,7 @@ import bot.api.HttpMethods;
 import bot.dto.SongScore;
 import bot.utils.FontUtils;
 import bot.utils.Format;
+import bot.utils.JavaFXUtils;
 import bot.utils.WebUtils;
 import javafx.application.Application;
 import javafx.embed.swing.SwingFXUtils;
@@ -19,10 +20,8 @@ import javafx.scene.shape.StrokeType;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
-import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
 
@@ -33,36 +32,10 @@ public class SongsImage extends Application {
     private static String filePath;
     final ImageView baseImage = new ImageView("https://i.imgur.com/kvy9P2K.png"); // Rectangle Image
     final Image starImage = new Image(Objects.requireNonNull(getClass().getClassLoader().getResourceAsStream("star.png")));
-    Stage mainStage;
-
-    public static boolean isFinished() {
-        return isFinished;
-    }
-
-    public static void setFinished(boolean isFinished) {
-        SongsImage.isFinished = isFinished;
-    }
-
-    public static List<SongScore> getScores() {
-        return scores;
-    }
-
-    public static void setScores(List<SongScore> scores) {
-        SongsImage.scores = scores;
-    }
-
-    public static String getFilePath() {
-        return filePath;
-    }
-
-    public static void setFilePath(String filePath) {
-        SongsImage.filePath = filePath;
-    }
 
     @Override
     public void start(Stage primaryStage) throws Exception {
         setFinished(false);
-        mainStage = primaryStage;
 
         Pane root = new Pane();
         root.getChildren().add(baseImage);
@@ -246,17 +219,32 @@ public class SongsImage extends Application {
         snapPara.setFill(Color.TRANSPARENT);
         WritableImage resultImage = root.snapshot(snapPara, null);
 
-        saveFile(resultImage, new File(getFilePath()));
+        JavaFXUtils.saveFile(resultImage, new File(getFilePath()));
+        setFinished(true);
         primaryStage.close();
     }
 
-    private void saveFile(Image content, File file) {
-        try {
-            BufferedImage bufferedImage = SwingFXUtils.fromFXImage(content, null);
-            ImageIO.write(bufferedImage, "png", file);
-        } catch (IOException ex) {
-            ex.printStackTrace();
-        }
-        setFinished(true);
+    public static boolean isFinished() {
+        return isFinished;
+    }
+
+    public static void setFinished(boolean isFinished) {
+        SongsImage.isFinished = isFinished;
+    }
+
+    public static List<SongScore> getScores() {
+        return scores;
+    }
+
+    public static void setScores(List<SongScore> scores) {
+        SongsImage.scores = scores;
+    }
+
+    public static String getFilePath() {
+        return filePath;
+    }
+
+    public static void setFilePath(String filePath) {
+        SongsImage.filePath = filePath;
     }
 }

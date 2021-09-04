@@ -1,9 +1,6 @@
 package bot.main;
 
-import bot.api.ApiConstants;
-import bot.api.BeatSaver;
-import bot.api.BeatSaviour;
-import bot.api.ScoreSaber;
+import bot.api.*;
 import bot.chart.PlayerChart;
 import bot.chart.RadarStatsChart;
 import bot.commands.*;
@@ -53,7 +50,7 @@ public class BeatSaberBot extends ListenerAdapter {
 
     final ScoreSaber ss = new ScoreSaber();
     final BeatSaver bs = new BeatSaver();
-    final BeatSaviour bsaviour = new BeatSaviour();
+    final BeatSaviour saviour = new BeatSaviour();
     final DatabaseManager db = new DatabaseManager();
     RankedMaps ranked = new RankedMaps();
     final RandomQuotesContainer randomQuotes = new RandomQuotesContainer();
@@ -61,6 +58,7 @@ public class BeatSaberBot extends ListenerAdapter {
     final Pattern scoreSaberIDPattern = Pattern.compile(ApiConstants.USER_ID_REGEX);
 
     public static void main(String[] args) {
+        new Patreon().fetchPatreonSupports().forEach(a -> System.out.println(a.getDiscordId()));
         DatabaseManager db = new DatabaseManager();
         ScoreSaber ss = new ScoreSaber();
         Platform.setImplicitExit(false);
@@ -200,11 +198,6 @@ public class BeatSaberBot extends ListenerAdapter {
                 break;
             case "unregister":
                 new HandlePlayerRegisteration(db).unregisterPlayer(event);
-                break;
-            case "list":
-                if (DiscordUtils.isAdmin(authorUser)) {
-                    new ListPlayers(db).sendRegisteredPlayers(channel);
-                }
                 break;
             case "registerall":
                 new RegisterAll(db).registerAllMembers(event);
@@ -436,6 +429,15 @@ public class BeatSaberBot extends ListenerAdapter {
                 new Rank().sendDACHRank(storedPlayer, event);
                 break;
             }
+            case "profile": {
+                Player storedPlayer = db.getPlayerByDiscordId(event.getAuthor().getIdLong());
+                if (storedPlayer == null) {
+                    Messages.sendMessage("Player could not be found. Please check if the user has linked his account.", channel);
+                    return;
+                }
+                new Profile().sendProfileImage(storedPlayer, event);
+                break;
+            }
             case "setgridimage": {
                 if (msgParts.size() < 3) {
                     new AccGridImage(db).resetImage(event);
@@ -519,11 +521,11 @@ public class BeatSaberBot extends ListenerAdapter {
     }
 
     private void fetchRankedMapsIfNonExistant(TextChannel channel) {
-        ranked = bsaviour.getCachedRankedMaps();
+        ranked = saviour.getCachedRankedMaps();
         if (ranked == null && System.getenv("disableRankedRequests") == null) {
             Messages.sendTempMessage("First command after startup, fetching ranked maps. Please wait... 🕒", 10, channel);
             RankedMapsFilterRequest request = new RankedMapsFilterRequest(0, 14, "date", "");
-            ranked = bsaviour.fetchAllRankedMaps(request);
+            ranked = saviour.fetchAllRankedMaps(request);
         }
     }
 

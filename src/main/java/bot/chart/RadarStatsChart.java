@@ -18,13 +18,13 @@ public class RadarStatsChart {
     public void sendChartImage(PlayerSkills skills, MessageEventDTO event) {
 
         RadarChart chart = getRadarChart(skills);
-        String filename = "src/main/resources/players";
+        String filename = BotConstants.RESOURCES_PATH+"players";
 
         ChartUtils.saveChart(chart, filename);
         File image = new File(filename + ".png");
         if (image.exists()) {
             Messages.sendImage(image, "players.png", event.getChannel());
-            image.delete();
+            image.deleteOnExit();
         }
     }
 

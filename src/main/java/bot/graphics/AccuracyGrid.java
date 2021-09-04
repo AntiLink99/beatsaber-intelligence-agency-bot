@@ -2,12 +2,12 @@ package bot.graphics;
 
 import bot.api.HttpMethods;
 import bot.utils.Format;
+import bot.utils.JavaFXUtils;
 import javafx.application.Application;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.SnapshotParameters;
 import javafx.scene.effect.ColorAdjust;
 import javafx.scene.effect.DropShadow;
-import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.PixelReader;
 import javafx.scene.image.WritableImage;
@@ -18,10 +18,8 @@ import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
-import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -33,8 +31,9 @@ public class AccuracyGrid extends Application {
     private static String playerId = "";
     private static String messageId = "";
     private static String customImageUrl = "";
+    private static String filePath = "";
     private static boolean isFinished = false;
-    Stage mainStage;
+
     final ImageView grid = new ImageView("https://i.imgur.com/8Y3FNri.png"); // Grid Image
 
     public static void setAccuracyValues(List<Float> accuracyValuesIn) {
@@ -77,10 +76,12 @@ public class AccuracyGrid extends Application {
         return isFinished;
     }
 
+    public static void setFilePath(String filePath) { AccuracyGrid.filePath = filePath; }
+
+    public static String getFilePath() { return filePath; }
     @Override
     public void start(Stage primaryStage) throws Exception {
         isFinished = false;
-        mainStage = primaryStage;
 
         Pane root = new Pane();
         root.getChildren().add(grid);
@@ -147,7 +148,8 @@ public class AccuracyGrid extends Application {
         PixelReader reader = resultImage.getPixelReader();
         resultImage = new WritableImage(reader, 0, 0, GraphicsConstants.accGridWidth, GraphicsConstants.accGridHeight);
 
-        saveFile(resultImage, new File("src/main/resources/accGrid_" + getPlayerId() + "_" + getMessageId() + ".png"));
+        JavaFXUtils.saveFile(resultImage, new File(getFilePath()));
+        isFinished = true;
         primaryStage.close();
     }
 
@@ -166,16 +168,5 @@ public class AccuracyGrid extends Application {
             return Color.rgb(199, 110, 32);
         }
         return Color.rgb(181, 5, 5);
-    }
-
-    private void saveFile(Image content, File file) {
-        try {
-            BufferedImage bufferedImage = SwingFXUtils.fromFXImage(content, null);
-            ImageIO.write(bufferedImage, "png", file);
-            isFinished = true;
-        } catch (IOException ex) {
-            ex.printStackTrace();
-        }
-
     }
 }

@@ -98,6 +98,16 @@
 			<artifactId>jsoup</artifactId>
 			<version>1.14.2</version>
 		</dependency>
+		<dependency>
+			<groupId>com.google.zxing</groupId>
+			<artifactId>javase</artifactId>
+			<version>3.3.0</version>
+		</dependency>
+		<dependency>
+			<groupId>com.patreon</groupId>
+			<artifactId>patreon</artifactId>
+			<version>0.4.2</version>
+		</dependency>
 	</dependencies>
 	<repositories>
 		<repository>

@@ -96,7 +96,7 @@ public class BeatSaver {
 
     public void createAndSendPlaylistFile(Playlist playlist, MessageChannel channel) {
         String playlistJson = gson.toJson(playlist);
-        File playlistFile = new File("src/main/resources/" + playlist.getPlaylistTitle().toLowerCase() + ".json");
+        File playlistFile = new File(BotConstants.RESOURCES_PATH + playlist.getPlaylistTitle().toLowerCase() + ".json");
         try {
             FileUtils.writeStringToFile(playlistFile, playlistJson, "UTF-8");
             if (playlistFile.exists()) {
@@ -106,7 +106,7 @@ public class BeatSaver {
             DiscordLogger.sendLogInChannel(e.getMessage(), DiscordLogger.HTTP_ERRORS);
             e.printStackTrace();
         }
-        playlistFile.delete();
+        playlistFile.deleteOnExit();
     }
 
     private Song fetchSongByKey(String key) {

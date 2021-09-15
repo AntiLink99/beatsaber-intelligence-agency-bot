@@ -1,12 +1,14 @@
 package bot.main;
 
-import bot.api.*;
+import bot.api.ApiConstants;
+import bot.api.BeatSaver;
+import bot.api.BeatSaviour;
+import bot.api.ScoreSaber;
 import bot.chart.PlayerChart;
 import bot.chart.RadarStatsChart;
 import bot.commands.*;
 import bot.db.DatabaseManager;
 import bot.dto.MessageEventDTO;
-import bot.dto.RandomQuotesContainer;
 import bot.dto.beatsaviour.RankedMaps;
 import bot.dto.beatsaviour.RankedMapsFilterRequest;
 import bot.dto.player.Player;
@@ -53,12 +55,11 @@ public class BeatSaberBot extends ListenerAdapter {
     final BeatSaviour saviour = new BeatSaviour();
     final DatabaseManager db = new DatabaseManager();
     RankedMaps ranked = new RankedMaps();
-    final RandomQuotesContainer randomQuotes = new RandomQuotesContainer();
 
     final Pattern scoreSaberIDPattern = Pattern.compile(ApiConstants.USER_ID_REGEX);
 
     public static void main(String[] args) {
-        new Patreon().fetchPatreonSupports().forEach(a -> System.out.println(a.getDiscordId()));
+        //new Patreon().fetchPatreonSupporters().forEach(a -> System.out.println(a.getDiscordId()));
         DatabaseManager db = new DatabaseManager();
         ScoreSaber ss = new ScoreSaber();
         Platform.setImplicitExit(false);
@@ -166,7 +167,6 @@ public class BeatSaberBot extends ListenerAdapter {
         User authorUser = author.getUser();
 
         fetchRankedMapsIfNonExistant(channel);
-        handleRandomQuotes(event);
         String msg = StringUtils.join(msgParts, " ");
         Player player = getPlayerDependingOnCommand(msgParts, channel, author.getUser()); // Refactor!!!
         db.connectToDatabase();
@@ -204,14 +204,6 @@ public class BeatSaberBot extends ListenerAdapter {
                 break;
             case "improvement":
                 new Improvement(db).sendImprovementMessage(channel);
-                break;
-            case "randomquote":
-                if (isFOAACategory(channel.getParent())) {
-                    initRandomQuotesIfNonExistant(event);
-                    new RandomQuote().sendRandomQuote(randomQuotes, event);
-                } else {
-                    Messages.sendMessage("Sorry, this command is only allowed in FOAA channels.", channel);
-                }
                 break;
             case "chart": {
                 long memberId = event.getAuthor().getIdLong();
@@ -429,7 +421,7 @@ public class BeatSaberBot extends ListenerAdapter {
                 new Rank().sendDACHRank(storedPlayer, event);
                 break;
             }
-            case "profile": {
+/*            case "profile": {
                 Player storedPlayer = db.getPlayerByDiscordId(event.getAuthor().getIdLong());
                 if (storedPlayer == null) {
                     Messages.sendMessage("Player could not be found. Please check if the user has linked his account.", channel);
@@ -437,7 +429,7 @@ public class BeatSaberBot extends ListenerAdapter {
                 }
                 new Profile().sendProfileImage(storedPlayer, event);
                 break;
-            }
+            }*/
             case "setgridimage": {
                 if (msgParts.size() < 3) {
                     new AccGridImage(db).resetImage(event);
@@ -529,10 +521,6 @@ public class BeatSaberBot extends ListenerAdapter {
         }
     }
 
-    private boolean isFOAACategory(Category parent) {
-        return parent != null && parent.getIdLong() == BotConstants.foaaCategoryId;
-    }
-
     @Override
     public void onGuildMemberRemove(GuildMemberRemoveEvent event) {
         DiscordLogger.sendLogInChannel("Member " + event.getUser().getName() + " left guild " + event.getGuild().getName(),  DiscordLogger.USERS);
@@ -606,26 +594,6 @@ public class BeatSaberBot extends ListenerAdapter {
             throw new FileNotFoundException("Player could not be found!");
         }
         return player;
-    }
-
-    private void initRandomQuotesIfNonExistant(MessageEventDTO event) {
-        if (randomQuotes.getRandomQuoteImages() == null || randomQuotes.getRandomQuoteImages().size() == 0) {
-            Messages.sendTempMessage("Loading quotes from channel...", 15, event.getChannel());
-            TextChannel quotesChannel = getChannelByName(event.getGuild(), "quotes");
-            randomQuotes.initialize(quotesChannel);
-            Messages.sendTempMessage(Format.bold(randomQuotes.getRandomQuoteImages().size() + " quotes loaded!"), 15, event.getChannel());
-        }
-    }
-
-    private void handleRandomQuotes(MessageEventDTO dto) {
-        TextChannel channel = dto.getChannel();
-        if (dto.getGuild().getIdLong() == BotConstants.foaaServerId && channel.getName().equals("quotes")) {
-            if (randomQuotes.getRandomQuoteImages() == null) {
-                TextChannel quotesChannel = getChannelByName(channel.getGuild(), "quotes");
-                randomQuotes.initialize(quotesChannel);
-            }
-            randomQuotes.addRandomQuoteImages(dto.getMessage());
-        }
     }
 
     private TextChannel getChannelByName(Guild guild, String name) {

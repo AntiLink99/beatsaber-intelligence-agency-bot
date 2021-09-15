@@ -4,8 +4,8 @@ import bot.dto.ScoreSaberMapData;
 import bot.dto.SongScore;
 import bot.dto.leaderboards.LeaderboardEntry;
 import bot.dto.player.Player;
+import bot.scraping.LeaderboardScraper;
 import bot.utils.DiscordLogger;
-import bot.webparsing.LeaderboardParser;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -24,12 +24,12 @@ public class ScoreSaber {
 
     final HttpMethods http;
     final Gson gson;
-    final LeaderboardParser leaderboardParser;
+    final LeaderboardScraper leaderboardScraper;
 
     public ScoreSaber() {
         http = new HttpMethods();
         gson = new Gson();
-        leaderboardParser = new LeaderboardParser();
+        leaderboardScraper = new LeaderboardScraper();
     }
 
     public Player getPlayerById(String playerId) {
@@ -43,7 +43,7 @@ public class ScoreSaber {
         JsonObject playerInfo = response.getAsJsonObject("playerInfo");
 
         Player ssPlayer = gson.fromJson(playerInfo.toString(), Player.class);
-        ssPlayer.setHistoryValues(Arrays.asList(ssPlayer.getHistory().split(",")).stream().map(Integer::parseInt).collect(Collectors.toList()));
+        ssPlayer.setHistoryValues(Arrays.stream(ssPlayer.getHistory().split(",")).map(Integer::parseInt).collect(Collectors.toList()));
         return ssPlayer;
     }
 
@@ -119,7 +119,7 @@ public class ScoreSaber {
             String leaderboardUrl = getLeaderboardUrl(i, countryCode);
             try {
                 Document doc = Jsoup.connect(leaderboardUrl).get();
-                List<LeaderboardEntry> docEntries = leaderboardParser.getLeaderboardEntriesFromDocument(doc);
+                List<LeaderboardEntry> docEntries = leaderboardScraper.getLeaderboardEntriesFromDocument(doc);
                 entries.addAll(docEntries);
             } catch (IOException e) {
                 e.printStackTrace();

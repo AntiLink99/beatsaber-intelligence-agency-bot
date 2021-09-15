@@ -1,5 +1,6 @@
 package bot.graphics;
 
+import bot.api.ApiConstants;
 import bot.api.HttpMethods;
 import bot.dto.SongScore;
 import bot.utils.FontUtils;
@@ -63,13 +64,12 @@ public class SongsImage extends Application {
 
             // Cover Image
             ImageView cover = new ImageView(); // Custom Image
-            String coverUrl = WebUtils.isURL(score.getCoverURL()) ? score.getCoverURL() : "https://scoresaber.com/imports/images/usr-avatars/404.jpg";
+            String coverUrl = WebUtils.isURL(score.getCoverURL()) ? score.getCoverURL() : ApiConstants.NO_AVATAR_URL;
             BufferedImage coverImage;
             try {
                 coverImage = HttpMethods.getBufferedImagefromUrl(coverUrl);
             } catch (Exception e) {
-                System.out.println("Could not fetch cover.");
-                coverImage = HttpMethods.getBufferedImagefromUrl("https://scoresaber.com/imports/images/usr-avatars/404.jpg");
+                coverImage = HttpMethods.getBufferedImagefromUrl(ApiConstants.NO_AVATAR_URL);
             }
             cover.setImage(SwingFXUtils.toFXImage(coverImage, null));
             cover.setOpacity(1);

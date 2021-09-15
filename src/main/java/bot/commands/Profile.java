@@ -3,6 +3,7 @@ package bot.commands;
 import bot.api.ApiConstants;
 import bot.dto.MessageEventDTO;
 import bot.dto.player.Player;
+import bot.graphics.GraphicsConstants;
 import bot.graphics.ProfileImage;
 import bot.main.BotConstants;
 import bot.utils.GraphicsUtils;
@@ -20,7 +21,7 @@ public class Profile {
             System.out.println("no player");
             return;
         }
-        BufferedImage qrCodeImage = GraphicsUtils.generateQRCode(ApiConstants.USER_PRE_URL+player.getPlayerId());
+        BufferedImage qrCodeImage = GraphicsUtils.generateQRCode(ApiConstants.USER_PRE_URL+player.getPlayerId(), GraphicsConstants.profileQrCodeWidth, GraphicsConstants.profileQrCodeHeight);
         if (qrCodeImage == null) {
             //error
             return;
@@ -34,12 +35,10 @@ public class Profile {
         ProfileImage.setFilePath(filePath);
         JavaFXUtils.launch(ProfileImage.class);
 
-        //while not finished
         File profileFile = new File(filePath);
         int profileWaitingCounter = 0;
         ProfileImage.setFinished(false); //Timing Problem Fix
         while (!ProfileImage.isFinished()) {
-
             if (profileWaitingCounter > 30) {
                 break;
             }

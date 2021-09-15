@@ -14,7 +14,7 @@ import java.util.List;
 
 public class Patreon {
 
-    public List<PatreonSupporter> fetchPatreonSupports() {
+    public List<PatreonSupporter> fetchPatreonSupporters() {
         String creatorAccessToken = "nthWN93Jfaj7QGxlBoJn4hvFK6CbpijeiuaPyIa8KTY"; //TODO: Export
 
         List<PatreonSupporter> supporters = new ArrayList<>();

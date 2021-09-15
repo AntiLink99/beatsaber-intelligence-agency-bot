@@ -17,6 +17,7 @@ import org.knowm.xchart.style.XYStyler;
 import org.knowm.xchart.style.markers.SeriesMarkers;
 
 import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.Collections;
 import java.util.List;
@@ -30,13 +31,9 @@ public class PlayerChart {
             Messages.sendMessage("Could not find history values for user. Please update the user with \"ru updated <ScoreSaber URL>\".", event.getChannel());
             return;
         }
-        List<Integer> rankValues = ListValueUtils.addElementReturnList(player.getHistoryValues(), player.getRank());
-        double max = Collections.min(rankValues), min = Collections.max(rankValues);
-
-        XYChart chart = getPlayerChart(Collections.singletonList(player), max, min);
-        String filename = BotConstants.RESOURCES_PATH + player.getPlayerId();
-        ChartUtils.saveChart(chart, filename);
-        File image = new File(filename + ".png");
+        String filepath = BotConstants.RESOURCES_PATH + player.getPlayerId();
+        storePlayerChartToFile(player, filepath);
+        File image = new File(filepath + ".png");
         if (image.exists()) {
             Messages.sendImage(image, player.getPlayerName() + ".png", event.getChannel());
             image.deleteOnExit();
@@ -73,7 +70,7 @@ public class PlayerChart {
         }
     }
 
-    private XYChart getPlayerChart(List<Player> players, double max, double min) {
+    public XYChart getPlayerChart(List<Player> players, double max, double min) {
         if (players.size() > 1) {
             players = players.stream().filter(p -> p.getHistoryValues().stream().anyMatch(v -> v <= min && v >= max)).collect(Collectors.toList());
         }
@@ -135,5 +132,21 @@ public class PlayerChart {
 
         styler.setAxisTickLabelsColor(Color.WHITE);
         return styler;
+    }
+
+    public void storePlayerChartToFile(Player player, String filePath) {
+        List<Integer> rankValues = ListValueUtils.addElementReturnList(player.getHistoryValues(), player.getRank());
+        double max = Collections.min(rankValues), min = Collections.max(rankValues);
+
+        XYChart chart = getPlayerChart(Collections.singletonList(player), max, min);
+        ChartUtils.saveChart(chart, filePath);
+    }
+
+    public BufferedImage getPlayerChartImage(Player player) {
+        List<Integer> rankValues = ListValueUtils.addElementReturnList(player.getHistoryValues(), player.getRank());
+        double max = Collections.min(rankValues), min = Collections.max(rankValues);
+
+        XYChart chart = getPlayerChart(Collections.singletonList(player), max, min);
+        return ChartUtils.toBufferedImage(chart);
     }
 }

@@ -10,9 +10,9 @@ import java.awt.image.BufferedImage;
 
 public class GraphicsUtils {
 
-    public static BufferedImage generateQRCode(String data) {
+    public static BufferedImage generateQRCode(String data, int width, int height) {
         try {
-            BitMatrix matrix = new MultiFormatWriter().encode(data, BarcodeFormat.QR_CODE, 200, 200);
+            BitMatrix matrix = new MultiFormatWriter().encode(data, BarcodeFormat.QR_CODE, width, height);
             return MatrixToImageWriter.toBufferedImage(matrix);
         } catch (WriterException e) {
             e.printStackTrace();

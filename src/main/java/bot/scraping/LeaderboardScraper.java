@@ -1,4 +1,4 @@
-package bot.webparsing;
+package bot.scraping;
 
 import bot.dto.leaderboards.LeaderboardEntry;
 import org.jsoup.nodes.Document;
@@ -8,7 +8,7 @@ import org.jsoup.select.Elements;
 import java.util.ArrayList;
 import java.util.List;
 
-public class LeaderboardParser {
+public class LeaderboardScraper {
 
     public List<LeaderboardEntry> getLeaderboardEntriesFromDocument(Document doc) {
         List<LeaderboardEntry> entries = new ArrayList<>();

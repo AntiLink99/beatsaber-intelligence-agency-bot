@@ -13,4 +13,11 @@ public class GraphicsConstants {
     //Recent Songs
     final static int recentSongsHeight = 514;
     final static int recentSongsWidth = 687;
+
+    //Profile
+    public final static int profileQrCodeHeight = 200;
+    public final static int profileQrCodeWidth = 200;
+    final static int greyBorderWidth = 8;
+    final static double playerPictureHeight = 300;
+    final static double playerChartWidth = 600;
 }

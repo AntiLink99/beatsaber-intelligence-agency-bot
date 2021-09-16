@@ -1,17 +1,19 @@
 package bot.utils;
 
-import bot.dto.discord.MessageAuthor;
 import bot.dto.player.Player;
-import bot.listeners.EmbedReactionListener;
+import bot.listeners.EmbedButtonListener;
 import bot.main.BotConstants;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.interactions.components.ActionRow;
+import net.dv8tion.jda.api.interactions.components.Button;
 import org.apache.commons.io.FileUtils;
 
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -19,7 +21,7 @@ import java.util.stream.Collectors;
 
 public class Messages {
 
-    private static final Color embedColor = Color.CYAN;
+    public static final Color embedColor = Color.CYAN;
 
     public static void sendMessage(String msg, MessageChannel channel) {
         try {
@@ -127,11 +129,22 @@ public class Messages {
         builder.setColor(embedColor);
         builder.setTitle(title);
         builder.setFooter("Page 1");
-        Message reactionMessage = channel.sendMessage(builder.build()).complete();
-        channel.getJDA().addEventListener(new EmbedReactionListener(reactionMessage, title, values));
+
+        if (values.size() <= BotConstants.entriesPerReactionPage) {
+            channel.sendMessage(builder.build()).complete();
+            return;
+        }
+        List<Button> initialButtons = new ArrayList<>();
+        initialButtons.add(Button.secondary("nextPage", "Next Page"));
+
+        Message reactionMessage = channel.sendMessage(builder.build())
+                .setActionRows(ActionRow.of(initialButtons))
+                .complete();
+
+        channel.getJDA().addEventListener(new EmbedButtonListener(reactionMessage, title, values));
     }
 
-    public static void editMessageStringMap(long messageId, Map<String, String> values, String title, String footer, MessageAuthor author, boolean isInline, TextChannel channel) {
+    public static void editMessageStringMap(long messageId, Map<String, String> values, String title, String footer, boolean isInline, TextChannel channel) {
         EmbedBuilder builder = new EmbedBuilder();
         for (String key : values.keySet()) {
             builder.addField(key, values.get(key), isInline);
@@ -139,9 +152,6 @@ public class Messages {
         builder.setColor(embedColor);
         builder.setTitle(title);
         builder.setFooter(footer);
-        if (author != null) {
-            builder.setAuthor(author.getAuthorName(), author.getHref(), author.getAvatarUrl());
-        }
         channel.editMessageById(messageId, builder.build()).queue();
     }
 

@@ -433,7 +433,7 @@ public class BeatSaberBot extends ListenerAdapter {
                 String urlString = msgParts.get(2);
                 List<String> allowedFormats = Arrays.asList(".jpeg", ".jpg", ".png");
                 if (!Format.isUrl(urlString) || allowedFormats.stream().noneMatch(format -> urlString.toLowerCase().contains(format))) {
-                    Messages.sendMessage("The gihttps://discord.com/api/webhooks/887867985488916490/QpKQpe0uJfjaSp6y3LkYVzSVDXNqZTCNe3KzIrLpWeNBFl5P578FXgkcnLgxSGBCBtirven parameter is not an image URL. (Has to contain .png, .jpg or .jpeg)", channel);
+                    Messages.sendMessage("The given parameter is not an image URL. (Has to contain .png, .jpg or .jpeg)", channel);
                     return;
                 }
                 new AccGridImage(db).sendAccGridImage(urlString, event);

@@ -3,8 +3,8 @@ package bot.utils;
 import bot.dto.Song;
 import bot.dto.Song.Version;
 import bot.dto.SongScore;
-import bot.dto.beatsaviour.BeatSaviourRankedMap;
-import bot.dto.beatsaviour.RankedMapRootDifficulties;
+import bot.dto.rankedmaps.BeatSaverRankedMap;
+import bot.dto.rankedmaps.DiffsItem;
 import bot.main.BotConstants;
 
 public class SongUtils {
@@ -36,40 +36,32 @@ public class SongUtils {
         }
     }
 
-    public static float getStarRatingForMapDiff(BeatSaviourRankedMap rankedMap, int difficulty) {
-        if (rankedMap == null || rankedMap.getDiffs() == null || rankedMap.getDiffs().getDifficultiesAsList().isEmpty()) {
-            return -1;
+    public static float getStarRatingForMapDiff(BeatSaverRankedMap rankedMap, int difficulty) {
+        if (rankedMap == null || rankedMap.getLatestVersion() == null) {
+            return 0;
         }
-        RankedMapRootDifficulties diffs = rankedMap.getDiffs();
         switch (difficulty) {
             case 1:
-                if (diffs.getEasy() != null) {
-                    return diffs.getEasy().getStars();
-                }
-                return -1;
+                return getStarsByDiffName(rankedMap, "easy");
             case 3:
-                if (diffs.getNormal() != null) {
-                    return diffs.getNormal().getStars();
-                }
-                return -1;
+                return getStarsByDiffName(rankedMap, "normal");
             case 5:
-                if (diffs.getHard() != null) {
-                    return diffs.getHard().getStars();
-                }
-                return -1;
+                return getStarsByDiffName(rankedMap, "hard");
             case 7:
-                if (diffs.getExpert() != null) {
-                    return diffs.getExpert().getStars();
-                }
-                return -1;
+                return getStarsByDiffName(rankedMap, "expert");
             case 9:
-                if (diffs.getExpertPlus() != null) {
-                    return diffs.getExpertPlus().getStars();
-                }
-                return -1;
+                return getStarsByDiffName(rankedMap, "expertplus");
             default:
-                return -1;
+                return 0;
         }
+    }
+
+    private static float getStarsByDiffName(BeatSaverRankedMap rankedMap, String diffName) {
+        DiffsItem diff = rankedMap.getDiffByNameForLatestVersion(diffName);
+        if (diff != null) {
+            return (float) diff.getStars();
+        }
+        return -1;
     }
 
     public static String getDiffImageUrl(int difficulty) {

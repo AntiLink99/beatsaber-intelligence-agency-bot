@@ -118,7 +118,7 @@ public class Song {
         return getVersions().stream().filter(ver -> hash.equalsIgnoreCase(ver.getHash())).findFirst().orElse(null);
     }
 
-    public class Uploader {
+    public static class Uploader {
         public int id;
         public String name;
         public String hash;
@@ -157,7 +157,7 @@ public class Song {
         }
     }
 
-    public class Metadata {
+    public static class Metadata {
         public int bpm;
         public int duration;
         public String songName;
@@ -214,7 +214,7 @@ public class Song {
         }
     }
 
-    public class Stats {
+    public static class Stats {
         public int plays;
         public int downloads;
         public int upvotes;
@@ -262,7 +262,7 @@ public class Song {
         }
     }
 
-    public class ParitySummary {
+    public static class ParitySummary {
         public int errors;
         public int warns;
         public int resets;
@@ -292,7 +292,7 @@ public class Song {
         }
     }
 
-    public class Diff {
+    public static class Diff {
         public int njs;
         public double offset;
         public int notes;
@@ -439,7 +439,7 @@ public class Song {
         }
     }
 
-    public class Version implements Comparable<Version> {
+    public static class Version implements Comparable<Version> {
         public String hash;
         public String key;
         public String state;

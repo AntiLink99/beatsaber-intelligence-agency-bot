@@ -1,17 +1,17 @@
 package bot.utils;
 
-import bot.dto.beatsaviour.BeatSaviourRankedMap;
-import bot.dto.beatsaviour.RankedMaps;
+import bot.dto.rankedmaps.BeatSaverRankedMap;
+import bot.dto.rankedmaps.RankedMaps;
 
 public class RankedMapUtils {
 
-    public static BeatSaviourRankedMap findRankedMapBySongHash(RankedMaps ranked, String songHash) {
-        if (ranked == null) {
+    public static BeatSaverRankedMap findRankedMapBySongHash(RankedMaps ranked, String songHash) {
+        if (ranked == null || ranked.getRankedMaps()  == null) {
             return null;
         }
-        for (BeatSaviourRankedMap map : ranked.getRankedMaps()) {
+        for (BeatSaverRankedMap map : ranked.getRankedMaps()) {
             try {
-                if (map.getHash().equalsIgnoreCase(songHash)) {
+                if (map.getLatestVersion().getHash().equalsIgnoreCase(songHash)) {
                     return map;
                 }
             } catch (NullPointerException e) {

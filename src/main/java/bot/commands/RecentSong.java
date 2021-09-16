@@ -10,9 +10,9 @@ import bot.dto.MessageEventDTO;
 import bot.dto.Song;
 import bot.dto.SongScore;
 import bot.dto.beatsaviour.BeatSaviourPlayerScore;
-import bot.dto.beatsaviour.BeatSaviourRankedMap;
-import bot.dto.beatsaviour.RankedMaps;
 import bot.dto.player.Player;
+import bot.dto.rankedmaps.BeatSaverRankedMap;
+import bot.dto.rankedmaps.RankedMaps;
 import bot.graphics.AccuracyGrid;
 import bot.main.BotConstants;
 import bot.utils.*;
@@ -111,7 +111,7 @@ public class RecentSong {
             String coverUrl = null;
             int rankOnPlayerLeaderboard = -1;
             if (isRanked) {
-                BeatSaviourRankedMap rankedMap = RankedMapUtils.findRankedMapBySongHash(ranked, recentScore.getSongHash());
+                BeatSaverRankedMap rankedMap = RankedMapUtils.findRankedMapBySongHash(ranked, recentScore.getSongHash());
                 rankOnPlayerLeaderboard = Format.roundDouble((Math.log10(recentScore.getWeight()) + Math.log10(0.965)) / Math.log10(0.965));
                 if (rankedMap != null) {
                     starRating = SongUtils.getStarRatingForMapDiff(rankedMap, recentScore.getDifficulty());

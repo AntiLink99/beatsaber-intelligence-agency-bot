@@ -23,6 +23,9 @@ public class ApiConstants {
 
     public static final String BS_DEFAULT_MAP_URL = BS_PRE_URL + "/maps/";
 
+    public static final String BS_RANKED_MAPS_PRE_URL = BS_API_PRE_URL + "/search/text/";
+    public static final String BS_RANKED_MAPS_POST_URL = "?sortOrder=Latest&ranked=true";
+
     // Beat Saviour
     public static final String BSAVIOUR_PRE_URL = "https://www.beatsavior.io";
     public static final String BSAVIOUR_RANKED_MAPS_URL = BSAVIOUR_PRE_URL + "/api/maps/ranked";

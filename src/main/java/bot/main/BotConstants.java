@@ -15,10 +15,10 @@ public class BotConstants {
     public static final String sealImageUrl = "https://i.imgur.com/LcCzrxx.jpg";
     public static final String donateUrl = "https://www.patreon.com/antilink";
     public static final String featureRequestUrl = "https://gitreports.com/issue/AntiLink99/beatsaber-intelligence-agency-bot";
+    public static final String bsiaServerInviteUrl = "https://discord.gg/HXbmf8Xefs";
     public static final long foaaServerId = Long.parseLong(System.getenv("server_id"));
     public static final long logServerId = Long.parseLong(System.getenv("log_server_id"));
     public static final long outputChannelId = Long.parseLong(System.getenv("channel_id"));
-    public static final long foaaCategoryId = 775129325443612693L;
 
     // Role milestones
     public static final Integer[] rankMilestones = {10, 50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000, 2000, 3000, 4000, 5000};
@@ -59,7 +59,10 @@ public class BotConstants {
 
     public static Map<String, String> getCommands(boolean isFOAA) {
         Map<String, String> commands = new LinkedMap<>();
-        commands.put(Format.underline("Important Links"), Format.bold(Format.link("❤️  Support AntiLink#1337 and the bot ❤️", donateUrl) + "\n" + Format.link("⭐ Request features and make suggestions ⭐", featureRequestUrl)));
+        commands.put(Format.underline("Important Links"), Format.bold(
+                Format.link("❤ Support AntiLink#1337 and the bot ❤", donateUrl) + "\n"
+                + Format.link("⭐ Request features and make suggestions ⭐", featureRequestUrl) + "\n"
+                + Format.link(":man_mage: Join the Discord Server for updates :man_mage:", bsiaServerInviteUrl)));
         commands.put("ru register <ScoreSaber URL>", "Registers a player that will be tracked and updated by the bot.");
         commands.put("ru invite", "Shares the invite link for this bot. Feel free to invite it to other servers!");
         commands.put("ru unregister", "Removes a player from the database so that the account is not being updated anymore.");

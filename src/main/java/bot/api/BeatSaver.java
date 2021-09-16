@@ -4,6 +4,9 @@ import bot.dto.MessageEventDTO;
 import bot.dto.Playlist;
 import bot.dto.PlaylistSong;
 import bot.dto.Song;
+import bot.dto.rankedmaps.BeatSaverRankedMap;
+import bot.dto.rankedmaps.BeatSaverRankedMaps;
+import bot.dto.rankedmaps.RankedMaps;
 import bot.listeners.PlaylistDifficultyListener;
 import bot.main.BotConstants;
 import bot.utils.DiscordLogger;
@@ -16,18 +19,21 @@ import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class BeatSaver {
 
-    final HttpMethods http;
-    final Gson gson;
+    private final HttpMethods http;
+    private final Gson gson;
+    private final RankedMaps rankedMaps;
 
     public BeatSaver() {
         http = new HttpMethods();
         gson = new Gson();
+        rankedMaps = new RankedMaps();
     }
 
     public void sendPlaylistInChannelByKeys(List<String> mapKeys, String playlistTitle, String playlistImageBase64, MessageChannel channel) {
@@ -138,5 +144,34 @@ public class BeatSaver {
             return null;
         }
         return songs.stream().map(song -> new PlaylistSong(song.getId(), song.getName())).collect(Collectors.toList());
+    }
+
+    public RankedMaps fetchAllRankedMaps() {
+        try {
+            List<BeatSaverRankedMap> resultMaps = new ArrayList<>();
+            for (int i = 0; i < 10000; i++) {
+                JsonObject rankedMapsJson = http.fetchJsonObject(getRankedMapsUrlByPage(i));
+                BeatSaverRankedMaps pageResult = gson.fromJson(rankedMapsJson, BeatSaverRankedMaps.class);
+                List<BeatSaverRankedMap> pageRankedMaps = pageResult.getRankedMaps();
+                if (pageRankedMaps.size() > 0) {
+                    resultMaps.addAll(pageRankedMaps);
+                    continue;
+                }
+                break;
+            }
+            rankedMaps.setRankedMaps(resultMaps);
+            return rankedMaps;
+        } catch (Exception e) {
+            DiscordLogger.sendLogInChannel(e.getMessage(), DiscordLogger.HTTP_ERRORS);
+            return null;
+        }
+    }
+
+    private String getRankedMapsUrlByPage(int pageNr) {
+        return ApiConstants.BS_RANKED_MAPS_PRE_URL + pageNr + ApiConstants.BS_RANKED_MAPS_POST_URL;
+    }
+
+    public RankedMaps getCachedRankedMaps() {
+        return rankedMaps;
     }
 }

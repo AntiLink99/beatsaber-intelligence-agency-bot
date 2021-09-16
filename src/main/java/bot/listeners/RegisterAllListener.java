@@ -47,7 +47,6 @@ public class RegisterAllListener extends ListenerAdapter {
             channel.sendMessage("Ok, registering stopped.").queue();
             event.getJDA().removeEventListener(this);
             progressionState = RegisterAllState.FINISHED;
-            return;
         } else if (event.getAuthor().getIdLong() == authorId) {
 
             if (progressionState == RegisterAllState.WAITING) {
@@ -62,7 +61,6 @@ public class RegisterAllListener extends ListenerAdapter {
                         event.getJDA().removeEventListener(this);
                         channel.sendMessage("Ok, no registering.").queue();
                         progressionState = RegisterAllState.FINISHED;
-                        return;
                 }
             } else if (progressionState == RegisterAllState.AWAIT_SS_URL) {
                 if (content.equalsIgnoreCase("skip")) {

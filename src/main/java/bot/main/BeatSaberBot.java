@@ -9,10 +9,9 @@ import bot.chart.RadarStatsChart;
 import bot.commands.*;
 import bot.db.DatabaseManager;
 import bot.dto.MessageEventDTO;
-import bot.dto.beatsaviour.RankedMaps;
-import bot.dto.beatsaviour.RankedMapsFilterRequest;
 import bot.dto.player.Player;
 import bot.dto.player.PlayerSkills;
+import bot.dto.rankedmaps.RankedMaps;
 import bot.utils.*;
 import javafx.application.Platform;
 import net.dv8tion.jda.api.JDA;
@@ -65,8 +64,13 @@ public class BeatSaberBot extends ListenerAdapter {
         Platform.setImplicitExit(false);
 
         try {
-            JDABuilder builder = JDABuilder.createDefault(System.getenv("bot_token")).setMemberCachePolicy(MemberCachePolicy.ALL).enableIntents(GatewayIntent.GUILD_MEMBERS).setChunkingFilter(ChunkingFilter.ALL).addEventListeners(new BeatSaberBot())
-                    .disableCache(CacheFlag.VOICE_STATE, CacheFlag.EMOTE).setActivity(Activity.playing(BotConstants.PLAYING));
+            JDABuilder builder = JDABuilder.createDefault(System.getenv("bot_token"))
+                    .setMemberCachePolicy(MemberCachePolicy.ALL)
+                    .enableIntents(GatewayIntent.GUILD_MEMBERS)
+                    .setChunkingFilter(ChunkingFilter.ALL)
+                    .addEventListeners(new BeatSaberBot())
+                    .disableCache(CacheFlag.VOICE_STATE, CacheFlag.EMOTE)
+                    .setActivity(Activity.playing(BotConstants.PLAYING));
 
             JDA jda = builder.build();
             try {
@@ -421,15 +425,6 @@ public class BeatSaberBot extends ListenerAdapter {
                 new Rank().sendDACHRank(storedPlayer, event);
                 break;
             }
-/*            case "profile": {
-                Player storedPlayer = db.getPlayerByDiscordId(event.getAuthor().getIdLong());
-                if (storedPlayer == null) {
-                    Messages.sendMessage("Player could not be found. Please check if the user has linked his account.", channel);
-                    return;
-                }
-                new Profile().sendProfileImage(storedPlayer, event);
-                break;
-            }*/
             case "setgridimage": {
                 if (msgParts.size() < 3) {
                     new AccGridImage(db).resetImage(event);
@@ -498,7 +493,6 @@ public class BeatSaberBot extends ListenerAdapter {
                             Messages.sendMessage("Could not find guild.", channel);
                         }
                     }
-
                 }
                 break;
             case "help":
@@ -513,11 +507,10 @@ public class BeatSaberBot extends ListenerAdapter {
     }
 
     private void fetchRankedMapsIfNonExistant(TextChannel channel) {
-        ranked = saviour.getCachedRankedMaps();
-        if (ranked == null && System.getenv("disableRankedRequests") == null) {
+        ranked = bs.getCachedRankedMaps();
+        if (ranked.getRankedMaps() == null && System.getenv("disableRankedRequests") == null) {
             Messages.sendTempMessage("First command after startup, fetching ranked maps. Please wait... 🕒", 10, channel);
-            RankedMapsFilterRequest request = new RankedMapsFilterRequest(0, 14, "date", "");
-            ranked = saviour.fetchAllRankedMaps(request);
+            ranked = bs.fetchAllRankedMaps();
         }
     }
 
@@ -586,8 +579,9 @@ public class BeatSaberBot extends ListenerAdapter {
 
     private Player getScoreSaberPlayerFromUrl(String profileUrl) throws FileNotFoundException {
         Matcher matcher = scoreSaberIDPattern.matcher(profileUrl);
-        if (!matcher.find())
+        if (!matcher.find()) {
             throw new FileNotFoundException("Player could not be found, invalid link!");
+        }
         String playerId = matcher.group(1);
         Player player = ss.getPlayerById(playerId);
         if (player == null) {

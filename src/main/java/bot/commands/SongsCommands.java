@@ -6,9 +6,9 @@ import bot.db.DatabaseManager;
 import bot.dto.MessageEventDTO;
 import bot.dto.Song;
 import bot.dto.SongScore;
-import bot.dto.beatsaviour.BeatSaviourRankedMap;
-import bot.dto.beatsaviour.RankedMaps;
 import bot.dto.player.Player;
+import bot.dto.rankedmaps.BeatSaverRankedMap;
+import bot.dto.rankedmaps.RankedMaps;
 import bot.graphics.SongsImage;
 import bot.main.BotConstants;
 import bot.utils.JavaFXUtils;
@@ -68,7 +68,7 @@ public class SongsCommands {
                 }
             }
 
-            BeatSaviourRankedMap map = RankedMapUtils.findRankedMapBySongHash(ranked, score.getSongHash());
+            BeatSaverRankedMap map = RankedMapUtils.findRankedMapBySongHash(ranked, score.getSongHash());
             if (map != null) {
                 float starRating = SongUtils.getStarRatingForMapDiff(map, score.getDifficulty());
                 score.setSongStars(starRating);
@@ -140,7 +140,7 @@ public class SongsCommands {
                 }
             }
 
-            BeatSaviourRankedMap map = RankedMapUtils.findRankedMapBySongHash(ranked, score.getSongHash());
+            BeatSaverRankedMap map = RankedMapUtils.findRankedMapBySongHash(ranked, score.getSongHash());
             if (map != null) {
                 float starRating = SongUtils.getStarRatingForMapDiff(map, score.getDifficulty());
                 score.setSongStars(starRating);

@@ -135,6 +135,7 @@ public class HttpMethods {
         method.setRequestHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.95 Safari/537.11");
         method.setRequestHeader("Accept-Language", "de-DE,de;q=0.9,en-US;q=0.8,en;q=0.7");
         method.setRequestHeader("Cookie", "__cfduid=de1f9ce53366f28f39d9f3907233af7e41606754887");
+        method.setRequestHeader("Server", "BeatSaber Intelligence Agency Discord Bot by AntiLink#1337");
         method.setRequestHeader("Accept", "*/*");
     }
 }

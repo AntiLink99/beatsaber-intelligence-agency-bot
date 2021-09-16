@@ -137,7 +137,12 @@ public class RecentSong {
             int noteCount = -1;
             if (bsMap != null) {
                 noteCount = SongUtils.getNoteCountForBeatSaverMapDiff(bsMap, recentScore);
-                coverUrl = bsMap.getVersionByHash(recentScore.getSongHash()).getCoverURL();
+                Song.Version version = bsMap.getVersionByHash(recentScore.getSongHash());
+                if (version != null) {
+                    coverUrl = version.getCoverURL();
+                } else {
+                    coverUrl = BotConstants.notOnBeatSaverImageUrl;
+                }
             }
 
             String accuracy = null;
@@ -182,14 +187,6 @@ public class RecentSong {
                 String weightPP = Format.fixedLength("Weighted PP: ", lineWidth) + Format.decimal(recentScore.getWeight() * recentScore.getPp());
                 String stars = Format.fixedLength("Stars: ", lineWidth) + (starRating > 0 ? Format.decimal(starRating) : "?") + "⭐";
                 songInfo += Format.codeProlog("\n" + rawPP + "\n" + weightPP + "\n" + stars);
-            }
-            if (coverUrl == null) {
-                Song song = bs.fetchSongByHash(recentScore.getSongHash());
-                if (song != null) {
-                    coverUrl = song.getVersionByHash(recentScore.getSongHash()).getCoverURL();
-                } else {
-                    coverUrl = BotConstants.notOnBeatSaverImageUrl;
-                }
             }
             String diffImageUrl = SongUtils.getDiffImageUrl(recentScore.getDifficulty());
             String songName = recentScore.getSongName() + " - " + getDurationStringFromMap(bsMap);

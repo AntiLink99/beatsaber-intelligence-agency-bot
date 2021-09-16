@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 public class BeatSaver {
@@ -149,14 +150,23 @@ public class BeatSaver {
     public RankedMaps fetchAllRankedMaps() {
         try {
             List<BeatSaverRankedMap> resultMaps = new ArrayList<>();
+            DiscordLogger.sendLogInChannel("Fetching ranked maps...", DiscordLogger.INFO);
             for (int i = 0; i < 10000; i++) {
-                JsonObject rankedMapsJson = http.fetchJsonObject(getRankedMapsUrlByPage(i));
-                BeatSaverRankedMaps pageResult = gson.fromJson(rankedMapsJson, BeatSaverRankedMaps.class);
-                List<BeatSaverRankedMap> pageRankedMaps = pageResult.getRankedMaps();
-                if (pageRankedMaps.size() > 0) {
-                    resultMaps.addAll(pageRankedMaps);
+                try {
+                    JsonObject rankedMapsJson = http.fetchJsonObject(getRankedMapsUrlByPage(i));
+                    BeatSaverRankedMaps pageResult = gson.fromJson(rankedMapsJson, BeatSaverRankedMaps.class);
+                    List<BeatSaverRankedMap> pageRankedMaps = pageResult.getRankedMaps();
+                    if (pageRankedMaps.size() > 0) {
+                        resultMaps.addAll(pageRankedMaps);
+                        DiscordLogger.sendLogInChannel("Fetched " + pageRankedMaps.size() + " maps!", DiscordLogger.INFO);
+                        continue;
+                    }
+                } catch (Exception e) {
+                    TimeUnit.MILLISECONDS.sleep(250);
+                    i--;
                     continue;
                 }
+                DiscordLogger.sendLogInChannel("Total map count: "+resultMaps.size(), DiscordLogger.INFO);
                 break;
             }
             rankedMaps.setRankedMaps(resultMaps);

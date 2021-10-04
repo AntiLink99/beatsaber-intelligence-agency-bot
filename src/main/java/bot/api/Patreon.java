@@ -15,7 +15,7 @@ import java.util.List;
 public class Patreon {
 
     public List<PatreonSupporter> fetchPatreonSupporters() {
-        String creatorAccessToken = "nthWN93Jfaj7QGxlBoJn4hvFK6CbpijeiuaPyIa8KTY"; //TODO: Export
+        String creatorAccessToken = System.getenv("creator_access_token");
 
         List<PatreonSupporter> supporters = new ArrayList<>();
         try {
@@ -55,5 +55,16 @@ public class Patreon {
             return null;
         }
         return supporters;
+    }
+
+    public boolean isPatreonSupporter(long discordId) {
+        List<PatreonSupporter> supporters = fetchPatreonSupporters();
+        if (supporters != null && supporters.size() > 0) {
+            return supporters
+                    .stream()
+                    .map(PatreonSupporter::getDiscordId)
+                    .anyMatch(id -> id == discordId);
+        }
+        return false;
     }
 }

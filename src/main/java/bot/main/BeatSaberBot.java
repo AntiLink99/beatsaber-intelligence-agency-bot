@@ -439,6 +439,9 @@ public class BeatSaberBot extends ListenerAdapter {
                 new AccGridImage(db).sendAccGridImage(urlString, event);
                 break;
             }
+            case "profile":
+                Messages.sendMessage("Coming soon:tm:!", channel);
+                break;
             case "seal":
                 Messages.sendImage(BotConstants.sealImageUrl, "Cute seal.jpg", channel);
                 break;

@@ -151,7 +151,7 @@ public class BeatSaberBot extends ListenerAdapter {
         }
 
         String msg = event.getMessage().getContentRaw();
-        if (!msg.toLowerCase().startsWith("ru ")) {
+        if (!msg.toLowerCase().startsWith("ru ") && !msg.toLowerCase().startsWith("bs ")) {
             return;
         }
 

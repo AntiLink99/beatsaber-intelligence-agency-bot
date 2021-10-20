@@ -2,7 +2,6 @@ package bot.main;
 
 import bot.api.ApiConstants;
 import bot.api.BeatSaver;
-import bot.api.BeatSaviour;
 import bot.api.ScoreSaber;
 import bot.chart.PlayerChart;
 import bot.chart.RadarStatsChart;
@@ -51,14 +50,12 @@ public class BeatSaberBot extends ListenerAdapter {
 
     final ScoreSaber ss = new ScoreSaber();
     final BeatSaver bs = new BeatSaver();
-    final BeatSaviour saviour = new BeatSaviour();
     final DatabaseManager db = new DatabaseManager();
     RankedMaps ranked = new RankedMaps();
 
     final Pattern scoreSaberIDPattern = Pattern.compile(ApiConstants.USER_ID_REGEX);
 
     public static void main(String[] args) {
-        //new Patreon().fetchPatreonSupporters().forEach(a -> System.out.println(a.getDiscordId()));
         DatabaseManager db = new DatabaseManager();
         ScoreSaber ss = new ScoreSaber();
         Platform.setImplicitExit(false);
@@ -145,7 +142,6 @@ public class BeatSaberBot extends ListenerAdapter {
         event.getHook().setEphemeral(true);
         event.deferReply(true).queue();
         handleCommand(msgParts, new MessageEventDTO(event));
-        event.reply("a").queue();
     }
 
     @Override
@@ -155,7 +151,7 @@ public class BeatSaberBot extends ListenerAdapter {
         }
 
         String msg = event.getMessage().getContentRaw();
-        if (!msg.toLowerCase().startsWith("ru ")) {
+        if (!msg.toLowerCase().startsWith("ru ") && !msg.toLowerCase().startsWith("bs ")) {
             return;
         }
 

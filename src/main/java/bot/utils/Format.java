@@ -69,7 +69,7 @@ public class Format {
     public static boolean isUrl(String str) {
         try {
             new URI(str);
-            return true;
+            return str.contains(".");
         } catch (URISyntaxException e) {
             return false;
         }

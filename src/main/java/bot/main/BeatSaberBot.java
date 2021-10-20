@@ -151,12 +151,12 @@ public class BeatSaberBot extends ListenerAdapter {
         }
 
         String msg = event.getMessage().getContentRaw();
-        if (!msg.toLowerCase().startsWith("ru ") && !msg.toLowerCase().startsWith("bs ")) {
+        if (!msg.toLowerCase().startsWith("ru ")) {
             return;
         }
 
         event.getChannel().sendTyping().queue();
-        List<String> msgParts = Arrays.asList(msg.split(" ", 3));
+        List<String> msgParts = Arrays.asList(msg.split(" "));
         handleCommand(msgParts, new MessageEventDTO(event));
     }
 
@@ -166,21 +166,21 @@ public class BeatSaberBot extends ListenerAdapter {
         Member author = event.getAuthor();
         User authorUser = author.getUser();
 
+        db.connectToDatabase();
         fetchRankedMapsIfNonExistant(channel);
         String msg = StringUtils.join(msgParts, " ");
-        Player player = getPlayerDependingOnCommand(msgParts, channel, author.getUser()); // Refactor!!!
-        db.connectToDatabase();
+        Player commandPlayer = getCommandPlayer(msgParts, channel, author.getUser());
 
         DiscordLogger.sendLogInChannel(Format.code("Command: " + msg + "\nRequester: " + author.getEffectiveName() + "\nGuild: " + guild.getName()), "info");
         String command = msgParts.get(1).toLowerCase();
         switch (command) {
             case "register":
-                boolean success = new HandlePlayerRegisteration(db).registerPlayer(player, channel);
+                boolean success = new HandlePlayerRegisteration(db).registerPlayer(commandPlayer, channel);
                 if (!success || guild.getIdLong() != BotConstants.foaaServerId) {
                     break;
                 }
             case "update":
-                new UpdatePlayer(db).updatePlayer(player, channel);
+                new UpdatePlayer(db).updatePlayer(commandPlayer, channel);
             case "claimpp":
                 if (guild.getIdLong() == BotConstants.foaaServerId) {
                     new ClaimPPRole(db).validateAndAssignRole(event.getAuthor(), channel, true);
@@ -206,21 +206,7 @@ public class BeatSaberBot extends ListenerAdapter {
                 new Improvement(db).sendImprovementMessage(channel);
                 break;
             case "chart": {
-                long memberId = event.getAuthor().getIdLong();
-                if (msgParts.size() == 3) {
-                    try {
-                        memberId = Long.parseLong(msgParts.get(2).replaceAll("[^0-9]", ""));
-                    } catch (NumberFormatException e) {
-                        Messages.sendMessage("Invalid user specified.", channel);
-                        return;
-                    }
-                }
-                Player storedPlayer = db.getPlayerByDiscordId(memberId);
-                if (storedPlayer == null) {
-                    Messages.sendMessage("The player is not registered. Try \"ru help\".", channel);
-                    return;
-                }
-                new PlayerChart().sendChartImage(storedPlayer, event);
+                new PlayerChart().sendChartImage(commandPlayer, event);
                 break;
             }
             case "chartall":
@@ -229,16 +215,7 @@ public class BeatSaberBot extends ListenerAdapter {
                 new PlayerChart().sendChartImage(storedPlayers, event, (msgParts.size() >= 3 ? msgParts.get(2) : null));
                 break;
             case "stand": {
-                long memberId = event.getAuthor().getIdLong();
-                if (msgParts.size() == 3) {
-                    try {
-                        memberId = Long.parseLong(msgParts.get(2).replaceAll("[^0-9]", ""));
-                    } catch (NumberFormatException e) {
-                        Messages.sendMessage("Invalid user specified.", channel);
-                        return;
-                    }
-                }
-                PlayerSkills skills = db.getPlayerSkillsByDiscordId(memberId);
+                PlayerSkills skills = db.getPlayerSkillsByDiscordId(commandPlayer.getDiscordUserId());
                 if (skills == null) {
                     Messages.sendMessage("No skill has been set yet. Try \"ru help\".", channel);
                     return;
@@ -309,66 +286,28 @@ public class BeatSaberBot extends ListenerAdapter {
                 new RandomMeme().sendRandomMeme(channel);
                 break;
             case "recentsong": {
-                long memberId = event.getAuthor().getIdLong();
                 int index = 1;
-                if (msgParts.size() == 3) {
-                    String[] arguments = msgParts.get(2).split(" ");
-                    String indexOrMemberMention = arguments[0];
-                    if (NumberUtils.isNumber(indexOrMemberMention)) {
-                        index = Integer.parseInt(indexOrMemberMention);
-                    }
-                    String lastArgument = arguments[arguments.length - 1];
-                    if (lastArgument.contains("@")) { // Mention
-                        try {
-                            memberId = Long.parseLong(lastArgument.replaceAll("[^0-9]", ""));
-                        } catch (NumberFormatException e) {
-                            Messages.sendMessage("Invalid user specified.", channel);
-                            return;
-                        }
-                    }
+                if (msgParts.size() == 4 && NumberUtils.isNumber(msgParts.get(3))) {
+                    index = Integer.parseInt(msgParts.get(3));
                 }
-                Player storedPlayer = db.getPlayerByDiscordId(memberId);
-                if (storedPlayer == null) {
-                    Messages.sendMessage("Player could not be found. Please check if the user has linked his account.", channel);
-                    return;
-                } else {
-                    DiscordLogger.sendLogInChannel(event.getAuthor() + " is requesting RecentSong for: " + storedPlayer.getPlayerName(), DiscordLogger.INFO);
-                    new RecentSong(db).sendRecentSong(storedPlayer, ranked, index, event);
-                }
+                DiscordLogger.sendLogInChannel(event.getAuthor() + " is requesting RecentSong for: " + commandPlayer.getPlayerName(), DiscordLogger.INFO);
+                new RecentSong(db).sendRecentSong(commandPlayer, ranked, index, event);
                 return;
             }
             case "topsong":
                 Messages.sendMessage("Try \"ru topsongs\" to see your top plays! ✨", channel);
                 break;
             case "recentsongs": {
-                long memberId = event.getAuthor().getIdLong();
                 int index = 1;
-                if (msgParts.size() == 3) {
-                    String[] arguments = msgParts.get(2).split(" ");
-                    String indexOrMemberMention = arguments[0];
-                    if (NumberUtils.isNumber(indexOrMemberMention)) {
-                        index = Integer.parseInt(indexOrMemberMention);
-                    }
-                    String lastArgument = arguments[arguments.length - 1];
-                    if (lastArgument.contains("@")) { // Mention
-                        try {
-                            memberId = Long.parseLong(lastArgument.replaceAll("[^0-9]", ""));
-                        } catch (NumberFormatException e) {
-                            Messages.sendMessage("Invalid user specified.", channel);
-                            return;
-                        }
+                if (msgParts.size() >= 3) {
+                    if (NumberUtils.isNumber(msgParts.get(2))) {
+                        index = Integer.parseInt(msgParts.get(2));
                     }
                 }
-                Player storedPlayer = db.getPlayerByDiscordId(memberId);
-                if (storedPlayer == null) {
-                    Messages.sendMessage("Player could not be found. Please check if the user has linked his account.", channel);
-                    return;
-                }
-                new SongsCommands(db, ranked).sendRecentSongs(storedPlayer, index, event);
+                new SongsCommands(db, ranked).sendRecentSongs(commandPlayer, index, event);
                 return;
             }
             case "topsongs": {
-                long memberId = event.getAuthor().getIdLong();
                 int index = 1;
                 if (msgParts.size() == 3) {
                     String[] arguments = msgParts.get(2).split(" ");
@@ -376,49 +315,20 @@ public class BeatSaberBot extends ListenerAdapter {
                     if (NumberUtils.isNumber(indexOrMemberMention)) {
                         index = Integer.parseInt(indexOrMemberMention);
                     }
-                    String lastArgument = arguments[arguments.length - 1];
-                    if (lastArgument.contains("@")) { // Mention
-                        try {
-                            memberId = Long.parseLong(lastArgument.replaceAll("[^0-9]", ""));
-                        } catch (NumberFormatException e) {
-                            Messages.sendMessage("Invalid user specified.", channel);
-                            return;
-                        }
-                    }
                 }
-                Player storedPlayer = db.getPlayerByDiscordId(memberId);
-                if (storedPlayer == null) {
-                    Messages.sendMessage("Player could not be found. Please check if the user has linked his account.", channel);
-                    return;
-                }
-                new SongsCommands(db, ranked).sendTopSongs(storedPlayer, index, event);
+                new SongsCommands(db, ranked).sendTopSongs(commandPlayer, index, event);
                 return;
             }
             case "localrank": {
-                Player storedPlayer = db.getPlayerByDiscordId(event.getAuthor().getIdLong());
-                if (storedPlayer == null) {
-                    Messages.sendMessage("Player could not be found. Please check if the user has linked his account.", channel);
-                    return;
-                }
-                new Rank().sendLocalRank(storedPlayer, event);
+                new Rank().sendLocalRank(commandPlayer, event);
                 break;
             }
             case "globalrank": {
-                Player storedPlayer = db.getPlayerByDiscordId(event.getAuthor().getIdLong());
-                if (storedPlayer == null) {
-                    Messages.sendMessage("Player could not be found. Please check if the user has linked his account.", channel);
-                    return;
-                }
-                new Rank().sendGlobalRank(storedPlayer, event);
+                new Rank().sendGlobalRank(commandPlayer, event);
                 break;
             }
             case "dachrank": {
-                Player storedPlayer = db.getPlayerByDiscordId(event.getAuthor().getIdLong());
-                if (storedPlayer == null) {
-                    Messages.sendMessage("Player could not be found. Please check if the user has linked his account.", channel);
-                    return;
-                }
-                new Rank().sendDACHRank(storedPlayer, event);
+                new Rank().sendDACHRank(commandPlayer, event);
                 break;
             }
             case "setgridimage": {
@@ -436,7 +346,7 @@ public class BeatSaberBot extends ListenerAdapter {
                 break;
             }
             case "profile":
-                Messages.sendMessage("Coming soon:tm:!", channel);
+                Messages.sendMessage("This feature is planned for the near future!", channel);
                 break;
             case "seal":
                 Messages.sendImage(BotConstants.sealImageUrl, "Cute seal.jpg", channel);
@@ -515,7 +425,7 @@ public class BeatSaberBot extends ListenerAdapter {
 
     @Override
     public void onGuildMemberRemove(GuildMemberRemoveEvent event) {
-        DiscordLogger.sendLogInChannel("Member " + event.getUser().getName() + " left guild " + event.getGuild().getName(),  DiscordLogger.USERS);
+        DiscordLogger.sendLogInChannel("Member " + event.getUser().getName() + " left guild " + event.getGuild().getName(), DiscordLogger.USERS);
         long userId = event.getUser().getIdLong();
 
         List<Guild> guilds = event.getJDA().getGuilds();
@@ -546,27 +456,28 @@ public class BeatSaberBot extends ListenerAdapter {
         DiscordLogger.sendLogInChannel(Format.code("Left guild \"" + event.getGuild().getName() + "\""), DiscordLogger.GUILDS);
     }
 
-    private Player getPlayerDependingOnCommand(List<String> msgParts, TextChannel channel, User author) {
-        List<String> commandsWithPlayerInfo = BotConstants.getCommandsWithPlayerInfo();
-
+    private Player getCommandPlayer(List<String> msgParts, TextChannel channel, User author) {
         Player player = null;
-        String command = msgParts.get(1);
-        if (commandsWithPlayerInfo.contains(command)) {
-            if (msgParts.size() == 3) {
-                String urlOrPlayerName = msgParts.get(2);
-                if (Format.isUrl(urlOrPlayerName)) {
-                    try {
-                        player = getScoreSaberPlayerFromUrl(msgParts.get(2));
-                        player.setDiscordUserId(author.getIdLong());
-                    } catch (FileNotFoundException e) {
-                        Messages.sendMessage(e.getMessage(), channel);
-                    }
-                } else {
-                    Messages.sendMessage("Could not find player \"" + urlOrPlayerName + "\".", channel);
+        String lastArgument = msgParts.get(msgParts.size() - 1);
+
+        if (Format.isUrl(lastArgument)) {
+            try {
+                player = getScoreSaberPlayerFromUrl(lastArgument);
+                player.setDiscordUserId(author.getIdLong());
+            } catch (FileNotFoundException e) {
+                Messages.sendMessage(e.getMessage(), channel);
+            }
+        } else {
+            long memberId = 0;
+            if (lastArgument.contains("@")) {
+                String mentionedMemberId = lastArgument.replaceAll("[^0-9]", "");
+                if (NumberUtils.isNumber(mentionedMemberId) ) {
+                    memberId = Long.parseLong(mentionedMemberId); //Mention
                 }
             } else {
-                Messages.sendMessage("Player URL or name is missing. Please try again. Try \"ru help\" for more info.", channel);
+                memberId = author.getIdLong(); //None
             }
+            player = db.getPlayerByDiscordId(memberId);
         }
         return player;
     }
@@ -587,9 +498,5 @@ public class BeatSaberBot extends ListenerAdapter {
             throw new FileNotFoundException("Player could not be found!");
         }
         return player;
-    }
-
-    private TextChannel getChannelByName(Guild guild, String name) {
-        return guild.getTextChannels().stream().filter(c -> c.getName().equals(name)).findFirst().orElse(null);
     }
 }

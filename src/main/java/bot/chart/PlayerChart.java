@@ -28,7 +28,7 @@ public class PlayerChart {
 
     public void sendChartImage(Player player, MessageEventDTO event) {
         if (player.getHistoryValues() == null) {
-            Messages.sendMessage("Could not find history values for user. Please update the user with \"ru updated <ScoreSaber URL>\".", event.getChannel());
+            Messages.sendMessage("Could not find history values for user. Please update the user with \"ru update <ScoreSaber URL>\".", event.getChannel());
             return;
         }
         String filepath = BotConstants.RESOURCES_PATH + player.getPlayerId();

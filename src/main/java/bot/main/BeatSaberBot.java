@@ -349,7 +349,9 @@ public class BeatSaberBot extends ListenerAdapter {
                 Messages.sendMessage("This feature is planned for the near future!", channel);
                 break;
             case "seal":
-                Messages.sendImage(BotConstants.sealImageUrl, "Cute seal.jpg", channel);
+                int randomSealIndex = RandomUtils.getRandomNum(83);
+                String sealFileName = (randomSealIndex < 10 ? "0" : "") + "00" + randomSealIndex + ".jpg";
+                Messages.sendImageEmbed("https://focabot.github.io/random-seal/seals/" + sealFileName, ":seal: Ow, ow, ow! :seal:", channel);
                 break;
             case "say":
                 String phrase = msgParts.size() >= 3 ? msgParts.get(2) : "🤡";

@@ -369,6 +369,11 @@ public class BeatSaberBot extends ListenerAdapter {
                     Messages.sendTempMessage("Status updated to: \"" + status + "\".", 10, channel);
                 }
                 break;
+            case "refreshranked":
+                if (DiscordUtils.isAdmin(authorUser)) {
+                    ranked = bs.fetchAllRankedMaps();
+                }
+                break;
             case "deletethat":
                 List<Message> latestMessages = event.getChannel().getHistory().retrievePast(100).complete();
                 latestMessages = latestMessages.stream().filter(message -> message.getAuthor().getIdLong() == event.getJDA().getSelfUser().getIdLong()).collect(Collectors.toList());

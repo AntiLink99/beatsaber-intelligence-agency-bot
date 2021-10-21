@@ -74,6 +74,7 @@ public class BeatSaberBot extends ListenerAdapter {
                 jda.awaitReady();
             } catch (InterruptedException e) {
                 e.printStackTrace();
+                return;
             }
             DiscordLogger.setLogGuild(jda.getGuildById(BotConstants.logServerId));
 
@@ -286,10 +287,7 @@ public class BeatSaberBot extends ListenerAdapter {
                 new RandomMeme().sendRandomMeme(channel);
                 break;
             case "recentsong": {
-                int index = 1;
-                if (msgParts.size() == 4 && NumberUtils.isNumber(msgParts.get(3))) {
-                    index = Integer.parseInt(msgParts.get(3));
-                }
+                int index = getIndexFromMsgParts(msgParts);
                 DiscordLogger.sendLogInChannel(event.getAuthor() + " is requesting RecentSong for: " + commandPlayer.getPlayerName(), DiscordLogger.INFO);
                 new RecentSong(db).sendRecentSong(commandPlayer, ranked, index, event);
                 return;
@@ -298,12 +296,7 @@ public class BeatSaberBot extends ListenerAdapter {
                 Messages.sendMessage("Try \"ru topsongs\" to see your top plays! ✨", channel);
                 break;
             case "recentsongs": {
-                int index = 1;
-                if (msgParts.size() >= 3) {
-                    if (NumberUtils.isNumber(msgParts.get(2))) {
-                        index = Integer.parseInt(msgParts.get(2));
-                    }
-                }
+                int index = getIndexFromMsgParts(msgParts);
                 new SongsCommands(db, ranked).sendRecentSongs(commandPlayer, index, event);
                 return;
             }
@@ -415,6 +408,13 @@ public class BeatSaberBot extends ListenerAdapter {
         }
         System.gc();
 
+    }
+
+    private int getIndexFromMsgParts(List<String> msgParts) {
+        if (msgParts.size() >= 3 && NumberUtils.isNumber(msgParts.get(2))) {
+            return Integer.parseInt(msgParts.get(2));
+        }
+        return 1;
     }
 
     private void fetchRankedMapsIfNonExistant(TextChannel channel) {

@@ -1,8 +1,12 @@
-Discord Beat Saber bot to fit all your needs
+# ⚔️ Discord Beat Saber bot to fit all your needs ⚔️
 
-All commands with "bs help"
+## Bot Invite: https://discord.com/api/oauth2/authorize?client_id=711323223891116043&permissions=0&scope=bot
 
-Example usage images:
+## All commands with "bs help"
+
+![alt text](https://media.discordapp.net/attachments/770380256192233513/841819993032622100/dc_bot_ver2.png?width=200&height=200)
+
+## __Example usage images:__
 ![alt text](https://cdn.discordapp.com/attachments/881215820053770331/900527182416347246/recentSongs_76561198125474611_900527159356035102.png)
 ![alt text](https://media.discordapp.net/attachments/881215820053770331/900870954383712257/unknown.png)
 

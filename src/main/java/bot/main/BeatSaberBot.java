@@ -258,16 +258,16 @@ public class BeatSaberBot extends ListenerAdapter {
                     Messages.sendMessage("Please provide at least one parameter.", channel);
                     break;
                 }
-                String[] inputValues = msgParts.get(2).split(" ");
-                if (inputValues.length == 1) {
-                    if (!NumberValidation.isInteger(inputValues[0])) {
+                List<String> inputValues = msgParts.subList(2, msgParts.size());
+                if (inputValues.size() == 1) {
+                    if (!NumberValidation.isInteger(inputValues.get(0))) {
                         Messages.sendMessage("The entered value has to be an integer.", channel);
                         return;
                     }
-                    new Ranked(ranked).sendRecentRankedPlaylist(Integer.parseInt(inputValues[0]), event);
-                } else if (inputValues.length == 2) {
-                    String minString = inputValues[0].replaceAll(",", ".");
-                    String maxString = inputValues[1].replaceAll(",", ".");
+                    new Ranked(ranked).sendRecentRankedPlaylist(Integer.parseInt(inputValues.get(0)), event);
+                } else if (inputValues.size() == 2) {
+                    String minString = inputValues.get(0).replaceAll(",", ".");
+                    String maxString = inputValues.get(1).replaceAll(",", ".");
                     if (!NumberUtils.isNumber(minString) || !NumberUtils.isNumber(maxString)) {
                         Messages.sendMessage("At least one of the entered values is not a number.", channel);
                         return;

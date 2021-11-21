@@ -95,13 +95,6 @@ public class BotConstants {
         return commands;
     }
 
-    public static List<String> getCommandsWithPlayerInfo() {
-        List<String> commandsWithPlayerInfo = new ArrayList<>();
-        commandsWithPlayerInfo.add("register");
-        commandsWithPlayerInfo.add("update");
-        return commandsWithPlayerInfo;
-    }
-
     private static String getImageBase64(String imageName) {
         byte[] imageBytes = null;
         try {

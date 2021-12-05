@@ -13,7 +13,8 @@ public class ApiConstants {
     public static final String SS_LEADERBOARD_PRE_URL = "https://scoresaber.com/leaderboard/";
     public static final String QUALIFIED_URL = "http://scoresaber.com/api.php?function=get-leaderboards&cat=5&limit=100&page=1&unique=1&qualified=1";
     public static final String NO_AVATAR_URL = "https://scoresaber.com/imports/images/usr-avatars/404.jpg";
-    public static final String PLAYER_LEADERBOARDS_URL = "https://scoresaber.com/api/players?page=";
+    public static final String PLAYER_LEADERBOARDS_API_URL = "https://scoresaber.com/api/players?page=";
+    public static final String PLAYER_LEADERBOARDS_URL = "https://scoresaber.com/rankings?page=";
 
     // Beat Saver
     public static final String BS_PRE_URL = "https://cdn.beatsaver.com";

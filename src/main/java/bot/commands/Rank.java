@@ -75,13 +75,13 @@ public class Rank {
         String titleUrl = "";
         switch (leaderboardType) {
             case LOCAL:
-                titleUrl = ss.getLeaderboardUrl(getPageNrFromPlayerRank(player.getCountryRank()), countryCode);
+                titleUrl = getLeaderboardUrl(getPageNrFromPlayerRank(player.getCountryRank()), countryCode);
                 break;
             case GLOBAL:
-                titleUrl = ss.getLeaderboardUrl(getPageNrFromPlayerRank(player.getRank()), countryCode);
+                titleUrl = getLeaderboardUrl(getPageNrFromPlayerRank(player.getRank()), countryCode);
                 break;
             case DACH:
-                titleUrl = ss.getLeaderboardUrl(getPageNrFromPlayerRank(playerIndex), countryCode);
+                titleUrl = getLeaderboardUrl(getPageNrFromPlayerRank(playerIndex),  countryCode);
                 break;
         }
 
@@ -121,5 +121,13 @@ public class Rank {
             page++;
         }
         return page;
+    }
+
+    private String getLeaderboardUrl(int pageNr, String countryCode) {
+        String url = ApiConstants.PLAYER_LEADERBOARDS_URL + pageNr;
+        if (countryCode != null) {
+            url += "&countries=" + countryCode;
+        }
+        return url;
     }
 }

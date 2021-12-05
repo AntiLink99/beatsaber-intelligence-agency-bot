@@ -94,7 +94,7 @@ public class ScoreSaber {
             if (i > 50) {
                 return null;
             }
-            String leaderboardUrl = getLeaderboardUrl(i, countryCode);
+            String leaderboardUrl = getLeaderboardApiUrl(i, countryCode);
             JsonArray response = http.fetchJsonArray(leaderboardUrl);
             Type listType = new TypeToken<List<LeaderboardPlayer>>() {}.getType();
 
@@ -114,8 +114,8 @@ public class ScoreSaber {
         return entries;
     }
 
-    public String getLeaderboardUrl(int pageNr, String countryCode) {
-        String url = ApiConstants.PLAYER_LEADERBOARDS_URL + pageNr;
+    public String getLeaderboardApiUrl(int pageNr, String countryCode) {
+        String url = ApiConstants.PLAYER_LEADERBOARDS_API_URL + pageNr;
         if (countryCode != null) {
             url += "&countries=" + countryCode;
         }

@@ -3,7 +3,7 @@ package bot.commands;
 import bot.api.ApiConstants;
 import bot.api.ScoreSaber;
 import bot.dto.MessageEventDTO;
-import bot.dto.leaderboards.LeaderboardEntry;
+import bot.dto.leaderboards.LeaderboardPlayer;
 import bot.dto.leaderboards.LeaderboardType;
 import bot.dto.player.Player;
 import bot.utils.Format;
@@ -36,18 +36,18 @@ public class Rank {
 
     private void sendRank(Player player, int startPage, int sizeLimit, String countryCode, LeaderboardType leaderboardType, MessageEventDTO event) {
         ScoreSaber ss = new ScoreSaber();
-        List<LeaderboardEntry> leaderboardEntries = ss.findLeaderboardEntriesAroundPlayer(player, countryCode, startPage, sizeLimit);
+        List<LeaderboardPlayer> leaderboardEntries = ss.findLeaderboardEntriesAroundPlayer(player, countryCode, startPage, sizeLimit);
         if (leaderboardEntries == null) {
             Messages.sendMessage("Could not extract ScoreSaber profiles. Maybe your rank is too low or there is another error.", event.getChannel());
             return;
         }
-        LeaderboardEntry playerEntry = leaderboardEntries.stream()
-                .filter(entry -> entry.getPlayerId() == player.getPlayerIdLong())
+        LeaderboardPlayer playerEntry = leaderboardEntries.stream()
+                .filter(entry -> entry.getIdLong() == player.getPlayerIdLong())
                 .findFirst()
                 .orElse(null);
         int playerIndex = leaderboardEntries.indexOf(playerEntry);
         assert playerEntry != null;
-        float playerPp = playerEntry.getPp();
+        double playerPp = playerEntry.getPp();
 
         String resultMessage = Format.bold("------------------------------------") + "\n";
         if (playerIndex > 1) {
@@ -88,22 +88,22 @@ public class Rank {
         Messages.sendMessageWithTitle(resultMessage, Format.underline(title), titleUrl, event.getChannel());
     }
 
-    private String toEntryString(LeaderboardEntry playerEntry, float ownPP, LeaderboardType type) {
+    private String toEntryString(LeaderboardPlayer playerEntry, double ownPP, LeaderboardType type) {
         String entryString = "";
         if (playerEntry == null) {
             return entryString;
         }
         boolean isOwnEntry = ownPP == -1;
-        entryString += "#" + playerEntry.getPlayerRank();
-        String countryName = new Locale("", playerEntry.getCountryCode().toUpperCase()).getDisplayCountry(Locale.ENGLISH);
+        entryString += "#" + playerEntry.getCustomLeaderboardRank();
+        String countryName = new Locale("", playerEntry.getCountry().toUpperCase()).getDisplayCountry(Locale.ENGLISH);
         if (type == LeaderboardType.LOCAL) {
-            entryString += " in " + countryName + " :flag_" + playerEntry.getCountryCode().toLowerCase() + ": \n";
+            entryString += " in " + countryName + " :flag_" + playerEntry.getCountry().toLowerCase() + ": \n";
         } else {
-            entryString += "\nFrom " + countryName + " :flag_" + playerEntry.getCountryCode().toLowerCase() + ": \n";
+            entryString += "\nFrom " + countryName + " :flag_" + playerEntry.getCountry().toLowerCase() + ": \n";
         }
-        entryString += Format.bold(Format.link(playerEntry.getPlayerName(), ApiConstants.SS_PRE_URL + playerEntry.getPlayerUrl()) + (isOwnEntry ? " (You)" : "")) + "\n";
+        entryString += Format.bold(Format.link(playerEntry.getName(), ApiConstants.USER_PRE_URL + playerEntry.getId()) + (isOwnEntry ? " (You)" : "")) + "\n";
         if (!isOwnEntry) {
-            float ppDiff = playerEntry.getPp() - ownPP;
+            double ppDiff = playerEntry.getPp() - ownPP;
             entryString += (ppDiff > 0 ? Format.decimal(ppDiff) + "pp more than you." : Format.decimal(-ppDiff) + "pp less than you.") + "\n";
         } else {
             entryString += "Your PP: " + playerEntry.getPp() + "pp\n";

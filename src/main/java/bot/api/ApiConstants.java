@@ -13,6 +13,7 @@ public class ApiConstants {
     public static final String SS_LEADERBOARD_PRE_URL = "https://scoresaber.com/leaderboard/";
     public static final String QUALIFIED_URL = "http://scoresaber.com/api.php?function=get-leaderboards&cat=5&limit=100&page=1&unique=1&qualified=1";
     public static final String NO_AVATAR_URL = "https://scoresaber.com/imports/images/usr-avatars/404.jpg";
+    public static final String PLAYER_LEADERBOARDS_URL = "https://scoresaber.com/api/players?page=";
 
     // Beat Saver
     public static final String BS_PRE_URL = "https://cdn.beatsaver.com";
@@ -28,7 +29,6 @@ public class ApiConstants {
 
     // Beat Saviour
     public static final String BSAVIOUR_PRE_URL = "https://www.beatsavior.io";
-    public static final String BSAVIOUR_RANKED_MAPS_URL = BSAVIOUR_PRE_URL + "/api/maps/ranked";
     public static final String BSAVIOUR_LIVESCORES_URL = BSAVIOUR_PRE_URL + "/api/livescores/player/";
 
     // Meme API

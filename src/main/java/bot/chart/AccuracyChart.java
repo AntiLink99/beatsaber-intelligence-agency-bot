@@ -60,7 +60,6 @@ public class AccuracyChart {
         styler.setChartTitleFont(titleFont);
         styler.setAxisTickLabelsFont(labelFont);
         styler.setAxisTitleFont(labelTitleFont);
-        // styler.setDecimalPattern("0.###");
 
         styler.setLegendPosition(LegendPosition.OutsideS);
         styler.setLegendLayout(LegendLayout.Horizontal);

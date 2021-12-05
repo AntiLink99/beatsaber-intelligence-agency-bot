@@ -26,7 +26,7 @@ public class Format {
         return "<@" + msg + ">";
     }
 
-    public static String decimal(float num) {
+    public static String decimal(double num) {
         DecimalFormatSymbols symbols = new DecimalFormatSymbols();
         symbols.setDecimalSeparator('.');
         DecimalFormat sep = new DecimalFormat("0.00");

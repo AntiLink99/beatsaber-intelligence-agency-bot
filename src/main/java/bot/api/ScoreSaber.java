@@ -2,18 +2,14 @@ package bot.api;
 
 import bot.dto.ScoreSaberMapData;
 import bot.dto.SongScore;
-import bot.dto.leaderboards.LeaderboardEntry;
+import bot.dto.leaderboards.LeaderboardPlayer;
 import bot.dto.player.Player;
-import bot.scraping.LeaderboardScraper;
 import bot.utils.DiscordLogger;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
 
-import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -24,12 +20,10 @@ public class ScoreSaber {
 
     final HttpMethods http;
     final Gson gson;
-    final LeaderboardScraper leaderboardScraper;
 
     public ScoreSaber() {
         http = new HttpMethods();
         gson = new Gson();
-        leaderboardScraper = new LeaderboardScraper();
     }
 
     public Player getPlayerById(String playerId) {
@@ -53,8 +47,7 @@ public class ScoreSaber {
         if (response != null) {
             JsonArray topScores = response.getAsJsonArray("scores");
 
-            Type listType = new TypeToken<List<SongScore>>() {
-            }.getType();
+            Type listType = new TypeToken<List<SongScore>>() {}.getType();
             return gson.fromJson(topScores.toString(), listType);
         }
         return new ArrayList<>();
@@ -65,20 +58,7 @@ public class ScoreSaber {
         JsonObject response = http.fetchJsonObject(recentScoresUrl);
         if (response != null) {
             JsonArray topScores = response.getAsJsonArray("scores");
-            Type listType = new TypeToken<List<SongScore>>() {
-            }.getType();
-            return gson.fromJson(topScores.toString(), listType);
-        }
-        return new ArrayList<>();
-    }
-
-    public List<SongScore> getRecentScoresByPlayerId(long playerId) {
-        String recentScoresUrl = ApiConstants.SS_PLAYER_PRE_URL + playerId + ApiConstants.SS_PLAYER_RECENT_SCORES_POST_URL;
-        JsonObject response = http.fetchJsonObject(recentScoresUrl);
-        if (response != null) {
-            JsonArray topScores = response.getAsJsonArray("scores");
-            Type listType = new TypeToken<List<SongScore>>() {
-            }.getType();
+            Type listType = new TypeToken<List<SongScore>>() {}.getType();
             return gson.fromJson(topScores.toString(), listType);
         }
         return new ArrayList<>();
@@ -89,8 +69,7 @@ public class ScoreSaber {
         JsonObject response = http.fetchJsonObject(recentScoresUrl);
         if (response != null) {
             JsonArray topScores = response.getAsJsonArray("scores");
-            Type listType = new TypeToken<List<SongScore>>() {
-            }.getType();
+            Type listType = new TypeToken<List<SongScore>>() {}.getType();
             return gson.fromJson(topScores.toString(), listType);
         }
         return new ArrayList<>();
@@ -101,46 +80,44 @@ public class ScoreSaber {
         JsonObject response = http.fetchJsonObject(qualifiedUrl);
         if (response != null) {
             JsonArray qualifiedSongs = response.getAsJsonArray("songs");
-            Type listType = new TypeToken<List<ScoreSaberMapData>>() {
-            }.getType();
+            Type listType = new TypeToken<List<ScoreSaberMapData>>() {}.getType();
             List<ScoreSaberMapData> qualifiedMaps = gson.fromJson(qualifiedSongs.toString(), listType);
             return qualifiedMaps.stream().filter(map -> !map.isRanked()).collect(Collectors.toList());
         }
         return new ArrayList<>();
     }
 
-    public List<LeaderboardEntry> findLeaderboardEntriesAroundPlayer(Player player, String countryCode, int startPage, int sizeLimit) {
-        List<LeaderboardEntry> entries = new ArrayList<>();
+    public List<LeaderboardPlayer> findLeaderboardEntriesAroundPlayer(Player player, String countryCode, int startPage, int sizeLimit) {
+        List<LeaderboardPlayer> entries = new ArrayList<>();
         boolean searchingPlayerData = true;
         for (int i = startPage; searchingPlayerData; i++) {
             if (i > 50) {
                 return null;
             }
             String leaderboardUrl = getLeaderboardUrl(i, countryCode);
-            try {
-                Document doc = Jsoup.connect(leaderboardUrl).get();
-                List<LeaderboardEntry> docEntries = leaderboardScraper.getLeaderboardEntriesFromDocument(doc);
-                entries.addAll(docEntries);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            JsonArray response = http.fetchJsonArray(leaderboardUrl);
+            Type listType = new TypeToken<List<LeaderboardPlayer>>() {}.getType();
+
+            entries.addAll(gson.fromJson(response, listType));
 
             if (entries.size() >= sizeLimit) {
                 entries = entries.subList(100, sizeLimit);
             }
 
-            LeaderboardEntry playerEntry = entries.stream().filter(entry -> entry.getPlayerId() == player.getPlayerIdLong()).findFirst().orElse(null);
+            LeaderboardPlayer playerEntry = entries.stream().filter(entry -> entry.getIdLong() == player.getPlayerIdLong()).findFirst().orElse(null);
             boolean playerIsNotInList = playerEntry == null; //Following Player necessary for ru rank
             boolean playerIsAtEndOfList = entries.indexOf(playerEntry) >= entries.size() - 3;
             searchingPlayerData = playerIsNotInList || playerIsAtEndOfList;
         }
+        List<LeaderboardPlayer> finalEntries = entries;
+        entries.forEach(entry -> entry.setCustomLeaderboardRank(finalEntries.indexOf(entry) + 1));
         return entries;
     }
 
     public String getLeaderboardUrl(int pageNr, String countryCode) {
-        String url = "https://scoresaber.com/global/" + pageNr;
+        String url = ApiConstants.PLAYER_LEADERBOARDS_URL + pageNr;
         if (countryCode != null) {
-            url += "?country=" + countryCode;
+            url += "&countries=" + countryCode;
         }
         return url;
     }

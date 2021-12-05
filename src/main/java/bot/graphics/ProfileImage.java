@@ -17,6 +17,9 @@ import javafx.stage.Stage;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.IOException;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
 
 public class ProfileImage extends Application {
     public static Player player;
@@ -32,6 +35,29 @@ public class ProfileImage extends Application {
         root.getChildren().add(baseImage);
 
         //QR Code
+        root.getChildren().add(getPlayerQRCode());
+
+        //Player Picture
+        root.getChildren().add(getPlayerPicture());
+
+        //PlayerChart
+        root.getChildren().add(getPlayerChart());
+
+        //Info
+
+        //Name
+
+        //Save
+        final SnapshotParameters snapPara = new SnapshotParameters();
+        snapPara.setFill(Color.TRANSPARENT);
+        WritableImage resultImage = root.snapshot(snapPara, null);
+
+        JavaFXUtils.saveFile(resultImage, new File(getFilePath()));
+        setFinished(true);
+        primaryStage.close();
+    }
+
+    private ImageView getPlayerQRCode() {
         ImageView qrCodeView = new ImageView();
         qrCodeView.setImage(SwingFXUtils.toFXImage(qrCodeImage, null));
         qrCodeView.setPreserveRatio(true);
@@ -40,9 +66,23 @@ public class ProfileImage extends Application {
         double qrCodeYPos = baseImage.getImage().getHeight() - qrCodeView.getImage().getHeight() - GraphicsConstants.greyBorderWidth;
         qrCodeView.setTranslateX(qrCodeXPos);
         qrCodeView.setTranslateY(qrCodeYPos);
-        root.getChildren().add(qrCodeView);
+        return qrCodeView;
+    }
 
-        //Player
+    private ImageView getPlayerChart() {
+        BufferedImage chartImage = new PlayerChart().getPlayerChartImage(player);
+        ImageView playerChartView = new ImageView();
+        playerChartView.setImage(SwingFXUtils.toFXImage(chartImage, null));
+        playerChartView.setPreserveRatio(true);
+        playerChartView.setFitWidth(GraphicsConstants.playerChartWidth);
+
+        double playerChartXPos = baseImage.getImage().getWidth() - GraphicsConstants.playerChartWidth - GraphicsConstants.greyBorderWidth;
+        playerChartView.setTranslateX(playerChartXPos);
+        playerChartView.setTranslateY(GraphicsConstants.greyBorderWidth + 400);
+        return playerChartView;
+    }
+
+    private ImageView getPlayerPicture() throws IOException, ExecutionException, InterruptedException, TimeoutException {
         String playerPictureUrl = ApiConstants.SS_PRE_URL + player.getAvatar();
         if (!WebUtils.isURL(playerPictureUrl)) {
             playerPictureUrl = ApiConstants.NO_AVATAR_URL;
@@ -60,29 +100,7 @@ public class ProfileImage extends Application {
         playerPictureView.setTranslateX(GraphicsConstants.greyBorderWidth);
         playerPictureView.setTranslateY(GraphicsConstants.greyBorderWidth);
         playerPictureView.setFitHeight(GraphicsConstants.playerPictureHeight);
-        root.getChildren().add(playerPictureView);
-
-        //PlayerChart
-        BufferedImage chartImage = new PlayerChart().getPlayerChartImage(player);
-        ImageView playerChartView = new ImageView();
-        playerChartView.setImage(SwingFXUtils.toFXImage(chartImage, null));
-        playerChartView.setPreserveRatio(true);
-        playerChartView.setFitWidth(GraphicsConstants.playerChartWidth);
-
-        double playerChartXPos = baseImage.getImage().getWidth() - GraphicsConstants.playerChartWidth - GraphicsConstants.greyBorderWidth;
-        playerChartView.setTranslateX(playerChartXPos);
-        playerChartView.setTranslateY(GraphicsConstants.greyBorderWidth);
-
-        root.getChildren().add(playerChartView);
-
-        //Save
-        final SnapshotParameters snapPara = new SnapshotParameters();
-        snapPara.setFill(Color.TRANSPARENT);
-        WritableImage resultImage = root.snapshot(snapPara, null);
-
-        JavaFXUtils.saveFile(resultImage, new File(getFilePath()));
-        setFinished(true);
-        primaryStage.close();
+        return playerPictureView;
     }
 
     public static Player getPlayer() {

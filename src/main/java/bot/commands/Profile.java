@@ -21,7 +21,7 @@ public class Profile {
             System.out.println("no player");
             return;
         }
-        BufferedImage qrCodeImage = GraphicsUtils.generateQRCode(ApiConstants.USER_PRE_URL+player.getPlayerId(), GraphicsConstants.profileQrCodeWidth, GraphicsConstants.profileQrCodeHeight);
+        BufferedImage qrCodeImage = GraphicsUtils.generateQRCode(ApiConstants.USER_PRE_URL + player.getPlayerId(), GraphicsConstants.profileQrCodeWidth, GraphicsConstants.profileQrCodeHeight);
         if (qrCodeImage == null) {
             //error
             return;

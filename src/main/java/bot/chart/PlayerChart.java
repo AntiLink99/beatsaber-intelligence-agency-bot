@@ -26,6 +26,9 @@ import java.util.stream.IntStream;
 
 public class PlayerChart {
 
+    private int lineWidthSingle = 10;
+    private final Color lineColor = Color.BLUE;
+
     public void sendChartImage(Player player, MessageEventDTO event) {
         if (player.getHistoryValues() == null) {
             Messages.sendMessage("Could not find history values for user. Please update the user with \"ru update <ScoreSaber URL>\".", event.getChannel());
@@ -72,11 +75,17 @@ public class PlayerChart {
 
     public XYChart getPlayerChart(List<Player> players, double max, double min) {
         if (players.size() > 1) {
-            players = players.stream().filter(p -> p.getHistoryValues().stream().anyMatch(v -> v <= min && v >= max)).collect(Collectors.toList());
+            players = players.stream()
+                    .filter(p -> p.getHistoryValues().stream().anyMatch(v -> v <= min && v >= max))
+                    .collect(Collectors.toList());
         }
         // Create Chart
-        int highestRank = Collections.min(players.stream().map(p -> Collections.min(ListValueUtils.addElementReturnList(p.getHistoryValues(), p.getRank()))).collect(Collectors.toList()));
-        int lowestRank = Collections.max(players.stream().map(p -> Collections.max(ListValueUtils.addElementReturnList(p.getHistoryValues(), p.getRank()))).collect(Collectors.toList()));
+        int highestRank = Collections.min(players.stream()
+                .map(p -> Collections.min(ListValueUtils.addElementReturnList(p.getHistoryValues(), p.getRank())))
+                .collect(Collectors.toList()));
+        int lowestRank = Collections.max(players.stream()
+                .map(p -> Collections.max(ListValueUtils.addElementReturnList(p.getHistoryValues(), p.getRank())))
+                .collect(Collectors.toList()));
 
         int chartHeight = (int) ((lowestRank - highestRank) * 0.25 + 800);
         if (chartHeight > 1200) {
@@ -84,19 +93,21 @@ public class PlayerChart {
         }
         XYChart chart = new XYChartBuilder().width(BotConstants.chartWidth).height(chartHeight).theme(ChartTheme.Matlab).title("Rank change").xAxisTitle("Days").yAxisTitle("Rank").build();
 
-        XYStyler styler = getXYStyler(chart, players, min, max);
+        setXYStyler(chart, players, min, max);
         for (Player player : players) {
             // Series
             List<Integer> history = ListValueUtils.addElementReturnList(player.getHistoryValues(), player.getRank()).stream().map(h -> -h).collect(Collectors.toList());
             List<Integer> time = IntStream.rangeClosed(-history.size() + 1, 0).boxed().collect(Collectors.toList());
-            XYSeries series = chart.addSeries(player.getPlayerName() + (players.indexOf(player) % 5 == 0 ? "\n" : ""), time, history);
-            series.setLineWidth(players.size() == 1 ? 10 : 5);
+            XYSeries series = chart.addSeries(player.getPlayerName(), time, history);
+            int lineWidthMulti = 5;
+            series.setLineWidth(players.size() == 1 ? lineWidthSingle : lineWidthMulti);
+            series.setLineColor(lineColor);
             series.setMarker(SeriesMarkers.NONE);
         }
         return chart;
     }
 
-    private XYStyler getXYStyler(XYChart chart, List<Player> players, double min, double max) {
+    private void setXYStyler(XYChart chart, List<Player> players, double min, double max) {
         Font font = new Font("Consolas", Font.BOLD, 20);
         Font titleFont = new Font("Consolas", Font.BOLD, 30);
         Font labelFont = new Font("Consolas", Font.BOLD, 20);
@@ -109,29 +120,30 @@ public class PlayerChart {
         styler.setYAxisMin(-min);
         styler.setYAxisMax(-max);
 
-        styler.setDefaultSeriesRenderStyle(XYSeriesRenderStyle.Line);
-        styler.setPlotGridLinesVisible(false);
-        styler.setMarkerSize(15);
-        styler.setPlotContentSize(.95);
+        styler.setDefaultSeriesRenderStyle(XYSeriesRenderStyle.Line)
+            .setPlotGridLinesVisible(false)
+            .setMarkerSize(15)
+            .setPlotContentSize(.95)
 
-        styler.setBaseFont(font);
-        styler.setLegendFont(legendFont);
-        styler.setChartTitleFont(titleFont);
-        styler.setAxisTickLabelsFont(labelFont);
-        styler.setAxisTitleFont(labelTitleFont);
-        styler.setDecimalPattern("######");
+            .setBaseFont(font)
+            .setLegendFont(legendFont)
+            .setChartTitleFont(titleFont);
 
-        styler.setLegendPosition(LegendPosition.OutsideS);
-        styler.setLegendLayout(LegendLayout.Horizontal);
-        styler.setLegendSeriesLineLength(20);
-        styler.setLegendBorderColor(Color.DARK_GRAY);
-        styler.setLegendBackgroundColor(Color.DARK_GRAY);
+        styler.setAxisTickLabelsFont(labelFont)
+            .setAxisTitleFont(labelTitleFont)
+            .setDecimalPattern("######");
 
-        styler.setChartBackgroundColor(Color.DARK_GRAY);
-        styler.setChartFontColor(Color.WHITE);
+        styler.setLegendPosition(LegendPosition.OutsideS)
+            .setLegendLayout(LegendLayout.Horizontal);
+
+        styler.setLegendSeriesLineLength(20)
+            .setLegendBorderColor(Color.DARK_GRAY)
+            .setLegendBackgroundColor(Color.DARK_GRAY)
+
+            .setChartBackgroundColor(Color.DARK_GRAY)
+            .setChartFontColor(Color.WHITE);
 
         styler.setAxisTickLabelsColor(Color.WHITE);
-        return styler;
     }
 
     public void storePlayerChartToFile(Player player, String filePath) {
@@ -146,7 +158,33 @@ public class PlayerChart {
         List<Integer> rankValues = ListValueUtils.addElementReturnList(player.getHistoryValues(), player.getRank());
         double max = Collections.min(rankValues), min = Collections.max(rankValues);
 
+        setLineWidthSingle(30);
+
         XYChart chart = getPlayerChart(Collections.singletonList(player), max, min);
+        chart.getStyler()
+                .setMarkerSize(100)
+                .setLegendVisible(false)
+                .setChartTitleVisible(false)
+                .setChartTitleBoxVisible(false)
+                .setPlotBorderVisible(false);
+        chart.getStyler()
+                .setAxisTitlesVisible(false)
+                .setToolTipsAlwaysVisible(false)
+                .setInfoPanelVisible(false);
+
+        Font labelFont = new Font("Consolas", Font.BOLD, 40);
+        Color transparent = new Color(0f,0f,0f,.0f );
+        chart.getStyler()
+                .setAxisTickLabelsFont(labelFont)
+                .setLegendBorderColor(transparent)
+                .setLegendBackgroundColor(transparent)
+                .setChartBackgroundColor(transparent)
+                .setChartFontColor(transparent);
+
         return ChartUtils.toBufferedImage(chart);
+    }
+
+    public void setLineWidthSingle(int lineWidthSingle) {
+        this.lineWidthSingle = lineWidthSingle;
     }
 }

@@ -67,7 +67,7 @@ public class BotConstants {
         commands.put("ru invite", "Shares the invite link for this bot. Feel free to invite it to other servers!");
         commands.put("ru unregister", "Removes a player from the database so that the account is not being updated anymore.");
         commands.put("ru update <ScoreSaber URL>", "Updates the player's role manually if a new milestone was reached.");
-        commands.put("ru recentsong (optional: <ScoreCount>) (optional: <@member>)", "Displays a player card for the recent score set on ScoreSaber. Use the BeatSaviour mod to receive more data.");
+        commands.put("ru recentsong (optional: <ScoreCount>) (optional: <@member>)", "Displays a player card for the recent score set on ScoreSaber. Use the BeatSavior mod to receive more data.");
         commands.put("ru setgridimage <Image URL>", "Sets a background image for the acc grid in 'ru recentsong'. Leave the URL empty to reset the image.");
         commands.put("ru recentsongs (optional: <PageID>) (optional: <@member>)", "Displays the recently set scores of a player.");
         commands.put("ru topsongs (optional: <PageID>) (optional: <@member>)", "Displays the best scores of a player.");

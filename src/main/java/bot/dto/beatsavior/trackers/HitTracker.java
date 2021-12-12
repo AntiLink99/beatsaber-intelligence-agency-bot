@@ -1,4 +1,4 @@
-package bot.dto.beatsaviour.trackers;
+package bot.dto.beatsavior.trackers;
 
 public class HitTracker {
     int leftNoteHit;

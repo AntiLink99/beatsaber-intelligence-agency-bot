@@ -1,4 +1,4 @@
-package bot.dto.beatsaviour.trackers;
+package bot.dto.beatsavior.trackers;
 
 import org.apache.commons.collections4.map.LinkedMap;
 

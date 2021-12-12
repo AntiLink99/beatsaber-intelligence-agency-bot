@@ -81,7 +81,7 @@ public class SongUtils {
         }
     }
 
-    public static boolean matchScoreSaberAndBeatSaviourDiffname(String ssDiff, String saviourDiff) {
+    public static boolean matchScoreSaberAndBeatSaviorDiffname(String ssDiff, String saviourDiff) {
         String ssDiffName = ssDiff.toLowerCase();
         String saviourDiffName = saviourDiff.toLowerCase();
         return ssDiffName.equals(saviourDiffName) || (ssDiffName.contains("expert+") && saviourDiffName.equals("expertplus"));

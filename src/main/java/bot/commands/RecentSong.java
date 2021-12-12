@@ -2,14 +2,14 @@ package bot.commands;
 
 import bot.api.ApiConstants;
 import bot.api.BeatSaver;
-import bot.api.BeatSaviour;
+import bot.api.BeatSavior;
 import bot.api.ScoreSaber;
 import bot.chart.AccuracyChart;
 import bot.db.DatabaseManager;
 import bot.dto.MessageEventDTO;
 import bot.dto.Song;
 import bot.dto.SongScore;
-import bot.dto.beatsaviour.BeatSaviourPlayerScore;
+import bot.dto.beatsavior.BeatSaviorPlayerScore;
 import bot.dto.player.Player;
 import bot.dto.rankedmaps.BeatSaverRankedMap;
 import bot.dto.rankedmaps.RankedMaps;
@@ -56,7 +56,7 @@ public class RecentSong {
     public void sendRecentSong(Player player, RankedMaps ranked, int index, MessageEventDTO event) {
         ScoreSaber ss = new ScoreSaber();
         BeatSaver bs = new BeatSaver();
-        BeatSaviour bsaviour = new BeatSaviour();
+        BeatSavior bsaviour = new BeatSavior();
 
         if (index > 40 || index < 1) {
             Messages.sendMessage("The value provided has to be an integer between 1 and 40.", event.getChannel());
@@ -78,12 +78,12 @@ public class RecentSong {
             File gridImage = new File(accGridFilePath);
 
             // Saviour
-            List<BeatSaviourPlayerScore> saviourScores = bsaviour.fetchPlayerMaps(Long.valueOf(playerId)).getPlayerMaps();
+            List<BeatSaviorPlayerScore> saviourScores = bsaviour.fetchPlayerMaps(Long.valueOf(playerId)).getPlayerMaps();
 
-            BeatSaviourPlayerScore saviourScore = null;
-            boolean hasBeatSaviour = saviourScores != null && !saviourScores.isEmpty();
-            if (hasBeatSaviour) {
-                saviourScore = saviourScores.stream().filter(score -> score.getSongID().equals(recentScore.getSongHash()) && SongUtils.matchScoreSaberAndBeatSaviourDiffname(recentScore.getDifficultyName(), score.getSongDifficulty()) && score.getTrackers().getWinTracker().isWon()).sorted()
+            BeatSaviorPlayerScore saviourScore = null;
+            boolean hasBeatSavior = saviourScores != null && !saviourScores.isEmpty();
+            if (hasBeatSavior) {
+                saviourScore = saviourScores.stream().filter(score -> score.getSongID().equals(recentScore.getSongHash()) && SongUtils.matchScoreSaberAndBeatSaviorDiffname(recentScore.getDifficultyName(), score.getSongDifficulty()) && score.getTrackers().getWinTracker().isWon()).sorted()
                         .findFirst().orElse(null);
                 if (saviourScore != null) {
                     List<Float> gridAcc = saviourScore.getTrackers().getAccuracyTracker().getGridAcc();
@@ -102,7 +102,7 @@ public class RecentSong {
 
                     JavaFXUtils.launch(AccuracyGrid.class);
                 } else {
-                    hasBeatSaviour = false;
+                    hasBeatSavior = false;
                 }
             }
             // Ranked
@@ -125,7 +125,7 @@ public class RecentSong {
                 String playRank = Format.fixedLength("\n" + getScoreMessage(rankOnPlayerLeaderboard), lineWidth);
                 topInfo += playRank;
             }
-            if (hasBeatSaviour && saviourScore.getTrackers().getHitTracker().getMiss() == 0) {
+            if (hasBeatSavior && saviourScore.getTrackers().getHitTracker().getMiss() == 0) {
                 topInfo += Format.fixedLength("\n✨ Full Combo! ✨", lineWidth);
             }
             topInfo += Format.fixedLength("\n" + recentScore.getRelativeTimeString(), lineWidth);
@@ -154,11 +154,11 @@ public class RecentSong {
                     float accuracyValue = (float) recentScore.getScore() / (float) maxScore * 100f;
                     accuracy = Format.fixedLength("Accuracy: " + Format.decimal(accuracyValue) + "%", lineWidth);
                 }
-                if (!hasBeatSaviour) {
+                if (!hasBeatSavior) {
                     songInfo += Format.codeProlog("\n" + accuracy);
                 }
             }
-            if (hasBeatSaviour) {
+            if (hasBeatSavior) {
                 String hitAccuracy = Format.fixedLength("Hit Accuracy: ", lineWidth) + Format.decimal(saviourScore.getTrackers().getAccuracyTracker().getAverageAcc());
                 String leftHandAccuracy = Format.fixedLength("Left Hand Hit Accuracy: ", lineWidth) + Format.decimal(saviourScore.getTrackers().getAccuracyTracker().getAccLeft());
                 String rightHandAccuracy = Format.fixedLength("Right Hand Hit Accuracy: ", lineWidth) + Format.decimal(saviourScore.getTrackers().getAccuracyTracker().getAccRight());
@@ -194,7 +194,7 @@ public class RecentSong {
             String footerText = "Mapped by " + recentScore.getLevelAuthorName();
 
             Messages.sendMessageWithImagesAndTexts(songInfo, songName, songUrl, coverUrl, diffImageUrl, footerText, event.getChannel());
-            if (hasBeatSaviour) {
+            if (hasBeatSavior) {
                 AccuracyChart.sendChartImage(saviourScore, player.getPlayerName(), recentScore.getDifficultyName(), event);
                 int gridWaitingCounter = 0;
                 while (!AccuracyGrid.isFinished()) {
@@ -216,7 +216,7 @@ public class RecentSong {
                 }
 
             } else {
-                Messages.sendPlainMessage(Format.italic("No BeatSaviour data was found for this score.\nMaybe it was set too far in the past or you don't have the mod installed."), event.getChannel());
+                Messages.sendPlainMessage(Format.italic("No BeatSavior data was found for this score.\nMaybe it was set too far in the past or you don't have the mod installed."), event.getChannel());
             }
         }
     }

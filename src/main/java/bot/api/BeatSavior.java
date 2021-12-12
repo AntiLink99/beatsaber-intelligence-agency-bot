@@ -1,23 +1,23 @@
 package bot.api;
 
-import bot.dto.beatsaviour.BeatSaviourPlayerScores;
+import bot.dto.beatsavior.BeatSaviorPlayerScores;
 import bot.utils.DiscordLogger;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 
-public class BeatSaviour {
+public class BeatSavior {
     final HttpMethods http;
     final Gson gson;
 
-    public BeatSaviour() {
+    public BeatSavior() {
         http = new HttpMethods();
         gson = new Gson();
     }
 
-    public BeatSaviourPlayerScores fetchPlayerMaps(Long playerId) {
+    public BeatSaviorPlayerScores fetchPlayerMaps(Long playerId) {
         try {
             JsonArray playerMaps = http.fetchJsonArray(ApiConstants.BSAVIOUR_LIVESCORES_URL + playerId);
-            return gson.fromJson("{\"playerMaps\": " + playerMaps + "}", BeatSaviourPlayerScores.class);
+            return gson.fromJson("{\"playerMaps\": " + playerMaps + "}", BeatSaviorPlayerScores.class);
         } catch (Exception e) {
             DiscordLogger.sendLogInChannel(e.getMessage(), DiscordLogger.HTTP_ERRORS);
             return null;

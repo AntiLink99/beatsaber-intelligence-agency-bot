@@ -1,12 +1,12 @@
-package bot.dto.beatsaviour;
+package bot.dto.beatsavior;
 
-import bot.dto.beatsaviour.trackers.PlayerTrackers;
-import bot.dto.beatsaviour.trackers.ScoreTracker;
+import bot.dto.beatsavior.trackers.PlayerTrackers;
+import bot.dto.beatsavior.trackers.ScoreTracker;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
-public class BeatSaviourPlayerScore implements Comparable<BeatSaviourPlayerScore> {
+public class BeatSaviorPlayerScore implements Comparable<BeatSaviorPlayerScore> {
 
     String _id;
     int songDataType;
@@ -132,7 +132,7 @@ public class BeatSaviourPlayerScore implements Comparable<BeatSaviourPlayerScore
     }
 
     @Override
-    public int compareTo(BeatSaviourPlayerScore otherScore) {
+    public int compareTo(BeatSaviorPlayerScore otherScore) {
         ScoreTracker otherTracker = otherScore.getTrackers().getScoreTracker();
         ScoreTracker thisTracker = getTrackers().getScoreTracker();
         if (otherTracker == null && thisTracker == null) {

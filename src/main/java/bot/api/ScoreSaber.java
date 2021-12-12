@@ -95,10 +95,10 @@ public class ScoreSaber {
                 return null;
             }
             String leaderboardUrl = getLeaderboardApiUrl(i, countryCode);
-            JsonArray response = http.fetchJsonArray(leaderboardUrl);
+            JsonObject response = http.fetchJsonObject(leaderboardUrl);
+            JsonArray responsePlayerList = response.getAsJsonArray("players");
             Type listType = new TypeToken<List<LeaderboardPlayer>>() {}.getType();
-
-            entries.addAll(gson.fromJson(response, listType));
+            entries.addAll(gson.fromJson(responsePlayerList, listType));
 
             if (entries.size() >= sizeLimit) {
                 entries = entries.subList(100, sizeLimit);

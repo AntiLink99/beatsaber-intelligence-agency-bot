@@ -1,7 +1,7 @@
 package bot.chart;
 
 import bot.dto.MessageEventDTO;
-import bot.dto.beatsaviour.BeatSaviourPlayerScore;
+import bot.dto.beatsavior.BeatSaviorPlayerScore;
 import bot.main.BotConstants;
 import bot.utils.ChartUtils;
 import bot.utils.Messages;
@@ -20,7 +20,7 @@ import java.awt.*;
 import java.io.File;
 
 public class AccuracyChart {
-    public static void sendChartImage(BeatSaviourPlayerScore score, String playerName, String diffName, MessageEventDTO event) {
+    public static void sendChartImage(BeatSaviorPlayerScore score, String playerName, String diffName, MessageEventDTO event) {
 
         XYChart chart = AccuracyChart.getAccuracyChart(score, playerName, diffName);
         String filename = BotConstants.RESOURCES_PATH+"accuracyChart_" + score.getPlayerID();
@@ -32,7 +32,7 @@ public class AccuracyChart {
         }
     }
 
-    private static XYChart getAccuracyChart(BeatSaviourPlayerScore score, String playerName, String diffName) {
+    private static XYChart getAccuracyChart(BeatSaviorPlayerScore score, String playerName, String diffName) {
         LinkedMap<String, Double> accuracyGraph = score.getTrackers().getScoreGraphTracker().getGraph();
 
         double[] accuracyValues = accuracyGraph.values().stream().mapToDouble(Double::doubleValue).toArray();

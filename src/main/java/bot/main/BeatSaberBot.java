@@ -470,7 +470,9 @@ public class BeatSaberBot extends ListenerAdapter {
         if (Format.isUrl(lastArgument)) {
             try {
                 player = getScoreSaberPlayerFromUrl(lastArgument);
-                player.setDiscordUserId(author.getIdLong());
+                if (player != null) {
+                    player.setDiscordUserId(author.getIdLong());
+                }
             } catch (FileNotFoundException e) {
                 Messages.sendMessage(e.getMessage(), channel);
             }
@@ -497,7 +499,7 @@ public class BeatSaberBot extends ListenerAdapter {
     private Player getScoreSaberPlayerFromUrl(String profileUrl) throws FileNotFoundException {
         Matcher matcher = scoreSaberIDPattern.matcher(profileUrl);
         if (!matcher.find()) {
-            throw new FileNotFoundException("Player could not be found, invalid link!");
+            return null;
         }
         String playerId = matcher.group(1);
         Player player = ss.getPlayerById(playerId);

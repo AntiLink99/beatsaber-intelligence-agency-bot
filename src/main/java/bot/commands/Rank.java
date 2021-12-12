@@ -15,17 +15,26 @@ import java.util.Locale;
 
 public class Rank {
 
-    public void sendGlobalRank(Player player, MessageEventDTO event) {
+    private final Player player;
+
+    public Rank(Player player) {
+        this.player = player;
+        if (player == null) {
+            throw new NullPointerException("Command player not found.");
+        }
+    }
+
+    public void sendGlobalRank(MessageEventDTO event) {
         int startPage = getPageNrFromPlayerRank(player.getRank() - 2);
         sendRank(player, startPage, 200, null, LeaderboardType.GLOBAL, event);
     }
 
-    public void sendLocalRank(Player player, MessageEventDTO event) {
+    public void sendLocalRank(MessageEventDTO event) {
         int startPage = getPageNrFromPlayerRank(player.getCountryRank() - 2);
         sendRank(player, startPage, 200, player.getCountry(), LeaderboardType.LOCAL, event);
     }
 
-    public void sendDACHRank(Player player, MessageEventDTO event) {
+    public void sendDACHRank(MessageEventDTO event) {
         String[] dachCodes = {"de","at","ch"};
         if (!Arrays.asList(dachCodes).contains(player.getCountry().toLowerCase())) {
             Messages.sendMessage("Your are not from Germany, Austria or Switzerland.", event.getChannel());
@@ -94,7 +103,22 @@ public class Rank {
             return entryString;
         }
         boolean isOwnEntry = ownPP == -1;
-        entryString += "#" + playerEntry.getCustomLeaderboardRank();
+
+        int entryRank;
+        switch (type) {
+            case GLOBAL:
+                entryRank = playerEntry.getRank();
+                break;
+            case LOCAL:
+                entryRank = playerEntry.getCountryRank();
+                break;
+            case DACH:
+                entryRank = playerEntry.getCustomLeaderboardRank();
+                break;
+            default:
+                entryRank = -1;
+        }
+        entryString += "#" + entryRank;
         String countryName = new Locale("", playerEntry.getCountry().toUpperCase()).getDisplayCountry(Locale.ENGLISH);
         if (type == LeaderboardType.LOCAL) {
             entryString += " in " + countryName + " :flag_" + playerEntry.getCountry().toLowerCase() + ": \n";

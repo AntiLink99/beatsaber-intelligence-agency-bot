@@ -268,7 +268,7 @@ public class BeatSaberBot extends ListenerAdapter {
                 } else if (inputValues.size() == 2) {
                     String minString = inputValues.get(0).replaceAll(",", ".");
                     String maxString = inputValues.get(1).replaceAll(",", ".");
-                    if (!NumberUtils.isNumber(minString) || !NumberUtils.isNumber(maxString)) {
+                    if (!NumberUtils.isCreatable(minString) || !NumberUtils.isCreatable(maxString)) {
                         Messages.sendMessage("At least one of the entered values is not a number.", channel);
                         return;
                     }
@@ -305,7 +305,7 @@ public class BeatSaberBot extends ListenerAdapter {
                 if (msgParts.size() == 3) {
                     String[] arguments = msgParts.get(2).split(" ");
                     String indexOrMemberMention = arguments[0];
-                    if (NumberUtils.isNumber(indexOrMemberMention)) {
+                    if (NumberUtils.isCreatable(indexOrMemberMention)) {
                         index = Integer.parseInt(indexOrMemberMention);
                     }
                 }
@@ -313,15 +313,15 @@ public class BeatSaberBot extends ListenerAdapter {
                 return;
             }
             case "localrank": {
-                new Rank().sendLocalRank(commandPlayer, event);
+                new Rank(commandPlayer).sendLocalRank(event);
                 break;
             }
             case "globalrank": {
-                new Rank().sendGlobalRank(commandPlayer, event);
+                new Rank(commandPlayer).sendGlobalRank(event);
                 break;
             }
             case "dachrank": {
-                new Rank().sendDACHRank(commandPlayer, event);
+                new Rank(commandPlayer).sendDACHRank(event);
                 break;
             }
             case "setgridimage": {
@@ -416,7 +416,7 @@ public class BeatSaberBot extends ListenerAdapter {
     }
 
     private int getIndexFromMsgParts(List<String> msgParts) {
-        if (msgParts.size() >= 3 && NumberUtils.isNumber(msgParts.get(2))) {
+        if (msgParts.size() >= 3 && NumberUtils.isCreatable(msgParts.get(2))) {
             return Integer.parseInt(msgParts.get(2));
         }
         return 1;
@@ -478,7 +478,7 @@ public class BeatSaberBot extends ListenerAdapter {
             long memberId = 0;
             if (lastArgument.contains("@")) {
                 String mentionedMemberId = lastArgument.replaceAll("[^0-9]", "");
-                if (NumberUtils.isNumber(mentionedMemberId) ) {
+                if (NumberUtils.isCreatable(mentionedMemberId)) {
                     memberId = Long.parseLong(mentionedMemberId); //Mention
                 }
             } else {

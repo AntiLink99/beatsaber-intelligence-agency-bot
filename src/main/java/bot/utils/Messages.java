@@ -84,12 +84,12 @@ public class Messages {
             e.printStackTrace();
         }
         channel.sendFile(imageFile, title + imagePath.substring(imagePath.length() - 4)).queue();
-        imageFile.deleteOnExit();
+        imageFile.delete();
     }
 
     public static void sendImage(File image, String title, TextChannel channel) {
         channel.sendFile(image, title).queue();
-        image.deleteOnExit();
+        image.delete();
     }
 
     public static void sendPlainMessage(String message, TextChannel channel) {

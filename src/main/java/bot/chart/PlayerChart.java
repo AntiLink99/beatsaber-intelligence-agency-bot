@@ -39,7 +39,7 @@ public class PlayerChart {
         File image = new File(filepath + ".png");
         if (image.exists()) {
             Messages.sendImage(image, player.getPlayerName() + ".png", event.getChannel());
-            image.deleteOnExit();
+            image.delete();
         }
     }
 
@@ -69,7 +69,7 @@ public class PlayerChart {
         File image = new File(filename + ".png");
         if (image.exists()) {
             Messages.sendImage(image, "players.png", event.getChannel());
-            image.deleteOnExit();
+            image.delete();
         }
     }
 

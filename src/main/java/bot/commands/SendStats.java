@@ -55,6 +55,6 @@ public class SendStats {
         }
 
         Messages.sendFile(statsFile, statsFile.getName(), event.getChannel());
-        statsFile.deleteOnExit();
+        statsFile.delete();
     }
 }

@@ -28,7 +28,7 @@ public class AccuracyChart {
         File image = new File(filename + ".png");
         if (image.exists()) {
             Messages.sendImage(image, "accuracyChart_" + score.getPlayerID() + ".png", event.getChannel());
-            image.deleteOnExit();
+            image.delete();
         }
     }
 

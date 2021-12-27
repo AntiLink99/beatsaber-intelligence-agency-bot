@@ -51,7 +51,7 @@ public class Profile {
         }
         if (profileFile.exists()) {
             Messages.sendImage(profileFile, fileName, event.getChannel());
-            profileFile.deleteOnExit();
+            profileFile.delete();
         }
     }
 }

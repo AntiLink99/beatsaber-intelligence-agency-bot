@@ -17,7 +17,7 @@ public class ApiConstants {
     public static final String PLAYER_LEADERBOARDS_URL = "https://scoresaber.com/rankings?page=";
 
     // Beat Saver
-    public static final String BS_PRE_URL = "https://cdn.beatsaver.com";
+    public static final String BS_PRE_URL = "https://beatsaver.com";
     public static final String BS_API_PRE_URL = "https://api.beatsaver.com";
 
     public static final String BS_MAP_BY_KEY = BS_API_PRE_URL + "/maps/id/";

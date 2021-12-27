@@ -94,7 +94,7 @@ public class PlaylistDifficultyListener extends ListenerAdapter {
     }
 
     private void addSongDifficultyByEmote(Song song, String emoji) {
-        resultMessage.put(song.getName(), getDifficultyNameByEmote(emoji) + "\n" + ApiConstants.BS_DEFAULT_MAP_URL + song.getId() + "\n" + ApiConstants.BS_PRE_URL + "/" + song.getId().toLowerCase() + ".zip");
+        resultMessage.put(song.getName(), getDifficultyNameByEmote(emoji) + "\n" + ApiConstants.BS_DEFAULT_MAP_URL + song.getId());
     }
 
     private String getDifficultyNameByEmote(String emoji) {

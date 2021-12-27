@@ -78,7 +78,7 @@ public class SongsCommands {
         File recentSongsImage = new File(filePath);
         // Remove old image file if exists
         if (recentSongsImage.exists()) {
-            recentSongsImage.deleteOnExit();
+            recentSongsImage.delete();
         }
 
         SongsImage.setFilePath(filePath);
@@ -101,7 +101,7 @@ public class SongsCommands {
         }
         if (recentSongsImage.exists()) {
             Messages.sendImage(recentSongsImage, "recentSongs_" + playerId + "_" + messageId + ".png", event.getChannel());
-            recentSongsImage.deleteOnExit();
+            recentSongsImage.delete();
         }
 
     }
@@ -150,7 +150,7 @@ public class SongsCommands {
         File topSongsImage = new File(filePath);
         // Remove old image file if exists
         if (topSongsImage.exists()) {
-            topSongsImage.deleteOnExit();
+            topSongsImage.delete();
         }
 
         SongsImage.setFilePath(filePath);
@@ -173,7 +173,7 @@ public class SongsCommands {
         }
         if (topSongsImage.exists()) {
             Messages.sendImage(topSongsImage, "topSongsImage_" + playerId + "_" + messageId + ".png", event.getChannel());
-            topSongsImage.deleteOnExit();
+            topSongsImage.delete();
         }
 
     }

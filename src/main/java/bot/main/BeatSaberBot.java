@@ -244,9 +244,8 @@ public class BeatSaberBot extends ListenerAdapter {
                     Messages.sendMessage("Please provide at least one key.", channel);
                     break;
                 }
-                List<String> values = new LinkedList<>(Arrays.asList(msgParts.get(2).split(" ")));
-                String playlistTitle = values.get(0);
-                values.remove(playlistTitle);
+                String playlistTitle = msgParts.get(2);
+                List<String> values = msgParts.subList(3, msgParts.size() - 1);
 
                 bs.sendRecruitingPlaylistInChannel(values, playlistTitle, BotConstants.playlistImageFOAA, event);
                 break;

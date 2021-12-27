@@ -97,7 +97,7 @@ public class RecentSong {
 
                     // Remove old acc grid file if exists
                     if (gridImage.exists()) {
-                        gridImage.deleteOnExit();
+                        gridImage.delete();
                     }
 
                     JavaFXUtils.launch(AccuracyGrid.class);
@@ -210,7 +210,7 @@ public class RecentSong {
                 }
                 if (gridImage.exists()) {
                     Messages.sendImage(gridImage, "accGrid_" + playerId + "_" + event.getId() + ".png", event.getChannel());
-                    gridImage.deleteOnExit();
+                    gridImage.delete();
                 } else {
                     DiscordLogger.sendLogInChannel("Image wasnt generated. accGrid_" + playerId + "_" + event.getId() + ".png", DiscordLogger.ERRORS);
                 }

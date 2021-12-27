@@ -24,7 +24,7 @@ public class RadarStatsChart {
         File image = new File(filename + ".png");
         if (image.exists()) {
             Messages.sendImage(image, "players.png", event.getChannel());
-            image.deleteOnExit();
+            image.delete();
         }
     }
 

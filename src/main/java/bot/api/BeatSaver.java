@@ -113,7 +113,7 @@ public class BeatSaver {
             DiscordLogger.sendLogInChannel(e.getMessage(), DiscordLogger.HTTP_ERRORS);
             e.printStackTrace();
         }
-        playlistFile.deleteOnExit();
+        playlistFile.delete();
     }
 
     private Song fetchSongByKey(String key) {

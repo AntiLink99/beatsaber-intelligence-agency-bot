@@ -35,13 +35,9 @@ import org.jetbrains.annotations.NotNull;
 
 import javax.security.auth.login.LoginException;
 import java.io.FileNotFoundException;
-import java.time.LocalTime;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -80,52 +76,6 @@ public class BeatSaberBot extends ListenerAdapter {
             DiscordLogger.setLogGuild(jda.getGuildById(BotConstants.logServerId));
 
             TextChannel botChannel = jda.getTextChannelById(BotConstants.outputChannelId);
-            Runnable runnable = () -> {
-                db.connectToDatabase();
-                DiscordLogger.sendLogInChannel("----- Starting User Refresh... [" + LocalTime.now().getHour() + ":" + LocalTime.now().getMinute() + "]", DiscordLogger.FOAA_REFRESH);
-                try {
-                    int fetchCounter = 0;
-                    List<Player> players = db.getAllStoredPlayers();
-                    for (Player storedPlayer : players) {
-                        Player ssPlayer = ss.getPlayerById(storedPlayer.getPlayerId());
-                        if (ssPlayer == null) {
-                            continue;
-                        }
-                        ssPlayer.setDiscordUserId(storedPlayer.getDiscordUserId());
-                        ssPlayer.setCustomAccGridImage(storedPlayer.getCustomAccGridImage());
-                        if (ssPlayer.getRank() != storedPlayer.getRank() && ssPlayer.getRank() != 0) {
-                            db.updatePlayer(ssPlayer);
-                            if (botChannel.getGuild().getIdLong() == BotConstants.foaaServerId) {
-                                Member member = botChannel.getGuild().getMembers().stream().filter(m -> m.getUser().getIdLong() == ssPlayer.getDiscordUserId()).findFirst().orElse(null);
-                                if (RoleManager.isNewMilestone(ssPlayer.getRank(), member)) {
-                                    DiscordLogger.sendLogInChannel("Changed role: " + ssPlayer.getPlayerName() + " New Rank: " + ssPlayer.getRank() + " - Old Rank: " + storedPlayer.getRank() + "   " + "(Top " + ListValueUtils.findMilestoneForRank(ssPlayer.getRank()) + ")",
-                                            DiscordLogger.FOAA_REFRESH);
-                                    RoleManager.removeMemberRolesByName(member, BotConstants.topRolePrefix);
-                                    RoleManager.assignMilestoneRole(ssPlayer.getRank(), member);
-                                    Messages.sendMilestoneMessage(ssPlayer, botChannel);
-                                }
-                            }
-                        }
-
-                        try {
-                            TimeUnit.MILLISECONDS.sleep(100);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-                        fetchCounter++;
-
-                        if (fetchCounter % 20 == 0) {
-                            TimeUnit.MINUTES.sleep(1);
-                        }
-                    }
-                } catch (Exception e) {
-                    DiscordLogger.sendLogInChannel("There was an exception in scheduled task: " + e.getMessage(), DiscordLogger.FOAA_REFRESH);
-                }
-                System.gc();
-            };
-
-            ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor();
-            service.scheduleAtFixedRate(runnable, 0, 20, TimeUnit.MINUTES);
         } catch (LoginException e) {
             e.printStackTrace();
         }
@@ -148,22 +98,26 @@ public class BeatSaberBot extends ListenerAdapter {
 
     @Override
     public void onMessageReceived(MessageReceivedEvent event) {
-        if (event.isFromType(ChannelType.PRIVATE) || event.getAuthor().isBot()) {
-            return;
-        }
+        try {
+            if (event.isFromType(ChannelType.PRIVATE) || event.getAuthor().isBot()) {
+                return;
+            }
 
-        String msg = event.getMessage().getContentRaw();
-        if (!msg.toLowerCase().startsWith("ru ") && !msg.toLowerCase().startsWith("bs ")) {
-            return;
-        }
+            String msg = event.getMessage().getContentRaw();
+            if (!msg.toLowerCase().startsWith("ru ") && !msg.toLowerCase().startsWith("bs ")) {
+                return;
+            }
 
-        event.getChannel().sendTyping().queue();
-        List<String> msgParts = Arrays.asList(msg.split(" "));
-        handleCommand(msgParts, new MessageEventDTO(event));
+            event.getChannel().sendTyping().queue();
+            List<String> msgParts = Arrays.asList(msg.split(" "));
+            handleCommand(msgParts, new MessageEventDTO(event));
+        } catch (Exception e) {
+            DiscordLogger.sendLogInChannel(e.getMessage(), DiscordLogger.ERRORS);
+            e.printStackTrace();
+        }
     }
 
     private void handleCommand(List<String> msgParts, MessageEventDTO event) {
-        try {
             TextChannel channel = event.getChannel();
             Guild guild = event.getGuild();
             Member author = event.getAuthor();
@@ -412,10 +366,6 @@ public class BeatSaberBot extends ListenerAdapter {
                 default:
                     Messages.sendMessage("Sorry, i don't speak wrong. 🤡  Try \"ru help\".\nIf you want to suggest something to the dev do it " + Format.link("here", BotConstants.featureRequestUrl) + ".", channel);
             }
-            System.gc();
-        } catch (Exception e) {
-            DiscordLogger.sendLogInChannel(e.getMessage(), DiscordLogger.ERRORS);
-        }
     }
 
     private int getIndexFromMsgParts(List<String> msgParts) {

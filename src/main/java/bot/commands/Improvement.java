@@ -25,6 +25,9 @@ public class Improvement {
         for (Player storedPlayer : storedPlayers) {
             List<Integer> historyValues = storedPlayer.getHistoryValues();
 
+            if (historyValues == null || historyValues.size() < 7) {
+                continue;
+            }
             int newRank = historyValues.get(historyValues.size() - 1);
             int oldRank = historyValues.get(historyValues.size() - 1 - 7);
             improvements.add(new PlayerImprovement(storedPlayer.getPlayerName(), oldRank, newRank));

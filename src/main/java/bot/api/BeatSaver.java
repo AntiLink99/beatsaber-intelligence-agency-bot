@@ -158,7 +158,6 @@ public class BeatSaver {
                     List<BeatSaverRankedMap> pageRankedMaps = pageResult.getRankedMaps();
                     if (pageRankedMaps.size() > 0) {
                         resultMaps.addAll(pageRankedMaps);
-                        DiscordLogger.sendLogInChannel("Fetched " + pageRankedMaps.size() + " maps!", DiscordLogger.INFO);
                         continue;
                     }
                 } catch (Exception e) {

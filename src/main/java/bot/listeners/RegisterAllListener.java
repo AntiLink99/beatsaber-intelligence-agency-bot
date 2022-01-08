@@ -77,7 +77,7 @@ public class RegisterAllListener extends ListenerAdapter {
                 player.setDiscordUserId(currentMember.getIdLong());
                 boolean successSave = db.savePlayer(player);
                 if (!successSave) {
-                    Messages.sendMessage("The player \"" + player.getPlayerName() + "\" is already registered! Use \"ru unregister <URL / Username>\" to remove the player from the database.", channel);
+                    Messages.sendMessage("The player \"" + player.getName() + "\" is already registered! Use \"ru unregister <URL / Username>\" to remove the player from the database.", channel);
                     return;
                 }
                 event.getMessage().addReaction("✔").queue();

@@ -1,14 +1,15 @@
 package bot.api;
 
 import bot.dto.ScoreSaberMapData;
-import bot.dto.SongScore;
 import bot.dto.leaderboards.LeaderboardPlayer;
 import bot.dto.player.Player;
+import bot.dto.scoresaber.PlayerScore;
 import bot.utils.DiscordLogger;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
+import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -37,39 +38,38 @@ public class ScoreSaber {
         JsonObject playerInfo = response.getAsJsonObject("playerInfo");
 
         Player ssPlayer = gson.fromJson(playerInfo.toString(), Player.class);
-        ssPlayer.setHistoryValues(Arrays.stream(ssPlayer.getHistory().split(",")).map(Integer::parseInt).collect(Collectors.toList()));
+        ssPlayer.setHistoryValues(Arrays.stream(ssPlayer.getHistories().split(",")).map(Integer::parseInt).collect(Collectors.toList()));
         return ssPlayer;
     }
 
-    public List<SongScore> getTopScoresByPlayerId(long playerId) {
+    public List<PlayerScore> getTopScoresByPlayerId(long playerId) {
         String topScoresUrl = ApiConstants.SS_PLAYER_PRE_URL + playerId + ApiConstants.SS_PLAYER_TOP_SCORES_POST_URL;
         JsonObject response = http.fetchJsonObject(topScoresUrl);
         if (response != null) {
             JsonArray topScores = response.getAsJsonArray("scores");
 
-            Type listType = new TypeToken<List<SongScore>>() {}.getType();
+            Type listType = new TypeToken<List<PlayerScore>>() {}.getType();
             return gson.fromJson(topScores.toString(), listType);
         }
         return new ArrayList<>();
     }
 
-    public List<SongScore> getTopScoresByPlayerIdAndPage(long playerId, int pageNr) {
-        String recentScoresUrl = ApiConstants.SS_PLAYER_PRE_URL + playerId + ApiConstants.SS_PLAYER_TOP_SCORES_POST_URL + "/" + pageNr;
-        JsonObject response = http.fetchJsonObject(recentScoresUrl);
-        if (response != null) {
-            JsonArray topScores = response.getAsJsonArray("scores");
-            Type listType = new TypeToken<List<SongScore>>() {}.getType();
-            return gson.fromJson(topScores.toString(), listType);
-        }
-        return new ArrayList<>();
+    public List<PlayerScore> getTopScoresByPlayerIdAndPage(long playerId, int pageNr) {
+        String topScoresUrl = ApiConstants.SS_PLAYER_PRE_URL + playerId + ApiConstants.SS_PLAYER_TOP_SCORES_POST_URL + "/" + pageNr;
+        return getPlayerScores(topScoresUrl);
     }
 
-    public List<SongScore> getRecentScoresByPlayerIdAndPage(long playerId, int pageNr) {
+    public List<PlayerScore> getRecentScoresByPlayerIdAndPage(long playerId, int pageNr) {
         String recentScoresUrl = ApiConstants.SS_PLAYER_PRE_URL + playerId + ApiConstants.SS_PLAYER_RECENT_SCORES_POST_URL + "/" + pageNr;
+        return getPlayerScores(recentScoresUrl);
+    }
+
+    @Nullable
+    private List<PlayerScore> getPlayerScores(String recentScoresUrl) {
         JsonObject response = http.fetchJsonObject(recentScoresUrl);
         if (response != null) {
-            JsonArray topScores = response.getAsJsonArray("scores");
-            Type listType = new TypeToken<List<SongScore>>() {}.getType();
+            JsonArray topScores = response.getAsJsonArray("playerScores");
+            Type listType = new TypeToken<List<PlayerScore>>() {}.getType();
             return gson.fromJson(topScores.toString(), listType);
         }
         return new ArrayList<>();

@@ -109,11 +109,9 @@ public class Messages {
                 return;
             }
 
-            Emote emote = Emotes.getEmoteByRank(player.getRank(), channel.getGuild().getEmotes());
-            String emoteLine = Emotes.getMessageWithMultipleEmotes(emote);
-
+            String emoteLine = Emotes.getMessageWithMultipleEmotes();
             sendPlainMessage(emoteLine, channel);
-            sendMessage(Format.bold(player.getPlayerName() + "'s milestone role was updated! " + roles.get(0).getAsMention()), channel);
+            sendMessage(Format.bold(player.getName() + "'s milestone role was updated! " + roles.get(0).getAsMention()), channel);
             sendPlainMessage(emoteLine, channel);
             sendPlainMessage(Format.ping(String.valueOf(player.getDiscordUserId())), channel);
         } catch (Exception ignored) {

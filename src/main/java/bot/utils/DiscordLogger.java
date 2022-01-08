@@ -10,7 +10,7 @@ public class DiscordLogger {
     public static final String INFO = "info";
     public static final String ERRORS = "errors";
     public static final String HTTP_ERRORS = "http-errors";
-    public static final String FOAA_REFRESH = "foaa-refresh";
+    public static final String WATCHER_REFRESH = "foaa-refresh";
     public static final String USERS = "users";
     public static final String GUILDS = "guilds";
 

@@ -5,10 +5,10 @@ import bot.api.ScoreSaber;
 import bot.db.DatabaseManager;
 import bot.dto.MessageEventDTO;
 import bot.dto.Song;
-import bot.dto.SongScore;
 import bot.dto.player.Player;
 import bot.dto.rankedmaps.BeatSaverRankedMap;
 import bot.dto.rankedmaps.RankedMaps;
+import bot.dto.scoresaber.PlayerScore;
 import bot.graphics.SongsImage;
 import bot.main.BotConstants;
 import bot.utils.JavaFXUtils;
@@ -43,34 +43,34 @@ public class SongsCommands {
             return;
         }
 
-        String playerId = player.getPlayerId();
+        String playerId = player.getId();
         String messageId = String.valueOf(event.getId());
 
-        List<SongScore> scores = ss.getRecentScoresByPlayerIdAndPage(Long.parseLong(player.getPlayerId()), index);
+        List<PlayerScore> scores = ss.getRecentScoresByPlayerIdAndPage(Long.parseLong(player.getId()), index);
         if (scores == null || scores.isEmpty()) {
             Messages.sendMessage("Scores could not be fetched. Please try again later.", event.getChannel());
             return;
         }
-        for (SongScore score : scores) {
-            Song song = bs.fetchSongByHash(score.getSongHash());
+        for (PlayerScore score : scores) {
+            Song song = bs.fetchSongByHash(score.getLeaderboard().getSongHash());
             if (song != null) {
-                Song.Version version = song.getVersionByHash(score.getSongHash().toLowerCase());
+                Song.Version version = song.getVersionByHash(score.getLeaderboard().getSongHash().toLowerCase());
                 if (version == null) {
                     version = song.getLatestVersion();
                 }
                 score.setCoverURL(version.getCoverURL());
 
-                if (score.getMaxScore() == 0 && SongUtils.getNoteCountForBeatSaverMapDiff(song, score) >= 13) { // Acc can't be calculated if map has < 13 notes
+                if (score.getLeaderboard().getMaxScore() == 0 && SongUtils.getNoteCountForBeatSaverMapDiff(song, score) >= 13) { // Acc can't be calculated if map has < 13 notes
                     int noteCount = SongUtils.getNoteCountForBeatSaverMapDiff(song, score);
                     int maxScore = noteCount * 920 - 7245;
-                    float accuracyValue = (float) score.getScore() / (float) maxScore;
-                    score.setAccuracy(accuracyValue);
+                    double accuracyValue = score.getAccuracy() / (double) maxScore;
+                    score.getScore().setAccuracy(accuracyValue);
                 }
             }
 
-            BeatSaverRankedMap map = RankedMapUtils.findRankedMapBySongHash(ranked, score.getSongHash());
+            BeatSaverRankedMap map = RankedMapUtils.findRankedMapBySongHash(ranked, score.getLeaderboard().getSongHash());
             if (map != null) {
-                float starRating = SongUtils.getStarRatingForMapDiff(map, score.getDifficulty());
+                float starRating = SongUtils.getStarRatingForMapDiff(map, score.getLeaderboard().getDifficultyValue());
                 score.setSongStars(starRating);
             }
         }
@@ -119,30 +119,30 @@ public class SongsCommands {
             return;
         }
 
-        String playerId = player.getPlayerId();
+        String playerId = player.getId();
         String messageId = String.valueOf(event.getId());
 
-        List<SongScore> scores = ss.getTopScoresByPlayerIdAndPage(Long.parseLong(player.getPlayerId()), index);
+        List<PlayerScore> scores = ss.getTopScoresByPlayerIdAndPage(Long.parseLong(player.getId()), index);
         if (scores == null || scores.isEmpty()) {
             Messages.sendMessage("Scores could not be fetched. Please try again later.", event.getChannel());
             return;
         }
-        for (SongScore score : scores) {
-            Song song = bs.fetchSongByHash(score.getSongHash());
+        for (PlayerScore score : scores) {
+            Song song = bs.fetchSongByHash(score.getLeaderboard().getSongHash());
             if (song != null) {
-                score.setCoverURL(song.getVersionByHash(score.getSongHash()).getCoverURL());
+                score.setCoverURL(song.getVersionByHash(score.getLeaderboard().getSongHash()).getCoverURL());
 
-                if (score.getMaxScore() == 0) {
+                if (score.getLeaderboard().getMaxScore() == 0) {
                     int noteCount = SongUtils.getNoteCountForBeatSaverMapDiff(song, score);
                     int maxScore = noteCount * 920 - 7245;
-                    float accuracyValue = (float) score.getScore() / (float) maxScore;
-                    score.setAccuracy(accuracyValue);
+                    float accuracyValue = (float) score.getScore().getModifiedScore() / (float) maxScore;
+                    score.getScore().setAccuracy(accuracyValue);
                 }
             }
 
-            BeatSaverRankedMap map = RankedMapUtils.findRankedMapBySongHash(ranked, score.getSongHash());
+            BeatSaverRankedMap map = RankedMapUtils.findRankedMapBySongHash(ranked, score.getLeaderboard().getSongHash());
             if (map != null) {
-                float starRating = SongUtils.getStarRatingForMapDiff(map, score.getDifficulty());
+                float starRating = SongUtils.getStarRatingForMapDiff(map, score.getLeaderboard().getDifficultyValue());
                 score.setSongStars(starRating);
             }
         }

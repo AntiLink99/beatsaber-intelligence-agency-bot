@@ -20,7 +20,7 @@ public class ListValueUtils {
         return ListValueUtils.findLowestSurpassedValue(rank, BotConstants.rankMilestones);
     }
 
-    public static int findHighestSurpassedValue(float valueToCheck, Integer[] values) {
+    public static int findHighestSurpassedValue(double valueToCheck, Integer[] values) {
         if (valueToCheck < values[0]) {
             return -1;
         }

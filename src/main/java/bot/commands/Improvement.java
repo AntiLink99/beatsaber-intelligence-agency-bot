@@ -30,7 +30,7 @@ public class Improvement {
             }
             int newRank = historyValues.get(historyValues.size() - 1);
             int oldRank = historyValues.get(historyValues.size() - 1 - 7);
-            improvements.add(new PlayerImprovement(storedPlayer.getPlayerName(), oldRank, newRank));
+            improvements.add(new PlayerImprovement(storedPlayer.getName(), oldRank, newRank));
         }
         Map<String, String> improvementsString = MapUtils.convertPlayerImprovements(improvements);
         Messages.sendMultiPageMessage(improvementsString, "Improvement over the last seven days", channel);

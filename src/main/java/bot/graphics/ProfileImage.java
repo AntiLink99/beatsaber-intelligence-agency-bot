@@ -83,7 +83,7 @@ public class ProfileImage extends Application {
     }
 
     private ImageView getPlayerPicture() throws IOException, ExecutionException, InterruptedException, TimeoutException {
-        String playerPictureUrl = ApiConstants.SS_PRE_URL + player.getAvatar();
+        String playerPictureUrl = ApiConstants.SS_PRE_URL + player.getProfilePicture();
         if (!WebUtils.isURL(playerPictureUrl)) {
             playerPictureUrl = ApiConstants.NO_AVATAR_URL;
         }

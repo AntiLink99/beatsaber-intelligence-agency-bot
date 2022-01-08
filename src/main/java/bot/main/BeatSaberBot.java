@@ -30,6 +30,7 @@ import net.dv8tion.jda.api.utils.ChunkingFilter;
 import net.dv8tion.jda.api.utils.MemberCachePolicy;
 import net.dv8tion.jda.api.utils.cache.CacheFlag;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.jetbrains.annotations.NotNull;
 
@@ -73,9 +74,17 @@ public class BeatSaberBot extends ListenerAdapter {
                 e.printStackTrace();
                 return;
             }
-            DiscordLogger.setLogGuild(jda.getGuildById(BotConstants.logServerId));
 
-            TextChannel botChannel = jda.getTextChannelById(BotConstants.outputChannelId);
+            Guild loggingGuild = jda.getGuildById(BotConstants.logServerId);
+            if (loggingGuild != null) {
+                DiscordLogger.setLogGuild(loggingGuild);
+            } else {
+                System.out.println("Continuing without logging guild.");
+            }
+
+            LeaderboardWatcher watcher = new LeaderboardWatcher(db, ss, jda);
+            watcher.createNewLeaderboardWatcher();
+            watcher.start();
         } catch (LoginException e) {
             e.printStackTrace();
         }
@@ -112,7 +121,7 @@ public class BeatSaberBot extends ListenerAdapter {
             List<String> msgParts = Arrays.asList(msg.split(" "));
             handleCommand(msgParts, new MessageEventDTO(event));
         } catch (Exception e) {
-            DiscordLogger.sendLogInChannel(e.getMessage(), DiscordLogger.ERRORS);
+            DiscordLogger.sendLogInChannel(ExceptionUtils.getStackTrace(e), DiscordLogger.ERRORS);
             e.printStackTrace();
         }
     }
@@ -243,7 +252,7 @@ public class BeatSaberBot extends ListenerAdapter {
                     break;
                 case "recentsong": {
                     int index = getIndexFromMsgParts(msgParts);
-                    DiscordLogger.sendLogInChannel(event.getAuthor() + " is requesting RecentSong for: " + commandPlayer.getPlayerName(), DiscordLogger.INFO);
+                    DiscordLogger.sendLogInChannel(event.getAuthor() + " is requesting RecentSong for: " + commandPlayer.getName(), DiscordLogger.INFO);
                     new RecentSong(db).sendRecentSong(commandPlayer, ranked, index, event);
                     return;
                 }

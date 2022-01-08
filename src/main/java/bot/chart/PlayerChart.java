@@ -34,11 +34,11 @@ public class PlayerChart {
             Messages.sendMessage("Could not find history values for user. Please update the user with \"ru update <ScoreSaber URL>\".", event.getChannel());
             return;
         }
-        String filepath = BotConstants.RESOURCES_PATH + player.getPlayerId();
+        String filepath = BotConstants.RESOURCES_PATH + player.getId();
         storePlayerChartToFile(player, filepath);
         File image = new File(filepath + ".png");
         if (image.exists()) {
-            Messages.sendImage(image, player.getPlayerName() + ".png", event.getChannel());
+            Messages.sendImage(image, player.getName() + ".png", event.getChannel());
             image.delete();
         }
     }
@@ -98,7 +98,7 @@ public class PlayerChart {
             // Series
             List<Integer> history = ListValueUtils.addElementReturnList(player.getHistoryValues(), player.getRank()).stream().map(h -> -h).collect(Collectors.toList());
             List<Integer> time = IntStream.rangeClosed(-history.size() + 1, 0).boxed().collect(Collectors.toList());
-            XYSeries series = chart.addSeries(player.getPlayerName(), time, history);
+            XYSeries series = chart.addSeries(player.getName(), time, history);
             int lineWidthMulti = 5;
             series.setLineWidth(players.size() == 1 ? lineWidthSingle : lineWidthMulti);
             series.setLineColor(lineColor);

@@ -7,43 +7,43 @@ public class Player implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private String playerId;
-    private String playerName;
-    private String avatar;
+    private String id;
+    private String name;
+    private String profilePicture;
     private int rank;
     private int countryRank;
     private float pp;
     private String country;
     private long discordUserId;
     private List<Integer> historyValues;
-    private String history;
+    private String histories;
     private transient String customAccGridImage;
 
-    public String getPlayerId() {
-        return playerId;
+    public String getId() {
+        return id;
     }
 
-    public void setPlayerId(String playerId) {
-        this.playerId = playerId;
+    public void setId(String id) {
+        this.id = id;
     }
 
     public long getPlayerIdLong() {
-        return Long.parseLong(this.playerId);
+        return Long.parseLong(this.id);
     }
-    public String getPlayerName() {
-        return playerName;
-    }
-
-    public void setPlayerName(String playerName) {
-        this.playerName = playerName;
+    public String getName() {
+        return name;
     }
 
-    public String getAvatar() {
-        return avatar;
+    public void setName(String name) {
+        this.name = name;
     }
 
-    public void setAvatar(String avatar) {
-        this.avatar = avatar;
+    public String getProfilePicture() {
+        return profilePicture;
+    }
+
+    public void setProfilePicture(String profilePicture) {
+        this.profilePicture = profilePicture;
     }
 
     public int getRank() {
@@ -86,12 +86,12 @@ public class Player implements Serializable {
         this.discordUserId = discordUserId;
     }
 
-    public String getHistory() {
-        return history;
+    public String getHistories() {
+        return histories;
     }
 
-    public void setHistory(String history) {
-        this.history = history;
+    public void setHistories(String histories) {
+        this.histories = histories;
     }
 
     public List<Integer> getHistoryValues() {

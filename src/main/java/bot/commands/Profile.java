@@ -21,12 +21,12 @@ public class Profile {
             System.out.println("no player");
             return;
         }
-        BufferedImage qrCodeImage = GraphicsUtils.generateQRCode(ApiConstants.USER_PRE_URL + player.getPlayerId(), GraphicsConstants.profileQrCodeWidth, GraphicsConstants.profileQrCodeHeight);
+        BufferedImage qrCodeImage = GraphicsUtils.generateQRCode(ApiConstants.USER_PRE_URL + player.getId(), GraphicsConstants.profileQrCodeWidth, GraphicsConstants.profileQrCodeHeight);
         if (qrCodeImage == null) {
             //error
             return;
         }
-        String playerId = player.getPlayerId();
+        String playerId = player.getId();
         String messageId = event.getMessage().getId();
         String fileName = "profile_" + playerId + "_" + messageId + ".png";
         String filePath = BotConstants.RESOURCES_PATH + fileName;

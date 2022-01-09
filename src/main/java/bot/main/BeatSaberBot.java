@@ -50,6 +50,8 @@ public class BeatSaberBot extends ListenerAdapter {
     final DatabaseManager db = new DatabaseManager();
     RankedMaps ranked = new RankedMaps();
 
+    static boolean hasStarted = false;
+
     final Pattern scoreSaberIDPattern = Pattern.compile(ApiConstants.USER_ID_REGEX);
 
     public static void main(String[] args) {
@@ -70,6 +72,7 @@ public class BeatSaberBot extends ListenerAdapter {
             try {
                 System.out.println("Awaiting JDA ready status...");
                 jda.awaitReady();
+                hasStarted = true;
             } catch (InterruptedException e) {
                 e.printStackTrace();
                 return;
@@ -108,7 +111,7 @@ public class BeatSaberBot extends ListenerAdapter {
     @Override
     public void onMessageReceived(MessageReceivedEvent event) {
         try {
-            if (event.isFromType(ChannelType.PRIVATE) || event.getAuthor().isBot()) {
+            if (event.isFromType(ChannelType.PRIVATE) || event.getAuthor().isBot() || !hasStarted) {
                 return;
             }
 
@@ -155,11 +158,6 @@ public class BeatSaberBot extends ListenerAdapter {
                 case "claimppall":
                     if (DiscordUtils.isAdmin(event.getAuthor().getUser())) {
                         new ClaimPPRole(db).validateAndAssignRoleForAll(event);
-                    }
-                    break;
-                case "updateall":
-                    if (DiscordUtils.isAdmin(authorUser)) {
-                        new UpdatePlayer(db).updateAllPlayers(channel);
                     }
                     break;
                 case "unregister":

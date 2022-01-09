@@ -3,18 +3,16 @@ package bot.main;
 import bot.api.ScoreSaber;
 import bot.db.DatabaseManager;
 import bot.dto.player.Player;
-import bot.utils.DiscordLogger;
-import bot.utils.DiscordUtils;
-import bot.utils.ListValueUtils;
-import bot.utils.Messages;
-import net.dv8tion.jda.api.EmbedBuilder;
+import bot.utils.*;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.TextChannel;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import roles.RoleManager;
 import roles.RoleManagerBSG;
 import roles.RoleManagerFOAA;
 
+import java.awt.*;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -44,7 +42,7 @@ public class LeaderboardWatcher {
         }
         this.watcherRunnable = () -> {
             db.connectToDatabase();
-            String updatingMessage = "----- Starting User Refresh... [" + LocalTime.now().getHour() + ":" + LocalTime.now().getMinute() + "]";
+            String updatingMessage = "----- Starting User Refresh... [" + Format.oneDigitZero(LocalTime.now().getHour()) + ":" + Format.oneDigitZero(LocalTime.now().getMinute()) + "]";
             DiscordLogger.sendLogInChannel(updatingMessage, DiscordLogger.WATCHER_REFRESH);
             try {
                 int fetchCounter = 0;
@@ -68,10 +66,7 @@ public class LeaderboardWatcher {
                     boolean isInactive = updatedPlayer.getRank() == 0;
                     boolean shouldUpdate = (rankIsDifferent || ppIsDifferent) && !isInactive;
                     if (shouldUpdate) {
-                        //Set DB Player
                         db.updatePlayer(updatedPlayer);
-
-                        //FOAA
                         handleFOAAPlayerUpdate(foaaOutput, updatedPlayer, storedPlayer);
                     }
 
@@ -90,16 +85,18 @@ public class LeaderboardWatcher {
                 //BSG
                 handleBSGPlayerUpdate(bsgOutput, updatedPlayers, oldPlayers);
             } catch (Exception e) {
-                DiscordLogger.sendLogInChannel("There was an exception in scheduled task: " + e.getMessage(), DiscordLogger.WATCHER_REFRESH);
+                e.printStackTrace();
+                DiscordLogger.sendLogInChannel(ExceptionUtils.getStackTrace(e), DiscordLogger.WATCHER_REFRESH);
             }
+            DiscordLogger.sendLogInChannel("Finished!", DiscordLogger.WATCHER_REFRESH);
         };
     }
 
     private void handleFOAAPlayerUpdate(TextChannel foaaOutput, Player updatedPlayer, Player storedPlayer) {
             Member member = DiscordUtils.getMemberByChannelAndId(foaaOutput, updatedPlayer.getDiscordUserId());
-            if (member == null || RoleManagerFOAA.isNewMilestone(updatedPlayer.getRank(), member)) {
+            if (member != null && RoleManagerFOAA.isNewMilestone(updatedPlayer.getRank(), member)) {
                 //Log
-                String newRoleMessage = "Changed role: " + updatedPlayer.getName() + " New Rank: " + updatedPlayer.getRank() + " - Old Rank: " + storedPlayer.getRank() + "   " + "(Top " + ListValueUtils.findMilestoneForRank(updatedPlayer.getRank()) + ")";
+                String newRoleMessage = "Changed FOAA role: " + updatedPlayer.getName() + " New Rank: " + updatedPlayer.getRank() + " - Old Rank: " + storedPlayer.getRank() + "   " + "(Top " + ListValueUtils.findFoaaMilestoneForRank(updatedPlayer.getRank()) + ")";
                 DiscordLogger.sendLogInChannel(newRoleMessage, DiscordLogger.WATCHER_REFRESH);
 
                 //Remove role
@@ -118,43 +115,90 @@ public class LeaderboardWatcher {
         oldPlayers = oldPlayers.stream().filter(player -> "DE".equals(player.getCountry())).collect(Collectors.toList());
 
         for (Player updatedPlayer : updatedPlayers) {
-            Player oldPlayer = oldPlayers.stream().filter(p -> p.getPlayerIdLong() == updatedPlayer.getPlayerIdLong()).findFirst().orElse(null);
+            Player oldPlayer = oldPlayers.stream()
+                    .filter(p -> p.getPlayerIdLong() == updatedPlayer.getPlayerIdLong())
+                    .findFirst()
+                    .orElse(null);
             if (oldPlayer == null) {
+                System.out.println("Could not find player with name: "+updatedPlayer.getName());
                 continue;
             }
 
-            List<Player> snipedPlayers;
-            if (updatedPlayer.getCountryRank() < oldPlayer.getCountryRank()) {
-               //Improvement
-                snipedPlayers = findSnipedPlayers(updatedPlayer, oldPlayer,  updatedPlayers, oldPlayers);
-            } else if (updatedPlayer.getCountryRank() > oldPlayer.getCountryRank()) {
-                //Decay
-
+            //Change certain someone's id
+            if (updatedPlayer.getDiscordUserId() == 272778901183266816L) {
+                updatedPlayer.setDiscordUserId(779146545755848774L);
             }
 
+            //Role change
+            boolean isInactive = updatedPlayer.getCountryRank() == 0;
             Member member = DiscordUtils.getMemberByChannelAndId(bsgOutput, updatedPlayer.getDiscordUserId());
-            if (member == null || RoleManagerBSG.isNewMilestone(updatedPlayer.getRank(), member)) {
+            if (member != null && RoleManagerBSG.isNewMilestone(updatedPlayer.getCountryRank(), member)) {
                 //Log
-                String newRoleMessage = "Changed role: " + updatedPlayer.getName() + " New Rank: " + updatedPlayer.getRank() + " - Old Rank: " + oldPlayer.getRank() + "   " + "(Top " + ListValueUtils.findMilestoneForRank(updatedPlayer.getRank()) + ")";
+                System.out.println("Updating member: "+member.getEffectiveName());
+                int milestone = ListValueUtils.findBsgMilestoneForRank(updatedPlayer.getCountryRank());
+                String newRoleMessage = "Changed BSG role: " + updatedPlayer.getName() + " New Rank: " + updatedPlayer.getCountryRank() + " - Old Rank: " + oldPlayer.getCountryRank() + "   " + "(Top " + milestone + ")";
                 DiscordLogger.sendLogInChannel(newRoleMessage, DiscordLogger.WATCHER_REFRESH);
 
-                //Remove role
+                //Remove all "Top "... roles
                 RoleManager.removeMemberRolesByName(member, BotConstants.topRolePrefix);
+                if (!isInactive) {
+                    //Add "Top xxx DE" role
+                    RoleManagerBSG.assignMilestoneRole(updatedPlayer.getCountryRank(), member);
+                    Messages.sendBsgRankMessage("🎉 " + Format.bold( Format.underline(updatedPlayer.getName())) + " is now part of the " + Format.underline("Top " + milestone) + " in Germany! Congrats! 🎉", "", updatedPlayer.getProfileURL(), Color.RED, updatedPlayer.getProfilePicture(), bsgOutput);
+                }
 
-                //Add role
-                RoleManagerBSG.assignMilestoneRole(updatedPlayer.getCountryRank(), member);
-
+            }
+            //Snipe Channel
+            boolean playerImproved = updatedPlayer.getCountryRank() < oldPlayer.getCountryRank();
+            if (playerImproved && !isInactive) {
                 //Send message (only improvement)
-                EmbedBuilder embed = new EmbedBuilder();
-                String improvementMessage = updatedPlayer.getName() + " has advanced from rank #" + oldPlayer.getCountryRank() + " to rank " + updatedPlayer.getCountryRank() + " ("+ updatedPlayer.getPp()+"pp)";
-                embed.setThumbnail(updatedPlayer.getProfilePicture());
-                //Send Embed
+                System.out.println("Player "+updatedPlayer.getName()+" improved!");
+                String improvementMessage = Format.underline(Format.bold(updatedPlayer.getName())) + " has advanced from rank " + Format.bold("#" + oldPlayer.getCountryRank() + " DE") + " to rank " + Format.bold("#" + updatedPlayer.getCountryRank() + " DE") + "! (" + updatedPlayer.getPp() + "pp)";
+
+                List<Player> snipedPlayers = findSnipedPlayers(updatedPlayer, oldPlayer, updatedPlayers, oldPlayers);
+                StringBuilder snipeMessages = new StringBuilder();
+                for (int i = 0; i < snipedPlayers.size(); i++) {
+                    Player snipedPlayer = snipedPlayers.get(i);
+                    snipeMessages.append("\n...and surpassed ")
+                            .append("#").append(snipedPlayer.getCountryRank()).append(" ")
+                            .append(Format.link(Format.bold(snipedPlayer.getName()), snipedPlayer.getProfileURL()))
+                            .append(" (").append(updatedPlayer.getPp()).append("pp)")
+                            .append("!");
+
+                    if (i == 10) {
+                        snipeMessages.append("\n...");
+                        break;
+                    }
+                }
+                Messages.sendBsgRankMessage(improvementMessage, snipeMessages.toString(), updatedPlayer.getProfileURL(), Color.WHITE, updatedPlayer.getProfilePicture(), bsgOutput);
             }
         }
     }
 
-    private List<Player> findSnipedPlayers(Player updatedPlayer, Player oldPlayer, List<Player> updatedPlayers, List<Player> oldPlayers) {
+    private List<Player> findSnipedPlayers(Player updatedPlayerWhoAdvanced, Player oldPlayerWhoAdvanced, List<Player> updatedPlayers, List<Player> oldPlayers) {
         List<Player> snipedPlayers = new ArrayList<>();
+
+        long playerId = updatedPlayerWhoAdvanced.getPlayerIdLong();
+
+        for (Player updatedOtherPlayer : updatedPlayers) {
+            if (updatedOtherPlayer.getPlayerIdLong() == playerId) {
+                continue;
+            }
+            Player oldOtherPlayer = oldPlayers.stream()
+                    .filter(op -> op.getPlayerIdLong() == updatedOtherPlayer.getPlayerIdLong())
+                    .findFirst()
+                    .orElse(null);
+            if (oldOtherPlayer == null) {
+                continue;
+            }
+
+            boolean otherPlayerWasBetter = oldOtherPlayer.getCountryRank() < oldPlayerWhoAdvanced.getCountryRank();
+            boolean otherPlayerIsNowWorse = updatedOtherPlayer.getCountryRank() > updatedPlayerWhoAdvanced.getCountryRank();
+            if (otherPlayerWasBetter && otherPlayerIsNowWorse) {
+                snipedPlayers.add(updatedOtherPlayer);
+            }
+        }
+
         return snipedPlayers;
     }
 

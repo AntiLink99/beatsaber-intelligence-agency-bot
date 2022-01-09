@@ -10,17 +10,18 @@ import java.util.List;
 public class RoleManagerFOAA {
 
     public static boolean isNewMilestone(int rank, Member member) {
-        if (member == null || rank > 5000) {
+        int minRank = BotConstants.foaaRankMilestones[BotConstants.foaaRankMilestones.length - 1];
+        if (member == null || rank > minRank) {
             return false;
         }
-        int milestone = ListValueUtils.findMilestoneForRank(rank);
+        int milestone = ListValueUtils.findFoaaMilestoneForRank(rank);
         Role milestoneRole = member.getRoles().stream().filter(role -> role.getName().equals(BotConstants.topRolePrefix + milestone)).findFirst().orElse(null);
         List<Role> milestoneRoles = RoleManager.getMemberRolesByName(member, BotConstants.topRolePrefix);
         return milestoneRole == null || milestoneRoles.size() > 1;
     }
 
     public static void assignMilestoneRole(int newRank, Member member) {
-        int milestone = ListValueUtils.findMilestoneForRank(newRank);
+        int milestone = ListValueUtils.findFoaaMilestoneForRank(newRank);
         RoleManager.assignRole(member, BotConstants.topRolePrefix + milestone);
     }
 

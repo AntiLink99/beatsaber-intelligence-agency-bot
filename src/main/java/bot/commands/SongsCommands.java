@@ -21,7 +21,8 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 public class SongsCommands {
-    //TODO: TopSongs & RecentSongs gleicher machen
+    //TODO: TopSongs & RecentSongs redundant code
+
     final DatabaseManager db;
     final RankedMaps ranked;
 

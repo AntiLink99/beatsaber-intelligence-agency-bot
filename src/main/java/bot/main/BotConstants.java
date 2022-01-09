@@ -22,8 +22,10 @@ public class BotConstants {
 
     public static final long foaaOutputChannelId = Long.parseLong(System.getenv("foaa_channel_id"));
     public static final long bsgOutputChannelId = Long.parseLong(System.getenv("bsg_channel_id"));
+
     // Role milestones
-    public static final Integer[] rankMilestones = {10, 50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000, 2000, 3000, 4000, 5000};
+    public static final Integer[] foaaRankMilestones = {10, 50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000, 2000, 3000, 4000, 5000};
+    public static final Integer[] bsgCountryRankMilestones = {1, 5, 10, 25, 50, 75, 100, 200};
     public static final String topRolePrefix = "Top ";
 
     public static final Integer[] foaaPpRoleMilestones = {300, 350, 400, 450, 500};

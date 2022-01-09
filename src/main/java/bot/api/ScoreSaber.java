@@ -35,7 +35,7 @@ public class ScoreSaber {
             DiscordLogger.sendLogInChannel("Could not find player with url \"" + playerUrl + "\".", DiscordLogger.HTTP_ERRORS);
             return null;
         }
-        JsonObject playerInfo = response.getAsJsonObject("playerInfo");
+        JsonObject playerInfo = response.getAsJsonObject();
 
         Player ssPlayer = gson.fromJson(playerInfo.toString(), Player.class);
         ssPlayer.setHistoryValues(Arrays.stream(ssPlayer.getHistories().split(",")).map(Integer::parseInt).collect(Collectors.toList()));
@@ -55,12 +55,12 @@ public class ScoreSaber {
     }
 
     public List<PlayerScore> getTopScoresByPlayerIdAndPage(long playerId, int pageNr) {
-        String topScoresUrl = ApiConstants.SS_PLAYER_PRE_URL + playerId + ApiConstants.SS_PLAYER_TOP_SCORES_POST_URL + "/" + pageNr;
+        String topScoresUrl = ApiConstants.SS_PLAYER_PRE_URL + playerId + ApiConstants.SS_PLAYER_TOP_SCORES_POST_URL + "&page=" + pageNr;
         return getPlayerScores(topScoresUrl);
     }
 
     public List<PlayerScore> getRecentScoresByPlayerIdAndPage(long playerId, int pageNr) {
-        String recentScoresUrl = ApiConstants.SS_PLAYER_PRE_URL + playerId + ApiConstants.SS_PLAYER_RECENT_SCORES_POST_URL + "/" + pageNr;
+        String recentScoresUrl = ApiConstants.SS_PLAYER_PRE_URL + playerId + ApiConstants.SS_PLAYER_RECENT_SCORES_POST_URL + "&page=" + pageNr;
         return getPlayerScores(recentScoresUrl);
     }
 

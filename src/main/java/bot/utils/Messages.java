@@ -102,7 +102,7 @@ public class Messages {
 
     public static void sendMilestoneMessage(Player player, TextChannel channel) {
         try {
-            String roleName = BotConstants.topRolePrefix + ListValueUtils.findMilestoneForRank(player.getRank());
+            String roleName = BotConstants.topRolePrefix + ListValueUtils.findFoaaMilestoneForRank(player.getRank());
             List<Role> roles = channel.getGuild().getRolesByName(roleName, true);
             if (roles.size() <= 0) {
                 System.out.println("Could not find role \"" + roleName + "\".");
@@ -188,5 +188,18 @@ public class Messages {
         builder.setImage(imageUrl);
         builder.setFooter(footerText);
         channel.sendMessage(builder.build()).queue();
+    }
+
+    public static void sendBsgRankMessage(String title, String desc, String titleUrl, Color color, String avatar, MessageChannel channel) {
+        try {
+            EmbedBuilder builder = new EmbedBuilder();
+            builder.setTitle(title, titleUrl);
+            builder.setDescription(desc);
+            builder.setColor(color);
+            builder.setThumbnail(avatar);
+            channel.sendMessage(builder.build()).queue();
+        } catch (Exception e) {
+            System.out.println("Could not send message because of lacking permissions: " + e.getMessage());
+        }
     }
 }

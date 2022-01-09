@@ -13,6 +13,7 @@ public class DiscordLogger {
     public static final String WATCHER_REFRESH = "foaa-refresh";
     public static final String USERS = "users";
     public static final String GUILDS = "guilds";
+    public static final String DB = "database";
 
     private static Guild guild;
 

@@ -2,6 +2,8 @@ package bot.db;
 
 import bot.dto.player.Player;
 import bot.dto.player.PlayerSkills;
+import bot.utils.DiscordLogger;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -52,6 +54,7 @@ public class DatabaseManager {
         } catch (SQLIntegrityConstraintViolationException e) {
             // ok
         } catch (Exception e) {
+            DiscordLogger.sendLogInChannel(ExceptionUtils.getStackTrace(e), DiscordLogger.DB);
             e.printStackTrace();
         }
 
@@ -67,6 +70,7 @@ public class DatabaseManager {
             stmt.setLong(1, userId);
             return stmt.executeUpdate() == 1;
         } catch (Exception e) {
+            DiscordLogger.sendLogInChannel(ExceptionUtils.getStackTrace(e), DiscordLogger.DB);
             e.printStackTrace();
         }
         return false;
@@ -92,6 +96,8 @@ public class DatabaseManager {
             stmt.setString(11, newPlayer.getId()); // Always last!
             return stmt.executeUpdate() == 1;
         } catch (Exception e) {
+            System.out.println("Failed for player with id: " + newPlayer.getId());
+            DiscordLogger.sendLogInChannel(ExceptionUtils.getStackTrace(e), DiscordLogger.DB);
             e.printStackTrace();
         }
         return false;
@@ -111,7 +117,7 @@ public class DatabaseManager {
                 player.setName(rs.getString("player_name"));
                 player.setProfilePicture(rs.getString("player_avatar"));
                 player.setRank(rs.getInt("player_rank"));
-                player.setCountryRank(rs.getInt("player_rank"));
+                player.setCountryRank(rs.getInt("player_country_rank"));
                 player.setPp(rs.getFloat("player_pp"));
                 player.setCountry(rs.getString("player_country"));
                 player.setDiscordUserId(rs.getLong("discord_user_id"));
@@ -123,6 +129,7 @@ public class DatabaseManager {
                 players.add(player);
             }
         } catch (SQLException e) {
+            DiscordLogger.sendLogInChannel(ExceptionUtils.getStackTrace(e), DiscordLogger.DB);
             e.printStackTrace();
         }
         return players;
@@ -143,7 +150,7 @@ public class DatabaseManager {
                 player.setName(rs.getString("player_name"));
                 player.setProfilePicture(rs.getString("player_avatar"));
                 player.setRank(rs.getInt("player_rank"));
-                player.setCountryRank(rs.getInt("player_rank"));
+                player.setCountryRank(rs.getInt("player_country_rank"));
                 player.setPp(rs.getFloat("player_pp"));
                 player.setCountry(rs.getString("player_country"));
                 player.setDiscordUserId(rs.getLong("discord_user_id"));
@@ -151,6 +158,7 @@ public class DatabaseManager {
                 return player;
             }
         } catch (SQLException e) {
+            DiscordLogger.sendLogInChannel(ExceptionUtils.getStackTrace(e), DiscordLogger.DB);
             e.printStackTrace();
         }
         return null;
@@ -183,6 +191,7 @@ public class DatabaseManager {
                 return player;
             }
         } catch (SQLException e) {
+            DiscordLogger.sendLogInChannel(ExceptionUtils.getStackTrace(e), DiscordLogger.DB);
             e.printStackTrace();
         }
         return null;
@@ -222,6 +231,7 @@ public class DatabaseManager {
                 return skills;
             }
         } catch (SQLException e) {
+            DiscordLogger.sendLogInChannel(ExceptionUtils.getStackTrace(e), DiscordLogger.DB);
             e.printStackTrace();
         }
         return null;

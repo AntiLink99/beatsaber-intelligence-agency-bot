@@ -1,5 +1,7 @@
 package bot.dto.player;
 
+import bot.api.ApiConstants;
+
 import java.io.Serializable;
 import java.util.List;
 
@@ -108,6 +110,10 @@ public class Player implements Serializable {
 
     public void setCustomAccGridImage(String customAccGridImage) {
         this.customAccGridImage = customAccGridImage;
+    }
+
+    public String getProfileURL() {
+        return ApiConstants.USER_PRE_URL + this.id;
     }
 
 }

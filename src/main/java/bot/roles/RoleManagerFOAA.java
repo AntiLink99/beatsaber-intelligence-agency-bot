@@ -1,4 +1,4 @@
-package roles;
+package bot.roles;
 
 import bot.main.BotConstants;
 import bot.utils.ListValueUtils;

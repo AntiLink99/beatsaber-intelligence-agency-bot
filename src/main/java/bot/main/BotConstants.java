@@ -51,7 +51,7 @@ public class BotConstants {
     public static final List<String> validSkills = Arrays.asList("accuracy", "speed", "stamina", "reading");
 
     // Recent Songs
-    public static final String newMemberMessage = ":crossed_swords: " + Format.bold("Welcome to the FOAA server! Be sure to check out the channels #rules and #roles for more information.") + " :crossed_swords:";
+    public static final String newMemberMessage = ":crossed_swords: " + Format.bold("Welcome to the FOAA server! Be sure to check out the channels #rules and #bot.roles for more information.") + " :crossed_swords:";
 
     public static final String imageUrlDiffEasy = "https://i.imgur.com/dIHIsOH.png";
     public static final String imageUrlDiffNormal = "https://i.imgur.com/5BYNku9.png";

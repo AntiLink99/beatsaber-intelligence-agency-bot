@@ -408,8 +408,8 @@ public class BeatSaberBot extends ListenerAdapter {
     public void onGuildMemberJoin(GuildMemberJoinEvent event) {
         if (event.getGuild().getIdLong() == BotConstants.foaaServerId) {
             Messages.sendPrivateMessage(BotConstants.newMemberMessage, event.getMember());
-            TextChannel botChannel = event.getJDA().getTextChannelById(Long.parseLong(System.getenv("channel_id")));
-            Messages.sendPlainMessage(Format.bold(event.getMember().getAsMention() + ", welcome!") + " Be sure to register yourself here with " + Format.underline("\"ru register <ScoreSaber URL>\"") + " to obtain your roles.", botChannel);
+            TextChannel botChannel = event.getJDA().getTextChannelById(Long.parseLong(System.getenv("foaa_channel_id")));
+            Messages.sendPlainMessage(Format.bold(event.getMember().getAsMention() + ", welcome!") + " Be sure to register yourself here with " + Format.underline("\"ru register <ScoreSaber URL>\"") + " to obtain your bot.roles.", botChannel);
         }
     }
 

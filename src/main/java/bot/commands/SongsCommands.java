@@ -64,7 +64,7 @@ public class SongsCommands {
                 if (score.getLeaderboard().getMaxScore() == 0 && SongUtils.getNoteCountForBeatSaverMapDiff(song, score) >= 13) { // Acc can't be calculated if map has < 13 notes
                     int noteCount = SongUtils.getNoteCountForBeatSaverMapDiff(song, score);
                     int maxScore = noteCount * 920 - 7245;
-                    double accuracyValue = score.getAccuracy() / (double) maxScore;
+                    double accuracyValue = score.getScore().getModifiedScore() / (double) maxScore;
                     score.getScore().setAccuracy(accuracyValue);
                 }
             }
@@ -136,7 +136,7 @@ public class SongsCommands {
                 if (score.getLeaderboard().getMaxScore() == 0) {
                     int noteCount = SongUtils.getNoteCountForBeatSaverMapDiff(song, score);
                     int maxScore = noteCount * 920 - 7245;
-                    float accuracyValue = (float) score.getScore().getModifiedScore() / (float) maxScore;
+                    double accuracyValue = score.getScore().getModifiedScore() / (double) maxScore;
                     score.getScore().setAccuracy(accuracyValue);
                 }
             }

@@ -6,6 +6,8 @@ import bot.dto.MessageEventDTO;
 import bot.dto.player.Player;
 import bot.dto.scoresaber.PlayerScore;
 import bot.main.BotConstants;
+import bot.roles.RoleManager;
+import bot.roles.RoleManagerFOAA;
 import bot.utils.Format;
 import bot.utils.ListValueUtils;
 import bot.utils.Messages;
@@ -13,8 +15,6 @@ import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.Role;
 import org.jetbrains.annotations.NotNull;
-import roles.RoleManager;
-import roles.RoleManagerFOAA;
 
 import java.util.Arrays;
 import java.util.List;

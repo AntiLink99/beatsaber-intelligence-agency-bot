@@ -3,14 +3,14 @@ package bot.main;
 import bot.api.ScoreSaber;
 import bot.db.DatabaseManager;
 import bot.dto.player.Player;
+import bot.roles.RoleManager;
+import bot.roles.RoleManagerBSG;
+import bot.roles.RoleManagerFOAA;
 import bot.utils.*;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.TextChannel;
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import roles.RoleManager;
-import roles.RoleManagerBSG;
-import roles.RoleManagerFOAA;
 
 import java.awt.*;
 import java.time.LocalTime;
@@ -119,8 +119,7 @@ public class LeaderboardWatcher {
                     .filter(p -> p.getPlayerIdLong() == updatedPlayer.getPlayerIdLong())
                     .findFirst()
                     .orElse(null);
-            if (oldPlayer == null) {
-                System.out.println("Could not find player with name: "+updatedPlayer.getName());
+            if (oldPlayer == null || oldPlayer.getRank() == 0) {
                 continue;
             }
 
@@ -139,12 +138,14 @@ public class LeaderboardWatcher {
                 String newRoleMessage = "Changed BSG role: " + updatedPlayer.getName() + " New Rank: " + updatedPlayer.getCountryRank() + " - Old Rank: " + oldPlayer.getCountryRank() + "   " + "(Top " + milestone + ")";
                 DiscordLogger.sendLogInChannel(newRoleMessage, DiscordLogger.WATCHER_REFRESH);
 
-                //Remove all "Top "... roles
+                //Remove all "Top "... bot.roles
                 RoleManager.removeMemberRolesByName(member, BotConstants.topRolePrefix);
                 if (!isInactive) {
                     //Add "Top xxx DE" role
                     RoleManagerBSG.assignMilestoneRole(updatedPlayer.getCountryRank(), member);
-                    Messages.sendBsgRankMessage("🎉 " + Format.bold( Format.underline(updatedPlayer.getName())) + " is now part of the " + Format.underline("Top " + milestone) + " in Germany! Congrats! 🎉", "", updatedPlayer.getProfileURL(), Color.RED, updatedPlayer.getProfilePicture(), bsgOutput);
+                    if (updatedPlayer.getCountryRank() < oldPlayer.getCountryRank()) {
+                        Messages.sendBsgRankMessage("🎉 " + Format.bold(Format.underline(updatedPlayer.getName())) + " is now part of the " + Format.underline("Top " + milestone) + " in Germany! Congrats! 🎉", "", updatedPlayer.getProfileURL(), Color.RED, updatedPlayer.getProfilePicture(), bsgOutput);
+                    }
                 }
 
             }

@@ -4,10 +4,10 @@ import bot.db.DatabaseManager;
 import bot.dto.MessageEventDTO;
 import bot.dto.player.Player;
 import bot.main.BotConstants;
+import bot.roles.RoleManager;
 import bot.utils.Messages;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.TextChannel;
-import roles.RoleManager;
 
 public class HandlePlayerRegisteration {
 

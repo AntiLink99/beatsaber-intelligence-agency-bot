@@ -3,13 +3,14 @@ package bot.commands;
 import bot.api.ScoreSaber;
 import bot.db.DatabaseManager;
 import bot.dto.MessageEventDTO;
-import bot.dto.SongScore;
 import bot.dto.player.Player;
+import bot.dto.scoresaber.PlayerScore;
 import bot.main.BotConstants;
+import bot.roles.RoleManager;
+import bot.roles.RoleManagerFOAA;
 import bot.utils.Format;
 import bot.utils.ListValueUtils;
 import bot.utils.Messages;
-import bot.utils.RoleManager;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.Role;
@@ -30,19 +31,19 @@ public class ClaimPPRole {
     public void validateAndAssignRole(@NotNull Member member, MessageChannel channel, boolean showMessages) {
         ScoreSaber ss = new ScoreSaber();
         long discordUserId = member.getUser().getIdLong();
-        long playerId = Long.parseLong(db.getPlayerByDiscordId(discordUserId).getPlayerId());
+        long playerId = Long.parseLong(db.getPlayerByDiscordId(discordUserId).getId());
         if (playerId == -1) {
             Messages.sendMessage("You are not registered. Use \"ru help\".", channel);
             return;
         }
 
-        List<SongScore> topScores = ss.getTopScoresByPlayerId(playerId);
+        List<PlayerScore> topScores = ss.getTopScoresByPlayerId(playerId);
         if (topScores != null && topScores.size() > 0) {
-            float maxPP = topScores.get(0).getPp();
-            int ppMilestone = ListValueUtils.findHighestSurpassedValue(maxPP, BotConstants.ppRoleMilestones);
+            double maxPP = topScores.get(0).getScore().getPp();
+            int ppMilestone = ListValueUtils.findHighestSurpassedValue(maxPP, BotConstants.foaaPpRoleMilestones);
             if (ppMilestone != -1) {
-                String milestoneRoleName = Format.foaaRole(BotConstants.ppRoles[Arrays.asList(BotConstants.ppRoleMilestones).indexOf(ppMilestone)]);
-                if (!RoleManager.memberHasRole(member, " PP", milestoneRoleName)) {
+                String milestoneRoleName = Format.foaaRole(BotConstants.foaaPpRoles[Arrays.asList(BotConstants.foaaPpRoleMilestones).indexOf(ppMilestone)]);
+                if (!RoleManagerFOAA.memberHasRole(member, " PP", milestoneRoleName)) {
                     RoleManager.removeMemberRolesByName(member, BotConstants.ppRoleSuffix);
                     Role assignedRole = RoleManager.assignRole(member, milestoneRoleName);
                     if (assignedRole != null && showMessages) {
@@ -58,7 +59,6 @@ public class ClaimPPRole {
     }
 
     public void validateAndAssignRoleForAll(MessageEventDTO event) {
-        ScoreSaber ss = new ScoreSaber();
         List<Player> storedPlayers = db.getAllStoredPlayers();
         for (Player player : storedPlayers) {
             Member member = event.getGuild().getMemberById(player.getDiscordUserId());

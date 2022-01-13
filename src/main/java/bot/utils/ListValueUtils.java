@@ -16,11 +16,15 @@ public class ListValueUtils {
         return -1;
     }
 
-    public static int findMilestoneForRank(int rank) {
-        return ListValueUtils.findLowestSurpassedValue(rank, BotConstants.rankMilestones);
+    public static int findFoaaMilestoneForRank(int rank) {
+        return ListValueUtils.findLowestSurpassedValue(rank, BotConstants.foaaRankMilestones);
     }
 
-    public static int findHighestSurpassedValue(float valueToCheck, Integer[] values) {
+    public static int findBsgMilestoneForRank(int rank) {
+        return ListValueUtils.findLowestSurpassedValue(rank, BotConstants.bsgCountryRankMilestones);
+    }
+
+    public static int findHighestSurpassedValue(double valueToCheck, Integer[] values) {
         if (valueToCheck < values[0]) {
             return -1;
         }

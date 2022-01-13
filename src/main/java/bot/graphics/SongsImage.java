@@ -2,7 +2,7 @@ package bot.graphics;
 
 import bot.api.ApiConstants;
 import bot.api.HttpMethods;
-import bot.dto.SongScore;
+import bot.dto.scoresaber.PlayerScore;
 import bot.utils.FontUtils;
 import bot.utils.Format;
 import bot.utils.JavaFXUtils;
@@ -29,7 +29,7 @@ import java.util.Objects;
 public class SongsImage extends Application {
 
     private static boolean isFinished = false;
-    private static List<SongScore> scores;
+    private static List<PlayerScore> scores;
     private static String filePath;
     final ImageView baseImage = new ImageView("https://i.imgur.com/kvy9P2K.png"); // Rectangle Image
     final Image starImage = new Image(Objects.requireNonNull(getClass().getClassLoader().getResourceAsStream("star.png")));
@@ -47,19 +47,19 @@ public class SongsImage extends Application {
         textShadow.setRadius(40);
 
         for (int i = 0; i < scores.size(); i++) {
-            SongScore score = scores.get(i);
-            String songName = score.getSongName();
-            String author = score.getLevelAuthorName();
-            int rank = score.getRank();
+            PlayerScore score = scores.get(i);
+            String songName = score.getLeaderboard().getSongName();
+            String author = score.getLeaderboard().getLevelAuthorName();
+            int rank = score.getScore().getRank();
             Color rankColor = FontUtils.getRankColor(rank, Color.WHITE);
             String pp = score.getPpString();
             String ppWeight = score.getWeightPpString();
-            String diff = score.getDifficultyName();
+            String diff = score.getLeaderboard().getDifficulty().getDifficultyName();
             String acc = score.getAccuracyString();
             float stars = score.getSongStars();
             String relativeTime = score.getRelativeTimeString();
-            boolean isRanked = score.getPp() > 0;
-            int rankOnPlayerLeaderboard = isRanked && score.getWeight() > 0 ? Format.roundDouble((Math.log10(score.getWeight()) + Math.log10(0.965)) / Math.log10(0.965)) : -1;
+            boolean isRanked = score.getScore().getPp() > 0;
+            int rankOnPlayerLeaderboard = isRanked && score.getScore().getWeight() > 0 ? Format.roundDouble((Math.log10(score.getScore().getWeight()) + Math.log10(0.965)) / Math.log10(0.965)) : -1;
             Color playerRankShadowColor = FontUtils.getRankColor(rankOnPlayerLeaderboard, Color.WHITE);
 
             // Cover Image
@@ -100,7 +100,7 @@ public class SongsImage extends Application {
             int rightTextsY = i * itemYOffset + itemStartYOffset;
             // Songname
             Text songNameText = new Text(rightTextsX, rightTextsY - 10, songName);
-            songNameText.setFont(score.getSongName().length() > 36 ? FontUtils.consolasBold(36 * 55f / score.getSongName().length()) : FontUtils.consolasBold(55));
+            songNameText.setFont(score.getLeaderboard().getSongName().length() > 36 ? FontUtils.consolasBold(36 * 55f / score.getLeaderboard().getSongName().length()) : FontUtils.consolasBold(55));
             songNameText.setFill(Color.WHITE);
             songNameText.setEffect(textShadow);
 
@@ -118,7 +118,7 @@ public class SongsImage extends Application {
             relTime.setEffect(textShadow);
 
             // Diff
-            Color diffColor = FontUtils.getDiffColor(score.getDifficulty());
+            Color diffColor = FontUtils.getDiffColor(score.getLeaderboard().getDifficultyValue());
             Text diffText = new Text(rightTextsX, rightTextsY + 160, diff);
             diffText.setFont(FontUtils.consolasBold(60));
             diffText.setFill(diffColor);
@@ -232,11 +232,11 @@ public class SongsImage extends Application {
         SongsImage.isFinished = isFinished;
     }
 
-    public static List<SongScore> getScores() {
+    public static List<PlayerScore> getScores() {
         return scores;
     }
 
-    public static void setScores(List<SongScore> scores) {
+    public static void setScores(List<PlayerScore> scores) {
         SongsImage.scores = scores;
     }
 

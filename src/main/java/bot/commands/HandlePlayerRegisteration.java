@@ -4,8 +4,8 @@ import bot.db.DatabaseManager;
 import bot.dto.MessageEventDTO;
 import bot.dto.player.Player;
 import bot.main.BotConstants;
+import bot.roles.RoleManager;
 import bot.utils.Messages;
-import bot.utils.RoleManager;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.TextChannel;
 
@@ -27,7 +27,7 @@ public class HandlePlayerRegisteration {
             Messages.sendMessage("You are already registered! Use \"ru unregister\" first to remove yourself from the database.", channel);
             return false;
         }
-        Messages.sendMessage("The player \"" + player.getPlayerName() + "\" was bound to you successfully and will be tracked from now on.", channel);
+        Messages.sendMessage("The player \"" + player.getName() + "\" was bound to you successfully and will be tracked from now on.", channel);
         return true;
     }
 

@@ -96,4 +96,11 @@ public class Format {
     public static String link(String name, String url) {
         return "[" + name + "](" + url + ")";
     }
+
+    public static String oneDigitZero(int num) {
+        if (String.valueOf(num).length() == 1) {
+            return "0" + num;
+        }
+        return String.valueOf(num);
+    }
 }

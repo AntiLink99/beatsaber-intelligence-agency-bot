@@ -8,11 +8,13 @@ import bot.chart.AccuracyChart;
 import bot.db.DatabaseManager;
 import bot.dto.MessageEventDTO;
 import bot.dto.Song;
-import bot.dto.SongScore;
 import bot.dto.beatsavior.BeatSaviorPlayerScore;
 import bot.dto.player.Player;
 import bot.dto.rankedmaps.BeatSaverRankedMap;
 import bot.dto.rankedmaps.RankedMaps;
+import bot.dto.scoresaber.Leaderboard;
+import bot.dto.scoresaber.PlayerScore;
+import bot.dto.scoresaber.Score;
 import bot.graphics.AccuracyGrid;
 import bot.main.BotConstants;
 import bot.utils.*;
@@ -56,34 +58,42 @@ public class RecentSong {
     public void sendRecentSong(Player player, RankedMaps ranked, int index, MessageEventDTO event) {
         ScoreSaber ss = new ScoreSaber();
         BeatSaver bs = new BeatSaver();
-        BeatSavior bsaviour = new BeatSavior();
+        BeatSavior bsavior = new BeatSavior();
 
         if (index > 40 || index < 1) {
             Messages.sendMessage("The value provided has to be an integer between 1 and 40.", event.getChannel());
             return;
         }
-        String playerId = player.getPlayerId();
+        String playerId = player.getId();
         if (playerId != null) {
 
             // ScoreSaber
             int pageNr = getPageNrFromSongIndex(index);
             index = (index - 1) % 8;
-            List<SongScore> ssScores = ss.getRecentScoresByPlayerIdAndPage(Long.parseLong(player.getPlayerId()), pageNr);
+            List<PlayerScore> ssScores = ss.getRecentScoresByPlayerIdAndPage(Long.parseLong(player.getId()), pageNr);
             if (ssScores == null || ssScores.isEmpty()) {
                 Messages.sendMessage("ScoreSaber didn't respond. Please try again later.", event.getChannel());
                 return;
             }
-            SongScore recentScore = ssScores.get(index);
+
+            PlayerScore recentData = ssScores.get(index); //TODO Nullpointer
+            Leaderboard recentLeaderboard = recentData.getLeaderboard();
+            Score recentScore = recentData.getScore();
+
+
             String accGridFilePath = BotConstants.RESOURCES_PATH+"accGrid_" + playerId + "_" + event.getId() + ".png";
             File gridImage = new File(accGridFilePath);
 
             // Saviour
-            List<BeatSaviorPlayerScore> saviourScores = bsaviour.fetchPlayerMaps(Long.valueOf(playerId)).getPlayerMaps();
+            List<BeatSaviorPlayerScore> saviourScores = bsavior.fetchPlayerMaps(Long.valueOf(playerId)).getPlayerMaps();
 
             BeatSaviorPlayerScore saviourScore = null;
             boolean hasBeatSavior = saviourScores != null && !saviourScores.isEmpty();
             if (hasBeatSavior) {
-                saviourScore = saviourScores.stream().filter(score -> score.getSongID().equals(recentScore.getSongHash()) && SongUtils.matchScoreSaberAndBeatSaviorDiffname(recentScore.getDifficultyName(), score.getSongDifficulty()) && score.getTrackers().getWinTracker().isWon()).sorted()
+                saviourScore = saviourScores.stream()
+                        .filter(score -> score.getSongID().equals(recentLeaderboard.getSongHash()) &&
+                        SongUtils.matchScoreSaberAndBeatSaviorDiffname(recentLeaderboard.getDifficulty().getDifficultyName(), score.getSongDifficulty()) &&
+                        score.getTrackers().getWinTracker().isWon()).sorted()
                         .findFirst().orElse(null);
                 if (saviourScore != null) {
                     List<Float> gridAcc = saviourScore.getTrackers().getAccuracyTracker().getGridAcc();
@@ -111,10 +121,10 @@ public class RecentSong {
             String coverUrl = null;
             int rankOnPlayerLeaderboard = -1;
             if (isRanked) {
-                BeatSaverRankedMap rankedMap = RankedMapUtils.findRankedMapBySongHash(ranked, recentScore.getSongHash());
+                BeatSaverRankedMap rankedMap = RankedMapUtils.findRankedMapBySongHash(ranked, recentLeaderboard.getSongHash());
                 rankOnPlayerLeaderboard = Format.roundDouble((Math.log10(recentScore.getWeight()) + Math.log10(0.965)) / Math.log10(0.965));
                 if (rankedMap != null) {
-                    starRating = SongUtils.getStarRatingForMapDiff(rankedMap, recentScore.getDifficulty());
+                    starRating = SongUtils.getStarRatingForMapDiff(rankedMap, recentLeaderboard.getDifficultyValue());
                 }
             }
 
@@ -133,11 +143,11 @@ public class RecentSong {
             String songInfo = Format.codeAutohotkey(topInfo);
 
             //BeatSaver
-            Song bsMap = bs.fetchSongByHash(recentScore.getSongHash());
+            Song bsMap = bs.fetchSongByHash(recentLeaderboard.getSongHash());
             int noteCount = -1;
             if (bsMap != null) {
-                noteCount = SongUtils.getNoteCountForBeatSaverMapDiff(bsMap, recentScore);
-                Song.Version version = bsMap.getVersionByHash(recentScore.getSongHash());
+                noteCount = SongUtils.getNoteCountForBeatSaverMapDiff(bsMap, recentData);
+                Song.Version version = bsMap.getVersionByHash(recentLeaderboard.getSongHash());
                 if (version != null) {
                     coverUrl = version.getCoverURL();
                 } else {
@@ -148,10 +158,10 @@ public class RecentSong {
             String accuracy = null;
             if (noteCount >= 13) { // Acc can't be calculated if map has < 13 notes
                 if (isRanked) {
-                    accuracy = Format.fixedLength("Accuracy: " + recentScore.getAccuracyString(), lineWidth);
+                    accuracy = Format.fixedLength("Accuracy: " + recentData.getAccuracyString(), lineWidth);
                 } else {
                     int maxScore = noteCount * 920 - 7245;
-                    float accuracyValue = (float) recentScore.getScore() / (float) maxScore * 100f;
+                    float accuracyValue = (float) recentScore.getModifiedScore() / (float) maxScore * 100f;
                     accuracy = Format.fixedLength("Accuracy: " + Format.decimal(accuracyValue) + "%", lineWidth);
                 }
                 if (!hasBeatSavior) {
@@ -188,14 +198,14 @@ public class RecentSong {
                 String stars = Format.fixedLength("Stars: ", lineWidth) + (starRating > 0 ? Format.decimal(starRating) : "?") + "⭐";
                 songInfo += Format.codeProlog("\n" + rawPP + "\n" + weightPP + "\n" + stars);
             }
-            String diffImageUrl = SongUtils.getDiffImageUrl(recentScore.getDifficulty());
-            String songName = recentScore.getSongName() + " - " + getDurationStringFromMap(bsMap);
-            String songUrl = ApiConstants.SS_LEADERBOARD_PRE_URL + recentScore.getLeaderboardId();
-            String footerText = "Mapped by " + recentScore.getLevelAuthorName();
+            String diffImageUrl = SongUtils.getDiffImageUrl(recentLeaderboard.getDifficultyValue());
+            String songName = recentLeaderboard.getSongName() + " - " + getDurationStringFromMap(bsMap);
+            String songUrl = ApiConstants.SS_LEADERBOARD_PRE_URL + recentLeaderboard.getId();
+            String footerText = "Mapped by " + recentLeaderboard.getLevelAuthorName();
 
             Messages.sendMessageWithImagesAndTexts(songInfo, songName, songUrl, coverUrl, diffImageUrl, footerText, event.getChannel());
             if (hasBeatSavior) {
-                AccuracyChart.sendChartImage(saviourScore, player.getPlayerName(), recentScore.getDifficultyName(), event);
+                AccuracyChart.sendChartImage(saviourScore, player.getName(), recentLeaderboard.getDifficulty().getDifficultyName(), event);
                 int gridWaitingCounter = 0;
                 while (!AccuracyGrid.isFinished()) {
                     if (gridWaitingCounter > 8) {

@@ -163,7 +163,7 @@ public class LeaderboardWatcher {
                     snipeMessages.append("\n...and surpassed ")
                             .append("#").append(snipedPlayer.getCountryRank()).append(" ")
                             .append(Format.link(Format.bold(snipedPlayer.getName()), snipedPlayer.getProfileURL()))
-                            .append(" (").append(updatedPlayer.getPp()).append("pp)")
+                            .append(" (").append(snipedPlayer.getPp()).append("pp)")
                             .append("!");
 
                     if (i == 10) {

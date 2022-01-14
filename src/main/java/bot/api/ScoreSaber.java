@@ -44,14 +44,7 @@ public class ScoreSaber {
 
     public List<PlayerScore> getTopScoresByPlayerId(long playerId) {
         String topScoresUrl = ApiConstants.SS_PLAYER_PRE_URL + playerId + ApiConstants.SS_PLAYER_TOP_SCORES_POST_URL;
-        JsonObject response = http.fetchJsonObject(topScoresUrl);
-        if (response != null) {
-            JsonArray topScores = response.getAsJsonArray("scores");
-
-            Type listType = new TypeToken<List<PlayerScore>>() {}.getType();
-            return gson.fromJson(topScores.toString(), listType);
-        }
-        return new ArrayList<>();
+        return getPlayerScores(topScoresUrl);
     }
 
     public List<PlayerScore> getTopScoresByPlayerIdAndPage(long playerId, int pageNr) {

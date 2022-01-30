@@ -37,7 +37,6 @@ import org.jetbrains.annotations.NotNull;
 import javax.security.auth.login.LoginException;
 import java.io.FileNotFoundException;
 import java.util.Arrays;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -195,9 +194,8 @@ public class BeatSaberBot extends ListenerAdapter {
                         Messages.sendMessage("Please provide at least one key.", channel);
                         break;
                     }
-                    List<String> values = new LinkedList<>(Arrays.asList(msgParts.get(2).split(" ")));
-                    String playlistTitle = values.get(0);
-                    values.remove(playlistTitle);
+                    String playlistTitle = msgParts.get(2);
+                    List<String> values = msgParts.subList(3, msgParts.size());
 
                     bs.sendPlaylistInChannelByKeys(values, playlistTitle, BotConstants.playlistImageFOAA, channel);
                     break;
@@ -208,7 +206,7 @@ public class BeatSaberBot extends ListenerAdapter {
                         break;
                     }
                     String playlistTitle = msgParts.get(2);
-                    List<String> values = msgParts.subList(3, msgParts.size() - 1);
+                    List<String> values = msgParts.subList(3, msgParts.size());
 
                     bs.sendRecruitingPlaylistInChannel(values, playlistTitle, BotConstants.playlistImageFOAA, event);
                     break;

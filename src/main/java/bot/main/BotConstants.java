@@ -37,7 +37,7 @@ public class BotConstants {
 
     public static final String[] playlistDifficultyEmotes = {"🟩", "🟦", "🟧", "🟥", "🟪"};
     public static final int improvementReactionMinTimeDiff = 400000000;
-    public static final String playlistImageFOAA = getImageBase64("foaa.png");
+    public static final String playlistImageFOAA = getImageBase64("playlistCover.png");
     public static final String playlistImageQualified = getImageBase64("qualified.png");
     public static final String playlistImageRanked = getImageBase64("ranked.png");
     public static final String playlistAuthor = "AntiLink#1337";

@@ -76,9 +76,9 @@ public class DatabaseManager {
         return false;
     }
 
-    public boolean updatePlayer(Player newPlayer) {
+    public void updatePlayer(Player newPlayer) {
         if (con == null) {
-            return false;
+            return;
         }
         String stmtToUse = DBConstants.UPDATE_PLAYER_BY_PLAYER_ID_STMT;
         try {
@@ -94,13 +94,12 @@ public class DatabaseManager {
             stmt.setString(9, newPlayer.getHistories());
             stmt.setString(10, newPlayer.getCustomAccGridImage());
             stmt.setString(11, newPlayer.getId()); // Always last!
-            return stmt.executeUpdate() == 1;
+            stmt.executeUpdate();
         } catch (Exception e) {
             System.out.println("Failed for player with id: " + newPlayer.getId());
             DiscordLogger.sendLogInChannel(ExceptionUtils.getStackTrace(e), DiscordLogger.DB);
             e.printStackTrace();
         }
-        return false;
     }
 
     public List<Player> getAllStoredPlayers() {

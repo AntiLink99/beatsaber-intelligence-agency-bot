@@ -150,7 +150,7 @@ public class LeaderboardWatcher {
 
             }
             //Snipe Channel
-            boolean playerImproved = updatedPlayer.getCountryRank() < oldPlayer.getCountryRank();
+            boolean playerImproved = updatedPlayer.getCountryRank() < oldPlayer.getCountryRank() && updatedPlayer.getPp() != oldPlayer.getPp();
             if (playerImproved && !isInactive) {
                 //Send message (only improvement)
                 System.out.println("Player "+updatedPlayer.getName()+" improved!");

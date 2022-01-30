@@ -299,7 +299,7 @@ public class BeatSaberBot extends ListenerAdapter {
                     break;
                 }
                 case "profile":
-                    Messages.sendMessage("This feature is planned for the near future!", channel);
+                    Messages.sendMessage("This feature is planned for the future!", channel);
                     break;
                 case "seal":
                     int randomSealIndex = RandomUtils.getRandomNum(83);

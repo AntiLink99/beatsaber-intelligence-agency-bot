@@ -29,8 +29,12 @@ public class ApiConstants {
     public static final String BS_RANKED_MAPS_POST_URL = "?sortOrder=Latest&ranked=true";
 
     // Beat Saviour
-    public static final String bsavior_PRE_URL = "https://www.beatsavior.io";
-    public static final String bsavior_LIVESCORES_URL = bsavior_PRE_URL + "/api/livescores/player/";
+    public static final String BSAVIOR_PRE_URL = "https://www.beatsavior.io";
+    public static final String BSAVIOR_LIVESCORES_URL = BSAVIOR_PRE_URL + "/api/livescores/player/";
+
+    //BeatLeader (Replays)
+
+    public static final String REPLAY_PRE_URL = "https://www.replay.beatleader.xyz/";
 
     // Meme API
     public static final String MEME_URL = "https://meme-api.herokuapp.com/gimme";

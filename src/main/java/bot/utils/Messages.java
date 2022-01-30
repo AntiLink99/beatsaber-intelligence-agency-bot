@@ -1,5 +1,7 @@
 package bot.utils;
 
+import bot.api.ApiConstants;
+import bot.dto.RecentSongData;
 import bot.dto.player.Player;
 import bot.listeners.EmbedButtonListener;
 import bot.main.BotConstants;
@@ -180,13 +182,30 @@ public class Messages {
         channel.sendMessage(msg).queue();
     }
 
-    public static void sendMessageWithImagesAndTexts(String msg, String title, String titleUrl, String imageUrl, String topImageUrl, String footerText, TextChannel channel) {
+    public static void sendRecentSongMessage(RecentSongData data, TextChannel channel) {
         EmbedBuilder builder = new EmbedBuilder();
-        builder.setDescription(msg);
+        builder.setDescription(data.getSongInfo());
         builder.setColor(embedColor);
-        builder.setAuthor(title, titleUrl, topImageUrl);
-        builder.setImage(imageUrl);
-        builder.setFooter(footerText);
+        builder.setAuthor(data.getSongName(), data.getSongUrl(), data.getDiffImageUrl());
+        builder.setImage(data.getCoverUrl());
+        builder.setFooter(data.getFooterText());
+
+        if (data.isRanked()) {
+            String strBuilder = ApiConstants.REPLAY_PRE_URL + "?id=" +
+                    data.getMapKey() +
+                    "&difficulty=" +
+                    data.getDiffName().replace("+", "Plus") +
+                    "&playerID=" +
+                    data.getPlayerId();
+
+            List<Button> initialButtons = new ArrayList<>();
+            initialButtons.add(Button.link(strBuilder, "🎬 Watch Replay 🎬"));
+
+            channel.sendMessage(builder.build())
+                    .setActionRows(ActionRow.of(initialButtons))
+                    .queue();
+            return;
+        }
         channel.sendMessage(builder.build()).queue();
     }
 

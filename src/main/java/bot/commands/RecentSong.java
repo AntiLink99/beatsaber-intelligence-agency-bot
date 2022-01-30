@@ -7,6 +7,7 @@ import bot.api.ScoreSaber;
 import bot.chart.AccuracyChart;
 import bot.db.DatabaseManager;
 import bot.dto.MessageEventDTO;
+import bot.dto.RecentSongData;
 import bot.dto.Song;
 import bot.dto.beatsavior.BeatSaviorPlayerScore;
 import bot.dto.player.Player;
@@ -203,7 +204,22 @@ public class RecentSong {
             String songUrl = ApiConstants.SS_LEADERBOARD_PRE_URL + recentLeaderboard.getId();
             String footerText = "Mapped by " + recentLeaderboard.getLevelAuthorName();
 
-            Messages.sendMessageWithImagesAndTexts(songInfo, songName, songUrl, coverUrl, diffImageUrl, footerText, event.getChannel());
+            RecentSongData recentSongData = new RecentSongData();
+            recentSongData.setSongInfo(songInfo);
+            recentSongData.setSongName(songName);
+            recentSongData.setSongUrl(songUrl);
+            recentSongData.setCoverUrl(coverUrl);
+            recentSongData.setDiffImageUrl(diffImageUrl);
+            recentSongData.setFooterText(footerText);
+            recentSongData.setRanked(isRanked);
+
+            if (isRanked) {
+                recentSongData.setMapKey(bsMap != null ? bsMap.getId() : null);
+                recentSongData.setPlayerId(playerId);
+                recentSongData.setDiffName(recentLeaderboard.getDifficulty().getDifficultyName());
+            }
+
+            Messages.sendRecentSongMessage(recentSongData, event.getChannel());
             if (hasBeatSavior) {
                 AccuracyChart.sendChartImage(saviourScore, player.getName(), recentLeaderboard.getDifficulty().getDifficultyName(), event);
                 int gridWaitingCounter = 0;

@@ -16,7 +16,7 @@ public class BeatSavior {
 
     public BeatSaviorPlayerScores fetchPlayerMaps(Long playerId) {
         try {
-            JsonArray playerMaps = http.fetchJsonArray(ApiConstants.bsavior_LIVESCORES_URL + playerId);
+            JsonArray playerMaps = http.fetchJsonArray(ApiConstants.BSAVIOR_LIVESCORES_URL + playerId);
             return gson.fromJson("{\"playerMaps\": " + playerMaps + "}", BeatSaviorPlayerScores.class);
         } catch (Exception e) {
             DiscordLogger.sendLogInChannel(e.getMessage(), DiscordLogger.HTTP_ERRORS);

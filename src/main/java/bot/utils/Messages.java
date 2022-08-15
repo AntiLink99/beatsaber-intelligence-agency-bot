@@ -70,12 +70,12 @@ public class Messages {
         return channel.sendMessage(builder.build()).complete();
     }
 
-    public static void sendImageEmbed(String imagePath, String title, MessageChannel channel) {
+    public static Message sendImageEmbed(String imagePath, String title, MessageChannel channel) {
         EmbedBuilder builder = new EmbedBuilder();
         builder.setTitle(Format.bold(Format.underline(title)));
         builder.setColor(embedColor);
         builder.setImage(imagePath);
-        channel.sendMessage(builder.build()).queue();
+        return channel.sendMessage(builder.build()).complete();
     }
 
     public static void sendImage(String imagePath, String title, TextChannel channel) {

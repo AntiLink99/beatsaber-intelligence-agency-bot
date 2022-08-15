@@ -25,17 +25,14 @@ import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
-import net.dv8tion.jda.api.requests.GatewayIntent;
-import net.dv8tion.jda.api.utils.ChunkingFilter;
-import net.dv8tion.jda.api.utils.MemberCachePolicy;
 import net.dv8tion.jda.api.utils.cache.CacheFlag;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.jetbrains.annotations.NotNull;
 
-import javax.security.auth.login.LoginException;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -60,22 +57,13 @@ public class BeatSaberBot extends ListenerAdapter {
 
         try {
             JDABuilder builder = JDABuilder.createDefault(System.getenv("bot_token"))
-                    .setMemberCachePolicy(MemberCachePolicy.ALL)
-                    .enableIntents(GatewayIntent.GUILD_MEMBERS)
-                    .setChunkingFilter(ChunkingFilter.ALL)
                     .addEventListeners(new BeatSaberBot())
                     .disableCache(CacheFlag.VOICE_STATE, CacheFlag.EMOTE)
                     .setActivity(Activity.playing(BotConstants.PLAYING));
-
             JDA jda = builder.build();
-            try {
-                System.out.println("Awaiting JDA ready status...");
-                jda.awaitReady();
-                hasStarted = true;
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-                return;
-            }
+            System.out.println("Awaiting JDA ready status...");
+            jda.awaitReady();
+            hasStarted = true;
 
             Guild loggingGuild = jda.getGuildById(BotConstants.logServerId);
             if (loggingGuild != null) {
@@ -87,7 +75,7 @@ public class BeatSaberBot extends ListenerAdapter {
             LeaderboardWatcher watcher = new LeaderboardWatcher(db, ss, jda);
             watcher.createNewLeaderboardWatcher();
             watcher.start();
-        } catch (LoginException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -104,7 +92,11 @@ public class BeatSaberBot extends ListenerAdapter {
         List<String> msgParts = Arrays.asList(("ru " + message).split(" "));
         event.getHook().setEphemeral(true);
         event.deferReply(true).queue();
-        handleCommand(msgParts, new MessageEventDTO(event));
+        try {
+            handleCommand(msgParts, new MessageEventDTO(event));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -128,7 +120,7 @@ public class BeatSaberBot extends ListenerAdapter {
         }
     }
 
-    private void handleCommand(List<String> msgParts, MessageEventDTO event) {
+    private void handleCommand(List<String> msgParts, MessageEventDTO event) throws IOException {
             TextChannel channel = event.getChannel();
             Guild guild = event.getGuild();
             Member author = event.getAuthor();
@@ -298,9 +290,6 @@ public class BeatSaberBot extends ListenerAdapter {
                     new AccGridImage(db).sendAccGridImage(urlString, event);
                     break;
                 }
-                case "profile":
-                    Messages.sendMessage("This feature is planned for the future!", channel);
-                    break;
                 case "seal":
                     int randomSealIndex = RandomUtils.getRandomNum(83);
                     String sealFileName = (randomSealIndex < 10 ? "0" : "") + "00" + randomSealIndex + ".jpg";

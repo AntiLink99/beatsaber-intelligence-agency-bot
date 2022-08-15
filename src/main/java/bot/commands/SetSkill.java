@@ -6,8 +6,6 @@ import bot.main.BotConstants;
 import bot.utils.Messages;
 import net.dv8tion.jda.api.entities.MessageChannel;
 
-import java.util.Arrays;
-import java.util.LinkedList;
 import java.util.List;
 
 public class SetSkill {
@@ -16,11 +14,10 @@ public class SetSkill {
         MessageChannel channel = event.getChannel();
         if (msgParts.size() >= 3) {
 
-            List<String> values = new LinkedList<>(Arrays.asList(msgParts.get(2).split(" ")));
-            String skill = values.get(0);
+            String skill = msgParts.get(2);
             int newValue;
             try {
-                newValue = Integer.parseInt(values.get(1));
+                newValue = Integer.parseInt(msgParts.get(3));
             } catch (NumberFormatException | IndexOutOfBoundsException e) {
                 Messages.sendMessage("The value provided has to be an integer from 1 to 10.", channel);
                 return;
@@ -30,6 +27,9 @@ public class SetSkill {
                 return;
             }
 
+            if ("acc".equals(skill)) {
+                skill = "accuracy";
+            }
             if (BotConstants.validSkills.contains(skill)) {
                 int rowsChanged = db.setSkill(event.getAuthor().getIdLong(), skill, newValue);
                 if (rowsChanged != 0) {

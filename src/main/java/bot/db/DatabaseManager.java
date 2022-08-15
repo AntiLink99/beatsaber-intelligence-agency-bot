@@ -44,12 +44,13 @@ public class DatabaseManager {
             stmt.setString(1, player.getId());
             stmt.setString(2, player.getName());
             stmt.setString(3, player.getProfilePicture());
-            stmt.setInt(4, player.getRank());
-            stmt.setInt(5, player.getCountryRank());
-            stmt.setFloat(6, player.getPp());
-            stmt.setString(7, player.getCountry());
-            stmt.setLong(8, player.getDiscordUserId());
-            stmt.setString(9, player.getHistories());
+            stmt.setString(4, player.getBio());
+            stmt.setInt(5, player.getRank());
+            stmt.setInt(6, player.getCountryRank());
+            stmt.setFloat(7, player.getPp());
+            stmt.setString(8, player.getCountry());
+            stmt.setLong(9, player.getDiscordUserId());
+            stmt.setString(10, player.getHistories());
             return stmt.executeUpdate() == 1;
         } catch (SQLIntegrityConstraintViolationException e) {
             // ok
@@ -86,14 +87,15 @@ public class DatabaseManager {
             stmt.setString(1, newPlayer.getId());
             stmt.setString(2, newPlayer.getName());
             stmt.setString(3, newPlayer.getProfilePicture());
-            stmt.setInt(4, newPlayer.getRank());
-            stmt.setInt(5, newPlayer.getCountryRank());
-            stmt.setFloat(6, newPlayer.getPp());
-            stmt.setString(7, newPlayer.getCountry());
-            stmt.setLong(8, newPlayer.getDiscordUserId());
-            stmt.setString(9, newPlayer.getHistories());
-            stmt.setString(10, newPlayer.getCustomAccGridImage());
-            stmt.setString(11, newPlayer.getId()); // Always last!
+            stmt.setString(4, newPlayer.getBio());
+            stmt.setInt(5, newPlayer.getRank());
+            stmt.setInt(6, newPlayer.getCountryRank());
+            stmt.setFloat(7, newPlayer.getPp());
+            stmt.setString(8, newPlayer.getCountry());
+            stmt.setLong(9, newPlayer.getDiscordUserId());
+            stmt.setString(10, newPlayer.getHistories());
+            stmt.setString(11, newPlayer.getCustomAccGridImage());
+            stmt.setString(12, newPlayer.getId()); // Always last!
             stmt.executeUpdate();
         } catch (Exception e) {
             System.out.println("Failed for player with id: " + newPlayer.getId());
@@ -115,6 +117,7 @@ public class DatabaseManager {
                 player.setId(rs.getString("player_id"));
                 player.setName(rs.getString("player_name"));
                 player.setProfilePicture(rs.getString("player_avatar"));
+                player.setBio(rs.getString("player_bio"));
                 player.setRank(rs.getInt("player_rank"));
                 player.setCountryRank(rs.getInt("player_country_rank"));
                 player.setPp(rs.getFloat("player_pp"));
@@ -148,6 +151,7 @@ public class DatabaseManager {
                 player.setId(rs.getString("player_id"));
                 player.setName(rs.getString("player_name"));
                 player.setProfilePicture(rs.getString("player_avatar"));
+                player.setBio(rs.getString("player_bio"));
                 player.setRank(rs.getInt("player_rank"));
                 player.setCountryRank(rs.getInt("player_country_rank"));
                 player.setPp(rs.getFloat("player_pp"));
@@ -177,6 +181,7 @@ public class DatabaseManager {
                 player.setId(rs.getString("player_id"));
                 player.setName(rs.getString("player_name"));
                 player.setProfilePicture(rs.getString("player_avatar"));
+                player.setBio(rs.getString("player_bio"));
                 player.setRank(rs.getInt("player_rank"));
                 player.setCountryRank(rs.getInt("player_country_rank"));
                 player.setPp(rs.getFloat("player_pp"));

@@ -132,15 +132,15 @@ public class LeaderboardWatcher {
             boolean isInactive = updatedPlayer.getCountryRank() == 0;
             Member member = DiscordUtils.getMemberByChannelAndId(bsgOutput, updatedPlayer.getDiscordUserId());
             if (member != null && RoleManagerBSG.isNewMilestone(updatedPlayer.getCountryRank(), member)) {
-                //Log
-                System.out.println("Updating member: "+member.getEffectiveName());
-                int milestone = ListValueUtils.findBsgMilestoneForRank(updatedPlayer.getCountryRank());
-                String newRoleMessage = "Changed BSG role: " + updatedPlayer.getName() + " New Rank: " + updatedPlayer.getCountryRank() + " - Old Rank: " + oldPlayer.getCountryRank() + "   " + "(Top " + milestone + ")";
-                DiscordLogger.sendLogInChannel(newRoleMessage, DiscordLogger.WATCHER_REFRESH);
-
                 //Remove all "Top "... bot.roles
                 RoleManager.removeMemberRolesByName(member, BotConstants.topRolePrefix);
                 if (!isInactive) {
+                    //Log
+                    System.out.println("Updating member: "+member.getEffectiveName());
+                    int milestone = ListValueUtils.findBsgMilestoneForRank(updatedPlayer.getCountryRank());
+                    String newRoleMessage = "Changed BSG role: " + updatedPlayer.getName() + " New Rank: " + updatedPlayer.getCountryRank() + " - Old Rank: " + oldPlayer.getCountryRank() + "   " + "(Top " + milestone + ")";
+                    DiscordLogger.sendLogInChannel(newRoleMessage, DiscordLogger.WATCHER_REFRESH);
+
                     //Add "Top xxx DE" role
                     RoleManagerBSG.assignMilestoneRole(updatedPlayer.getCountryRank(), member);
                     if (updatedPlayer.getCountryRank() < oldPlayer.getCountryRank()) {
@@ -153,7 +153,7 @@ public class LeaderboardWatcher {
             boolean playerImproved = updatedPlayer.getCountryRank() < oldPlayer.getCountryRank() && updatedPlayer.getPp() != oldPlayer.getPp();
             if (playerImproved && !isInactive) {
                 //Send message (only improvement)
-                System.out.println("Player "+updatedPlayer.getName()+" improved!");
+                System.out.println("Player " + updatedPlayer.getName() + " improved!");
                 String improvementMessage = Format.underline(Format.bold(updatedPlayer.getName())) + " has advanced from rank " + Format.bold("#" + oldPlayer.getCountryRank() + " DE") + " to rank " + Format.bold("#" + updatedPlayer.getCountryRank() + " DE") + "! (" + updatedPlayer.getPp() + "pp)";
 
                 List<Player> snipedPlayers = findSnipedPlayers(updatedPlayer, oldPlayer, updatedPlayers, oldPlayers);

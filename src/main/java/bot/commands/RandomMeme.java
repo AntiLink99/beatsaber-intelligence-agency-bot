@@ -4,6 +4,7 @@ import bot.api.ApiConstants;
 import bot.api.HttpMethods;
 import bot.utils.Messages;
 import com.google.gson.JsonObject;
+import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.TextChannel;
 
 public class RandomMeme {
@@ -13,6 +14,8 @@ public class RandomMeme {
         JsonObject json = http.fetchJsonObject(ApiConstants.MEME_URL);
         String title = json.get("title").getAsString();
         String url = json.get("url").getAsString();
-        Messages.sendImageEmbed(url, title, channel);
+        Message memeEmbed = Messages.sendImageEmbed(url, title, channel);
+        memeEmbed.addReaction("⬆").queue();
+        memeEmbed.addReaction("⬇").queue();
     }
 }

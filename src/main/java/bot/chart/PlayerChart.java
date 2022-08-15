@@ -27,11 +27,17 @@ import java.util.stream.IntStream;
 public class PlayerChart {
 
     private int lineWidthSingle = 10;
+    private final int lineWidthMulti = 5;
     private final Color lineColor = Color.BLUE;
 
     public void sendChartImage(Player player, MessageEventDTO event) {
+        if (player == null) {
+            Messages.sendMessage("Could not find player. Please check if you are registered.", event.getChannel());
+            return;
+        }
+
         if (player.getHistoryValues() == null) {
-            Messages.sendMessage("Could not find history values for user. Please update the user with \"ru update <ScoreSaber URL>\".", event.getChannel());
+            Messages.sendMessage("Could not find history values for user. Please update the user with \"ru update\".", event.getChannel());
             return;
         }
         String filepath = BotConstants.RESOURCES_PATH + player.getId();
@@ -63,7 +69,7 @@ public class PlayerChart {
         }
 
         XYChart chart = getPlayerChart(players, max, min);
-        String filename = BotConstants.RESOURCES_PATH+"players";
+        String filename = BotConstants.RESOURCES_PATH + "players";
 
         ChartUtils.saveChart(chart, filename);
         File image = new File(filename + ".png");
@@ -99,9 +105,12 @@ public class PlayerChart {
             List<Integer> history = ListValueUtils.addElementReturnList(player.getHistoryValues(), player.getRank()).stream().map(h -> -h).collect(Collectors.toList());
             List<Integer> time = IntStream.rangeClosed(-history.size() + 1, 0).boxed().collect(Collectors.toList());
             XYSeries series = chart.addSeries(player.getName(), time, history);
-            int lineWidthMulti = 5;
-            series.setLineWidth(players.size() == 1 ? lineWidthSingle : lineWidthMulti);
-            series.setLineColor(lineColor);
+            if (players.size() == 1) {
+                series.setLineWidth(lineWidthSingle);
+                series.setLineColor(lineColor);
+            } else {
+                series.setLineWidth(lineWidthMulti);
+            }
             series.setMarker(SeriesMarkers.NONE);
         }
         return chart;

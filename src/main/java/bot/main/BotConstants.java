@@ -13,7 +13,7 @@ public class BotConstants {
     public static final String PLAYING = "-> bs help <-";
     public static final String RESOURCES_PATH = "src/main/resources/".replace("/", File.separator);
     public static final String donateUrl = "https://www.patreon.com/antilink";
-    public static final String featureRequestUrl = "https://gitreports.com/issue/AntiLink99/beatsaber-intelligence-agency-bot";
+    public static final String featureRequestUrl = "https://github.com/AntiLink99/beatsaber-intelligence-agency-bot/issues";
     public static final String bsiaServerInviteUrl = "https://discord.gg/HXbmf8Xefs";
 
     public static final long foaaServerId = Long.parseLong(System.getenv("foaa_server_id"));

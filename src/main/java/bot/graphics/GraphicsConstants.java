@@ -1,5 +1,7 @@
 package bot.graphics;
 
+import javafx.scene.paint.Color;
+
 public class GraphicsConstants {
 
     //Accuracy Grid
@@ -20,4 +22,8 @@ public class GraphicsConstants {
     final static int greyBorderWidth = 8;
     final static double playerPictureHeight = 300;
     final static double playerChartWidth = 600;
+
+    final public static int bioWidth = 600;
+
+    final public static Color ppColor = Color.rgb(137, 146, 232);
 }

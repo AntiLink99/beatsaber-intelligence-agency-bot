@@ -12,6 +12,7 @@ public class Player implements Serializable {
     private String id;
     private String name;
     private String profilePicture;
+    private String bio;
     private int rank;
     private int countryRank;
     private float pp;
@@ -46,6 +47,14 @@ public class Player implements Serializable {
 
     public void setProfilePicture(String profilePicture) {
         this.profilePicture = profilePicture;
+    }
+
+    public String getBio() {
+        return bio;
+    }
+
+    public void setBio(String bio) {
+        this.bio = bio;
     }
 
     public int getRank() {

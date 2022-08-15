@@ -29,7 +29,7 @@ public class ApiConstants {
     public static final String BS_RANKED_MAPS_POST_URL = "?sortOrder=Latest&ranked=true";
 
     // Beat Saviour
-    public static final String BSAVIOR_PRE_URL = "https://www.beatsavior.io";
+    public static final String BSAVIOR_PRE_URL = "https://beat-savior.herokuapp.com";
     public static final String BSAVIOR_LIVESCORES_URL = BSAVIOR_PRE_URL + "/api/livescores/player/";
 
     //BeatLeader (Replays)

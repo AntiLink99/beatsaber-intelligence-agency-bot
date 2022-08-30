@@ -8,8 +8,6 @@ import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.cookie.CookiePolicy;
 import org.apache.commons.httpclient.methods.GetMethod;
-import org.apache.commons.httpclient.methods.PostMethod;
-import org.apache.commons.httpclient.methods.StringRequestEntity;
 import org.apache.commons.httpclient.params.HttpClientParams;
 import org.apache.commons.io.IOUtils;
 
@@ -51,6 +49,7 @@ public class HttpMethods {
             throw ex;
         } finally {
             future.cancel(true);
+            connection.disconnect();
         }
         return image;
     }
@@ -73,59 +72,45 @@ public class HttpMethods {
         return response;
     }
 
-    public InputStream post(String url, String body) throws IOException {
-        PostMethod post = new PostMethod(url);
-        post.setRequestEntity(new StringRequestEntity(body, "application/json", "UTF-8"));
-
-        int statusCode = http.executeMethod(post);
-        if (statusCode != 200) {
-            DiscordLogger.sendLogInChannel("Data could not be fetched. (" + url + ")\nStatuscode: " + statusCode, DiscordLogger.HTTP_ERRORS);
-            return null;
-        }
-
-        InputStream response = null;
-        try {
-            response = post.getResponseBodyAsStream();
-        } catch (IOException e) {
-            DiscordLogger.sendLogInChannel(e.getMessage(), DiscordLogger.HTTP_ERRORS);
-        }
-        return response;
-    }
-
     public JsonObject fetchJsonObject(String url) {
+        InputStream fetchedStream = null;
         try {
-            InputStream fetchedStream = get(url);
+            fetchedStream = get(url);
             if (fetchedStream == null) {
                 return null;
             }
-            return JsonParser.parseString(IOUtils.toString(fetchedStream, StandardCharsets.UTF_8)).getAsJsonObject();
+            JsonObject response = JsonParser.parseString(IOUtils.toString(fetchedStream, StandardCharsets.UTF_8)).getAsJsonObject();
+            fetchedStream.close();
+            return response;
         } catch (IOException e) {
+            if (fetchedStream != null) {
+                try {
+                    fetchedStream.close();
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                }
+            }
             DiscordLogger.sendLogInChannel(e.getMessage(), DiscordLogger.HTTP_ERRORS);
             return null;
         }
     }
 
     public JsonArray fetchJsonArray(String url) {
+        InputStream fetchedStream = null;
         try {
-            InputStream fetchedStream = get(url);
+            fetchedStream = get(url);
             if (fetchedStream == null) {
                 return null;
             }
             return JsonParser.parseString(IOUtils.toString(fetchedStream, StandardCharsets.UTF_8)).getAsJsonArray();
         } catch (IOException e) {
-            DiscordLogger.sendLogInChannel(e.getMessage(), DiscordLogger.HTTP_ERRORS);
-            return null;
-        }
-    }
-
-    public JsonObject fetchJsonObjectPost(String url, String body) {
-        try {
-            InputStream fetchedStream = post(url, body);
-            if (fetchedStream == null) {
-                return null;
+            if (fetchedStream != null) {
+                try {
+                    fetchedStream.close();
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                }
             }
-            return JsonParser.parseString(IOUtils.toString(fetchedStream, StandardCharsets.UTF_8)).getAsJsonObject();
-        } catch (IOException e) {
             DiscordLogger.sendLogInChannel(e.getMessage(), DiscordLogger.HTTP_ERRORS);
             return null;
         }

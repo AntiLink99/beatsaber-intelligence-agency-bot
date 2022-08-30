@@ -151,6 +151,8 @@ public class AccuracyGrid extends Application {
         JavaFXUtils.saveFile(resultImage, new File(getFilePath()));
         isFinished = true;
         primaryStage.close();
+        accuracyValues.clear();
+        notesCounts.clear();
     }
 
     private Paint getAccTextColor(float accuracy) {

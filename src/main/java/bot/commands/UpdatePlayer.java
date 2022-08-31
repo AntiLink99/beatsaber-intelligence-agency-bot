@@ -35,6 +35,6 @@ public class UpdatePlayer {
         final long playerDiscordId = storedPlayer.getDiscordUserId();
         ssPlayer.setDiscordUserId(playerDiscordId);
         ssPlayer.setCustomAccGridImage(storedPlayer.getCustomAccGridImage());
-        Messages.sendMessage("Player \"" + ssPlayer.getName() + "\"updated successfully.", channel);
+        Messages.sendMessage("Player \"" + ssPlayer.getName() + "\" updated successfully.", channel);
     }
 }

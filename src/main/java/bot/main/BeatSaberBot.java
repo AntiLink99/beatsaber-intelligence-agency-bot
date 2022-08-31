@@ -24,7 +24,10 @@ import net.dv8tion.jda.api.events.guild.member.GuildMemberRemoveEvent;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import net.dv8tion.jda.api.interactions.commands.OptionMapping;
+import net.dv8tion.jda.api.interactions.commands.Command;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.commands.build.BaseCommand;
+import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.utils.cache.CacheFlag;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -33,6 +36,8 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -47,6 +52,7 @@ public class BeatSaberBot extends ListenerAdapter {
     RankedMaps ranked = new RankedMaps();
 
     static boolean hasStarted = false;
+    static long applicationId = -1;
 
     final Pattern scoreSaberIDPattern = Pattern.compile(ApiConstants.USER_ID_REGEX);
 
@@ -63,7 +69,10 @@ public class BeatSaberBot extends ListenerAdapter {
             JDA jda = builder.build();
             System.out.println("Awaiting JDA ready status...");
             jda.awaitReady();
+
             hasStarted = true;
+            applicationId = jda.retrieveApplicationInfo().complete().getIdLong();
+            System.out.println("*** AppID: " + applicationId);
 
             Guild loggingGuild = jda.getGuildById(BotConstants.logServerId);
             if (loggingGuild != null) {
@@ -75,6 +84,8 @@ public class BeatSaberBot extends ListenerAdapter {
             LeaderboardWatcher watcher = new LeaderboardWatcher(db, ss, jda);
             watcher.createNewLeaderboardWatcher();
             watcher.start();
+
+            jda.getGuilds().forEach(BeatSaberBot::setupCommands);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -85,10 +96,7 @@ public class BeatSaberBot extends ListenerAdapter {
         if (!event.isFromGuild() || event.getUser().isBot()) {
             return;
         }
-        String message = event.getOptions().stream().map(OptionMapping::getAsString).collect(Collectors.joining());
-        if (message.isEmpty()) {
-            return;
-        }
+        String message = parseCommandsForHandler(event);
         List<String> msgParts = Arrays.asList(("ru " + message).split(" "));
         event.getHook().setEphemeral(true);
         event.deferReply(true).queue();
@@ -97,6 +105,44 @@ public class BeatSaberBot extends ListenerAdapter {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    private static String parseCommandsForHandler(SlashCommandEvent event) {
+        String messageParams = event.getOptions().stream().map(o -> {
+            if (o.getType() == OptionType.USER) {
+                return "@" + o.getAsString();
+            }
+            return o.getAsString();
+        }).collect(Collectors.joining(" "));
+        String message = event.getName() + " " + messageParams;
+        return message
+                .replaceAll("ranked_by_latest", "ranked")
+                .replaceAll("ranked_by_stars", "ranked")
+                .replaceAll("playlist_embed", "rplaylist");
+    }
+
+    private static void setupCommands(Guild guild) {
+        DiscordLogger.sendLogInChannel("Settings up slash commands for Guild: " + guild.getName(), DiscordLogger.INFO);
+        List<CommandData> wantedCommands = new ArrayList<>(SlashCommands.getCurrentCommands());
+        List<String> wantedCommandNames = wantedCommands.stream().map(BaseCommand::getName).collect(Collectors.toList());
+
+        List<Command> commands = guild.retrieveCommands().complete()
+                .stream()
+                .filter(c -> c.getApplicationIdLong() == applicationId)
+                .collect(Collectors.toList());
+        for (Command command: commands) {
+            boolean commandIsAlreadyOnGuild = wantedCommandNames.contains(command.getName());
+            boolean commandWasCreatedBeforeTwoMonths = command.getTimeCreated().toLocalDateTime().isBefore(LocalDateTime.now().minusDays(60));
+            if (commandIsAlreadyOnGuild) {
+                if (commandWasCreatedBeforeTwoMonths) {
+                    System.out.println("Deleting command " + command.getName());
+                    guild.deleteCommandById(command.getId()).queue();
+                } else {
+                    wantedCommands.removeIf(c -> c.getName().equals(command.getName()));
+                }
+            }
+        }
+        guild.updateCommands().addCommands(wantedCommands).queue();
     }
 
     @Override
@@ -141,16 +187,6 @@ public class BeatSaberBot extends ListenerAdapter {
                     }
                 case "update":
                     new UpdatePlayer(db).updatePlayer(commandPlayer, channel);
-                case "claimpp":
-                    if (guild.getIdLong() == BotConstants.foaaServerId) {
-                        new ClaimPPRole(db).validateAndAssignRole(event.getAuthor(), channel, true);
-                    }
-                    break;
-                case "claimppall":
-                    if (DiscordUtils.isAdmin(event.getAuthor().getUser())) {
-                        new ClaimPPRole(db).validateAndAssignRoleForAll(event);
-                    }
-                    break;
                 case "unregister":
                     new HandlePlayerRegisteration(db).unregisterPlayer(event);
                     break;
@@ -323,18 +359,6 @@ public class BeatSaberBot extends ListenerAdapter {
                         ranked = bs.fetchAllRankedMaps();
                     }
                     break;
-                case "deletethat":
-                    List<Message> latestMessages = event.getChannel().getHistory().retrievePast(100).complete();
-                    latestMessages = latestMessages.stream().filter(message -> message.getAuthor().getIdLong() == event.getJDA().getSelfUser().getIdLong()).collect(Collectors.toList());
-
-                    if (!latestMessages.isEmpty()) {
-                        Message latestMessage = latestMessages.get(0);
-                        latestMessage.delete().queue();
-                        Messages.sendTempMessage("Message deleted.", 4, channel);
-                    } else {
-                        Messages.sendTempMessage("I could not find my latest message...", 4, channel);
-                    }
-                    break;
                 case "invite": {
                     Messages.sendMessage(Format.bold("https://discord.com/api/oauth2/authorize?client_id=711323223891116043&permissions=0&scope=bot"), channel);
                     break;
@@ -403,6 +427,7 @@ public class BeatSaberBot extends ListenerAdapter {
     @Override
     public void onGuildJoin(GuildJoinEvent event) {
         DiscordLogger.sendLogInChannel(Format.code("Joined guild \"" + event.getGuild().getName() + "\""), DiscordLogger.GUILDS);
+        setupCommands(event.getGuild());
     }
 
     @Override
@@ -440,7 +465,7 @@ public class BeatSaberBot extends ListenerAdapter {
 
     @Override
     public void onReady(@NotNull ReadyEvent event) {
-        System.out.println("Ready!");
+        System.out.println("READY!");
     }
 
     private Player getScoreSaberPlayerFromUrl(String profileUrl) throws FileNotFoundException {

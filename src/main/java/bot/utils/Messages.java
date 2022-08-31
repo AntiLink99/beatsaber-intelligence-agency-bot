@@ -30,7 +30,7 @@ public class Messages {
             EmbedBuilder builder = new EmbedBuilder();
             builder.setDescription(msg);
             builder.setColor(embedColor);
-            channel.sendMessage(builder.build()).queue();
+            channel.sendMessageEmbeds(builder.build()).queue();
         } catch (Exception e) {
             System.out.println("Could not send message because of lacking permissions: " + e.getMessage());
         }
@@ -42,7 +42,7 @@ public class Messages {
             builder.setDescription(msg);
             builder.setColor(embedColor);
             builder.setTitle(title, titleUrl);
-            channel.sendMessage(builder.build()).queue();
+            channel.sendMessageEmbeds(builder.build()).queue();
         } catch (Exception e) {
             System.out.println("Could not send message because of lacking permissions: " + e.getMessage());
         }
@@ -55,7 +55,7 @@ public class Messages {
         }
         builder.setColor(embedColor);
         builder.setTitle(title);
-        channel.sendMessage(builder.build()).queue();
+        channel.sendMessageEmbeds(builder.build()).queue();
     }
 
     public static Message sendMessageStringMap(Map<String, String> values, String title, MessageChannel channel) {
@@ -67,7 +67,7 @@ public class Messages {
         if (title != null) {
             builder.setTitle(title);
         }
-        return channel.sendMessage(builder.build()).complete();
+        return channel.sendMessageEmbeds(builder.build()).complete();
     }
 
     public static Message sendImageEmbed(String imagePath, String title, MessageChannel channel) {
@@ -75,7 +75,7 @@ public class Messages {
         builder.setTitle(Format.bold(Format.underline(title)));
         builder.setColor(embedColor);
         builder.setImage(imagePath);
-        return channel.sendMessage(builder.build()).complete();
+        return channel.sendMessageEmbeds(builder.build()).complete();
     }
 
     public static void sendImage(String imagePath, String title, TextChannel channel) {
@@ -131,13 +131,13 @@ public class Messages {
         builder.setFooter("Page 1");
 
         if (values.size() <= BotConstants.entriesPerReactionPage) {
-            channel.sendMessage(builder.build()).complete();
+            channel.sendMessageEmbeds(builder.build()).complete();
             return;
         }
         List<Button> initialButtons = new ArrayList<>();
         initialButtons.add(Button.secondary("nextPage", "Next Page"));
 
-        Message reactionMessage = channel.sendMessage(builder.build())
+        Message reactionMessage = channel.sendMessageEmbeds(builder.build())
                 .setActionRows(ActionRow.of(initialButtons))
                 .complete();
 
@@ -152,7 +152,7 @@ public class Messages {
         builder.setColor(embedColor);
         builder.setTitle(title);
         builder.setFooter(footer);
-        channel.editMessageById(messageId, builder.build()).queue();
+        channel.editMessageEmbedsById(messageId, builder.build()).queue();
     }
 
     public static void sendTempMessage(String msg, int deleteAfterSecs, MessageChannel channel) {
@@ -160,14 +160,16 @@ public class Messages {
             EmbedBuilder builder = new EmbedBuilder();
             builder.setDescription(msg);
             builder.setColor(embedColor);
-            Message message = channel.sendMessage(builder.build()).complete();
+            Message message = channel.sendMessageEmbeds(builder.build()).complete();
 
-            new java.util.Timer().schedule(new java.util.TimerTask() {
-                @Override
-                public void run() {
-                    message.delete().queue();
-                }
-            }, deleteAfterSecs * 1000L);
+            if (message != null) {
+                new java.util.Timer().schedule(new java.util.TimerTask() {
+                    @Override
+                    public void run() {
+                        message.delete().queue();
+                    }
+                }, deleteAfterSecs * 1000L);
+            }
         } catch (Exception ignored) {
 
         }
@@ -201,12 +203,12 @@ public class Messages {
             List<Button> initialButtons = new ArrayList<>();
             initialButtons.add(Button.link(strBuilder, "🎬 Watch Replay 🎬"));
 
-            channel.sendMessage(builder.build())
+            channel.sendMessageEmbeds(builder.build())
                     .setActionRows(ActionRow.of(initialButtons))
                     .queue();
             return;
         }
-        channel.sendMessage(builder.build()).queue();
+        channel.sendMessageEmbeds(builder.build()).queue();
     }
 
     public static void sendBsgRankMessage(String title, String desc, String titleUrl, Color color, String avatar, MessageChannel channel) {
@@ -216,7 +218,7 @@ public class Messages {
             builder.setDescription(desc);
             builder.setColor(color);
             builder.setThumbnail(avatar);
-            channel.sendMessage(builder.build()).queue();
+            channel.sendMessageEmbeds(builder.build()).queue();
         } catch (Exception e) {
             System.out.println("Could not send message because of lacking permissions: " + e.getMessage());
         }

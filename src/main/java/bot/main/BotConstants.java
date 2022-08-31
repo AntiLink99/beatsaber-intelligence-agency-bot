@@ -17,7 +17,6 @@ public class BotConstants {
     public static final String bsiaServerInviteUrl = "https://discord.gg/HXbmf8Xefs";
 
     public static final long foaaServerId = Long.parseLong(System.getenv("foaa_server_id"));
-    public static final long bsgServerId = Long.parseLong(System.getenv("bsg_server_id"));
     public static final long logServerId = Long.parseLong(System.getenv("log_server_id"));
 
     public static final long foaaOutputChannelId = Long.parseLong(System.getenv("foaa_channel_id"));
@@ -74,8 +73,8 @@ public class BotConstants {
         commands.put("bs setgridimage <Image URL>", "Sets a background image for the acc grid in 'bs recentsong'. Leave the URL empty to reset the image.");
         commands.put("bs recentsongs (optional: <PageID>) (optional: <@member>)", "Displays the recently set scores of a player.");
         commands.put("bs topsongs (optional: <PageID>) (optional: <@member>)", "Displays the best scores of a player.");
-        commands.put("bs globalrank", "Shows your global rank in comparison to the two players above and below you on ScoreSaber.");
-        commands.put("bs localrank", "Shows your local rank in comparison to the two players above and below you on ScoreSaber.");
+        commands.put("bs globalrank (optional: <@member>)", "Shows your global rank in comparison to the two players above and below you on ScoreSaber.");
+        commands.put("bs localrank (optional: <@member>)", "Shows your local rank in comparison to the two players above and below you on ScoreSaber.");
         commands.put("bs improvement", "Lists the rank difference between the last seven days for all players.");
         if (isFOAA) {
             commands.put("bs claimpp", "Assigns a pp role to you depending on your top play.");
@@ -91,7 +90,6 @@ public class BotConstants {
         commands.put("bs ranked <amount>", "Automatically creates a playlist with the " + Format.bold("{amount}") + " latest ranked maps.");
         commands.put("bs stand (optional: <@member>)", "Displays a radar chart of the skills the player set for himself.");
         commands.put("bs setskill <skill> <1-10>", "Sets the skill value for the radar chart displayed with \"bs stand\".");
-        commands.put("bs deletethat", "Deletes the latest message from the bot in the channel.");
         commands.put("bs say <anything>", "Repeats the given phrase and deletes the message of the sender.");
         commands.put("bs seal", "Cute seal.");
         commands.put("bs help", "Lists all commands, duh.");

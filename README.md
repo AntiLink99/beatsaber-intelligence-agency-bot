@@ -2,6 +2,8 @@
 
 ## Bot Invite: https://discord.com/api/oauth2/authorize?client_id=711323223891116043&permissions=0&scope=bot
 
+## The bot evaluates your message content on Discord, but nothing is stored. If this bothers you anyway, feel free to write me a message: AntiLink#1337
+
 ## All commands with "bs help"
 
 ![alt text](https://media.discordapp.net/attachments/770380256192233513/841819993032622100/dc_bot_ver2.png?width=200&height=200)

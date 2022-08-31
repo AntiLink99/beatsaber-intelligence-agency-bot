@@ -20,4 +20,5 @@ The bot evaluates your message content on Discord for the purpose of finding Twi
 It does not store any data except your ScoreSaber and Discord ID.
 
 If this bothers you anyway, feel free to write me a message and we can figure something out: AntiLink#1337
+
 You can always delete your whole data stored by using the unregister command.

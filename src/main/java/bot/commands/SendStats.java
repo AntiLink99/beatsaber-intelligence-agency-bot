@@ -5,9 +5,6 @@ import bot.main.BotConstants;
 import bot.utils.Messages;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.entities.MessageChannel;
-import net.dv8tion.jda.api.entities.User;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -19,16 +16,11 @@ import java.util.stream.Collectors;
 public class SendStats {
 
     public void sendStats(MessageEventDTO event) {
-        User author = event.getAuthor().getUser();
-        MessageChannel dmChannel = author.openPrivateChannel().complete();
-
         JDA jda = event.getJDA();
         List<Guild> guilds = jda.getGuilds().stream()
                 .sorted(Comparator.comparingInt(Guild::getMemberCount))
                 .collect(Collectors.toList());
-        List<Member> members = guilds.stream()
-                .flatMap(guild -> guild.getMembers().stream())
-                .collect(Collectors.toList());
+        int memberCount = guilds.stream().mapToInt(Guild::getMemberCount).sum();
 
         StringBuilder statsResult = new StringBuilder();
         statsResult.append("Guild count:".toUpperCase())
@@ -37,7 +29,7 @@ public class SendStats {
                 .append("\n");
         statsResult.append("Member count:".toUpperCase())
                 .append("   ")
-                .append(members.size())
+                .append(memberCount)
                 .append("\n\n");
         for (Guild guild : guilds) {
             statsResult.append(guild.getName())

@@ -47,7 +47,6 @@ public class LeaderboardWatcher {
             try {
                 int fetchCounter = 0;
                 List<Player> oldPlayers = db.getAllStoredPlayers();
-
                 List<Player> updatedPlayers = new ArrayList<>();
                 //Iterate over stored players
                 for (Player storedPlayer : oldPlayers) {
@@ -114,6 +113,7 @@ public class LeaderboardWatcher {
         updatedPlayers = updatedPlayers.stream().filter(player -> "DE".equals(player.getCountry())).collect(Collectors.toList());
         oldPlayers = oldPlayers.stream().filter(player -> "DE".equals(player.getCountry())).collect(Collectors.toList());
 
+        List<Member> bsgMembers = bsgOutput.getGuild().loadMembers().get();
         for (Player updatedPlayer : updatedPlayers) {
             Player oldPlayer = oldPlayers.stream()
                     .filter(p -> p.getPlayerIdLong() == updatedPlayer.getPlayerIdLong())
@@ -130,7 +130,7 @@ public class LeaderboardWatcher {
 
             //Role change
             boolean isInactive = updatedPlayer.getCountryRank() == 0;
-            Member member = DiscordUtils.getMemberByChannelAndId(bsgOutput, updatedPlayer.getDiscordUserId());
+            Member member = bsgMembers.stream().filter(m -> m.getIdLong() == updatedPlayer.getDiscordUserId()).findFirst().orElse(null);
             if (member != null && RoleManagerBSG.isNewMilestone(updatedPlayer.getCountryRank(), member)) {
                 //Remove all "Top "... bot.roles
                 RoleManager.removeMemberRolesByName(member, BotConstants.topRolePrefix);

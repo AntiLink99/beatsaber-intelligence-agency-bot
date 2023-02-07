@@ -38,6 +38,9 @@ public class ScoreSaber {
         JsonObject playerInfo = response.getAsJsonObject();
 
         Player ssPlayer = gson.fromJson(playerInfo.toString(), Player.class);
+        if (ssPlayer.getHistories().startsWith(",")) {
+            ssPlayer.setHistories(ssPlayer.getHistories().substring(1));
+        }
         ssPlayer.setHistoryValues(Arrays.stream(ssPlayer.getHistories().split(",")).map(Integer::parseInt).collect(Collectors.toList()));
         return ssPlayer;
     }

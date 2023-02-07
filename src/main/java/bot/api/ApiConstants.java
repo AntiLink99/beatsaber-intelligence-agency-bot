@@ -3,6 +3,7 @@ package bot.api;
 public class ApiConstants {
 
     public static final String USER_ID_REGEX = "scoresaber\\.com\\/u\\/(\\d+)";
+    public static final String TWITCH_ID_REGEX = "twitch\\.tv\\/videos\\/(\\d+)";
     // ScoreSaber
     public static final String SS_PRE_URL = "https://scoresaber.com";
     public static final String USER_PRE_URL = SS_PRE_URL + "/u/";
@@ -12,7 +13,7 @@ public class ApiConstants {
     public static final String SS_PLAYER_RECENT_SCORES_POST_URL = "/scores?sort=recent";
     public static final String SS_LEADERBOARD_PRE_URL = "https://scoresaber.com/leaderboard/";
     public static final String QUALIFIED_URL = "https://scoresaber.com/api.php?function=get-leaderboards&cat=5&limit=100&page=1&unique=1&qualified=1";
-    public static final String NO_AVATAR_URL = "https://scoresaber.com/imports/images/usr-avatars/404.jpg";
+    public static final String NO_AVATAR_URL = "https://images.squarespace-cdn.com/content/v1/55fc0004e4b069a519961e2d/1442590746571-RPGKIXWGOO671REUNMCB/image-asset.gif?format=300w";
     public static final String PLAYER_LEADERBOARDS_API_URL = "https://scoresaber.com/api/players?page=";
     public static final String PLAYER_LEADERBOARDS_URL = "https://scoresaber.com/rankings?page=";
 

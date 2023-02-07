@@ -10,6 +10,7 @@ import bot.dto.MessageEventDTO;
 import bot.dto.RecentSongData;
 import bot.dto.Song;
 import bot.dto.beatsavior.BeatSaviorPlayerScore;
+import bot.dto.beatsavior.BeatSaviorPlayerScores;
 import bot.dto.player.Player;
 import bot.dto.rankedmaps.BeatSaverRankedMap;
 import bot.dto.rankedmaps.RankedMaps;
@@ -87,7 +88,9 @@ public class RecentSong {
 
             // Saviour
             //TODO
-            List<BeatSaviorPlayerScore> saviourScores = bsavior.fetchPlayerMaps(Long.valueOf(playerId)).getPlayerMaps();
+            BeatSaviorPlayerScores saviorPlayerScores = bsavior.fetchPlayerMaps(Long.valueOf(playerId));
+            System.out.println(saviorPlayerScores);
+            List<BeatSaviorPlayerScore> saviourScores = saviorPlayerScores != null ? saviorPlayerScores.getPlayerMaps() : null;
 
             BeatSaviorPlayerScore saviourScore = null;
             boolean hasBeatSavior = saviourScores != null && !saviourScores.isEmpty();

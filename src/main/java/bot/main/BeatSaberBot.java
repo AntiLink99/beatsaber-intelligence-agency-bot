@@ -28,6 +28,7 @@ import net.dv8tion.jda.api.interactions.commands.Command;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.BaseCommand;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
+import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.utils.cache.CacheFlag;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -36,7 +37,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -55,6 +55,7 @@ public class BeatSaberBot extends ListenerAdapter {
     static long applicationId = -1;
 
     final Pattern scoreSaberIDPattern = Pattern.compile(ApiConstants.USER_ID_REGEX);
+    final Pattern twitchVODPattern = Pattern.compile(ApiConstants.TWITCH_ID_REGEX);
 
     public static void main(String[] args) {
         DatabaseManager db = new DatabaseManager();
@@ -64,6 +65,7 @@ public class BeatSaberBot extends ListenerAdapter {
         try {
             JDABuilder builder = JDABuilder.createDefault(System.getenv("bot_token"))
                     .addEventListeners(new BeatSaberBot())
+                    .enableIntents(GatewayIntent.DIRECT_MESSAGES, GatewayIntent.GUILD_MESSAGES, GatewayIntent.GUILD_MEMBERS)
                     .disableCache(CacheFlag.VOICE_STATE, CacheFlag.EMOTE)
                     .setActivity(Activity.playing(BotConstants.PLAYING));
             JDA jda = builder.build();
@@ -84,13 +86,21 @@ public class BeatSaberBot extends ListenerAdapter {
             LeaderboardWatcher watcher = new LeaderboardWatcher(db, ss, jda);
             watcher.createNewLeaderboardWatcher();
             watcher.start();
-
-            jda.getGuilds().forEach(BeatSaberBot::setupCommands);
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
+    public static void printSlashInfoMessage(Guild g) {
+        TextChannel channel = g.getSystemChannel();
+        if (channel == null) {
+            channel = g.getCommunityUpdatesChannel();
+            if (channel == null) {
+                channel = g.getTextChannels().get(0);
+            }
+        }
+        Messages.sendPlainMessage("Hello people! Starting **September 1st**, Discord will force bots to only listen to slash commands.\n**Please try to use slash commands from now on.** I will try to look for a workaround, but this is the only way for now.\n\n**If the commands do not show up, make sure the bot has the correct permissions or re-invite it.** \nIf you encounter any issues let me know: __AntiLink#1337__ 👏", channel);
+    }
     @Override
     public void onSlashCommand(SlashCommandEvent event) {
         if (!event.isFromGuild() || event.getUser().isBot()) {
@@ -126,20 +136,12 @@ public class BeatSaberBot extends ListenerAdapter {
         List<CommandData> wantedCommands = new ArrayList<>(SlashCommands.getCurrentCommands());
         List<String> wantedCommandNames = wantedCommands.stream().map(BaseCommand::getName).collect(Collectors.toList());
 
-        List<Command> commands = guild.retrieveCommands().complete()
-                .stream()
-                .filter(c -> c.getApplicationIdLong() == applicationId)
-                .collect(Collectors.toList());
-        for (Command command: commands) {
+        List<Command> commands = guild.retrieveCommands().complete();
+        for (Command command : commands) {
             boolean commandIsAlreadyOnGuild = wantedCommandNames.contains(command.getName());
-            boolean commandWasCreatedBeforeTwoMonths = command.getTimeCreated().toLocalDateTime().isBefore(LocalDateTime.now().minusDays(60));
             if (commandIsAlreadyOnGuild) {
-                if (commandWasCreatedBeforeTwoMonths) {
-                    System.out.println("Deleting command " + command.getName());
-                    guild.deleteCommandById(command.getId()).queue();
-                } else {
-                    wantedCommands.removeIf(c -> c.getName().equals(command.getName()));
-                }
+                System.out.println("Deleting command " + command.getName());
+                guild.deleteCommandById(command.getId()).complete();
             }
         }
         guild.updateCommands().addCommands(wantedCommands).queue();
@@ -151,14 +153,15 @@ public class BeatSaberBot extends ListenerAdapter {
             if (event.isFromType(ChannelType.PRIVATE) || event.getAuthor().isBot() || !hasStarted) {
                 return;
             }
-
+            db.connectToDatabase();
             String msg = event.getMessage().getContentRaw();
+
+            List<String> msgParts = Arrays.asList(msg.split(" "));
             if (!msg.toLowerCase().startsWith("ru ") && !msg.toLowerCase().startsWith("bs ")) {
                 return;
             }
 
             event.getChannel().sendTyping().queue();
-            List<String> msgParts = Arrays.asList(msg.split(" "));
             handleCommand(msgParts, new MessageEventDTO(event));
         } catch (Exception e) {
             DiscordLogger.sendLogInChannel(ExceptionUtils.getStackTrace(e), DiscordLogger.ERRORS);
@@ -187,6 +190,7 @@ public class BeatSaberBot extends ListenerAdapter {
                     }
                 case "update":
                     new UpdatePlayer(db).updatePlayer(commandPlayer, channel);
+                    break;
                 case "unregister":
                     new HandlePlayerRegisteration(db).unregisterPlayer(event);
                     break;
@@ -378,8 +382,7 @@ public class BeatSaberBot extends ListenerAdapter {
                     }
                     break;
                 case "help":
-                    boolean isFOAA = guild.getIdLong() == BotConstants.foaaServerId;
-                    Messages.sendMultiPageMessage(BotConstants.getCommands(isFOAA), "🔨 Bot commands 🔨", channel);
+                    Messages.sendMultiPageMessage(BotConstants.getCommands(), "🔨 Bot commands 🔨", channel);
                     break;
                 default:
                     Messages.sendMessage("Sorry, i don't speak wrong. 🤡  Try \"ru help\".\nIf you want to suggest something to the dev do it " + Format.link("here", BotConstants.featureRequestUrl) + ".", channel);
@@ -418,9 +421,14 @@ public class BeatSaberBot extends ListenerAdapter {
     @Override
     public void onGuildMemberJoin(GuildMemberJoinEvent event) {
         if (event.getGuild().getIdLong() == BotConstants.foaaServerId) {
-            Messages.sendPrivateMessage(BotConstants.newMemberMessage, event.getMember());
+            Messages.sendPrivateMessage(BotConstants.foaaMemberMessage, event.getMember());
             TextChannel botChannel = event.getJDA().getTextChannelById(Long.parseLong(System.getenv("foaa_channel_id")));
             Messages.sendPlainMessage(Format.bold(event.getMember().getAsMention() + ", welcome!") + " Be sure to register yourself here with " + Format.underline("\"ru register <ScoreSaber URL>\"") + " to obtain your bot.roles.", botChannel);
+        } else if (event.getGuild().getIdLong() == BotConstants.bsgServerId) {
+            Messages.sendPrivateMessage(BotConstants.bsgMemberMessage, event.getMember());
+            TextChannel welcomeChannel = event.getJDA().getTextChannelById(Long.parseLong(System.getenv("bsg_welcome_channel_id")));
+            Messages.sendPlainMessage(Format.bold(event.getMember().getEffectiveName() + ", welcome! 👏👏👏 Member Count: " + event.getGuild().getMemberCount()), welcomeChannel);
+            Messages.sendImage(BotConstants.bsgImage, "welcomeImage.png", welcomeChannel);
         }
     }
 
@@ -479,5 +487,32 @@ public class BeatSaberBot extends ListenerAdapter {
             throw new FileNotFoundException("Player could not be found!");
         }
         return player;
+    }
+
+    @Deprecated
+    private void sendRecentSongsIfTwitchVOD(String msg, MessageEventDTO event, Player commandPlayer) {
+        Matcher matcher = twitchVODPattern.matcher(msg);
+        if (!matcher.find()) {
+            return;
+        }
+        String vodId = matcher.group(1);
+        if (commandPlayer != null) {
+            Messages.sendTempMessage("Loading set scores for Twitch video '" + vodId + "'...", 5, event.getChannel());
+            int index = -1;
+            switch (vodId) {
+                case "1568529890":
+                    index = 1;
+                    break;
+                case "1548336392":
+                    index = 5;
+                    break;
+                case "1546471726":
+                    index = 2;
+                    break;
+            }
+            if (index > 0) {
+                new SongsCommands(db, ranked).sendRecentSongs(commandPlayer, index, event);
+            }
+        }
     }
 }

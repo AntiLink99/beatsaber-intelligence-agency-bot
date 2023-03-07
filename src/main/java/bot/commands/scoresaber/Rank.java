@@ -1,4 +1,4 @@
-package bot.commands;
+package bot.commands.scoresaber;
 
 import bot.api.ApiConstants;
 import bot.api.ScoreSaber;
@@ -37,7 +37,7 @@ public class Rank {
     public void sendDACHRank(MessageEventDTO event) {
         String[] dachCodes = {"de","at","ch"};
         if (!Arrays.asList(dachCodes).contains(player.getCountry().toLowerCase())) {
-            Messages.sendMessage("Your are not from Germany, Austria or Switzerland.", event.getChannel());
+            Messages.sendMessage("You are not from Germany, Austria or Switzerland.", event.getChannel());
             return;
         }
         sendRank(player, 1, 10000, "de,at,ch", LeaderboardType.DACH, event);

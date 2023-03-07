@@ -1,9 +1,10 @@
 package bot.api;
 
+import bot.dto.PlayerScore;
 import bot.dto.ScoreSaberMapData;
+import bot.dto.beatleader.scores.PlayerScoreBL;
 import bot.dto.leaderboards.LeaderboardPlayer;
 import bot.dto.player.Player;
-import bot.dto.scoresaber.PlayerScoreSS;
 import bot.utils.DiscordLogger;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
@@ -17,12 +18,12 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class ScoreSaber {
+public class BeatLeader {
 
     final HttpMethods http;
     final Gson gson;
 
-    public ScoreSaber() {
+    public BeatLeader() {
         http = new HttpMethods();
         gson = new Gson();
     }
@@ -45,27 +46,27 @@ public class ScoreSaber {
         return ssPlayer;
     }
 
-    public List<PlayerScoreSS> getTopScoresByPlayerId(long playerId) {
-        String topScoresUrl = ApiConstants.SS_PLAYER_PRE_URL + playerId + ApiConstants.SS_PLAYER_TOP_SCORES_POST_URL;
-        return getPlayerScores(topScoresUrl);
+    public List<PlayerScore> getTopScoresByPlayerId(long playerId) {
+        String url = ApiConstants.getBeatLeaderRecentScoresURL(String.valueOf(playerId), 1);
+        return getPlayerScores(url);
     }
 
-    public List<PlayerScoreSS> getTopScoresByPlayerIdAndPage(long playerId, int pageNr) {
-        String topScoresUrl = ApiConstants.SS_PLAYER_PRE_URL + playerId + ApiConstants.SS_PLAYER_TOP_SCORES_POST_URL + "&page=" + pageNr;
-        return getPlayerScores(topScoresUrl);
+    public List<PlayerScore> getTopScoresByPlayerIdAndPage(long playerId, int pageNr) {
+        String url = ApiConstants.getBeatLeaderTopScoresURL(String.valueOf(playerId), pageNr);
+        return getPlayerScores(url);
     }
 
-    public List<PlayerScoreSS> getRecentScoresByPlayerIdAndPage(long playerId, int pageNr) {
-        String recentScoresUrl = ApiConstants.SS_PLAYER_PRE_URL + playerId + ApiConstants.SS_PLAYER_RECENT_SCORES_POST_URL + "&page=" + pageNr;
-        return getPlayerScores(recentScoresUrl);
+    public List<PlayerScore> getRecentScoresByPlayerIdAndPage(long playerId, int pageNr) {
+        String url = ApiConstants.getBeatLeaderRecentScoresURL(String.valueOf(playerId), pageNr);
+        return getPlayerScores(url);
     }
 
     @Nullable
-    private List<PlayerScoreSS> getPlayerScores(String recentScoresUrl) {
+    private List<PlayerScore> getPlayerScores(String recentScoresUrl) {
         JsonObject response = http.fetchJsonObject(recentScoresUrl);
         if (response != null) {
-            JsonArray topScores = response.getAsJsonArray("playerScores");
-            Type listType = new TypeToken<List<PlayerScoreSS>>() {}.getType();
+            JsonArray topScores = response.getAsJsonArray("data");
+            Type listType = new TypeToken<List<PlayerScoreBL>>() {}.getType();
             return gson.fromJson(topScores.toString(), listType);
         }
         return new ArrayList<>();

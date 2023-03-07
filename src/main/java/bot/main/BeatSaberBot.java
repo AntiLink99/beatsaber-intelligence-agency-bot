@@ -6,11 +6,14 @@ import bot.api.ScoreSaber;
 import bot.chart.PlayerChart;
 import bot.chart.RadarStatsChart;
 import bot.commands.*;
+import bot.commands.beatleader.SongsCommandsBL;
+import bot.commands.scoresaber.*;
 import bot.db.DatabaseManager;
 import bot.dto.MessageEventDTO;
 import bot.dto.player.Player;
 import bot.dto.player.PlayerSkills;
 import bot.dto.rankedmaps.RankedMaps;
+import bot.graphics.AccGridImage;
 import bot.utils.*;
 import javafx.application.Platform;
 import net.dv8tion.jda.api.JDA;
@@ -292,6 +295,11 @@ public class BeatSaberBot extends ListenerAdapter {
                     new SongsCommands(db, ranked).sendRecentSongs(commandPlayer, index, event);
                     return;
                 }
+                case "recentsongsbl": {
+                    int index = getIndexFromMsgParts(msgParts);
+                    new SongsCommandsBL(db, ranked).sendRecentSongs(commandPlayer, index, event);
+                    return;
+                }
                 case "topsongs": {
                     int index = 1;
                     if (msgParts.size() == 3) {
@@ -302,6 +310,18 @@ public class BeatSaberBot extends ListenerAdapter {
                         }
                     }
                     new SongsCommands(db, ranked).sendTopSongs(commandPlayer, index, event);
+                    return;
+                }
+                case "topsongsbl": {
+                    int index = 1;
+                    if (msgParts.size() == 3) {
+                        String[] arguments = msgParts.get(2).split(" ");
+                        String indexOrMemberMention = arguments[0];
+                        if (NumberUtils.isCreatable(indexOrMemberMention)) {
+                            index = Integer.parseInt(indexOrMemberMention);
+                        }
+                    }
+                    new SongsCommandsBL(db, ranked).sendTopSongs(commandPlayer, index, event);
                     return;
                 }
                 case "localrank": {

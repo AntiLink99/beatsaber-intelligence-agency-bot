@@ -1,4 +1,4 @@
-package bot.commands;
+package bot.commands.scoresaber;
 
 import bot.api.BeatSaver;
 import bot.api.ScoreSaber;
@@ -8,7 +8,7 @@ import bot.dto.Song;
 import bot.dto.player.Player;
 import bot.dto.rankedmaps.BeatSaverRankedMap;
 import bot.dto.rankedmaps.RankedMaps;
-import bot.dto.scoresaber.PlayerScore;
+import bot.dto.scoresaber.PlayerScoreSS;
 import bot.graphics.SongsImage;
 import bot.main.BotConstants;
 import bot.utils.JavaFXUtils;
@@ -17,6 +17,7 @@ import bot.utils.RankedMapUtils;
 import bot.utils.SongUtils;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -47,12 +48,12 @@ public class SongsCommands {
         String playerId = player.getId();
         String messageId = String.valueOf(event.getId());
 
-        List<PlayerScore> scores = ss.getRecentScoresByPlayerIdAndPage(Long.parseLong(player.getId()), index);
+        List<PlayerScoreSS> scores = ss.getRecentScoresByPlayerIdAndPage(Long.parseLong(player.getId()), index);
         if (scores == null || scores.isEmpty()) {
             Messages.sendMessage("Scores could not be fetched. Please try again later.", event.getChannel());
             return;
         }
-        for (PlayerScore score : scores) {
+        for (PlayerScoreSS score : scores) {
             Song song = bs.fetchSongByHash(score.getLeaderboard().getSongHash());
             if (song != null) {
                 Song.Version version = song.getVersionByHash(score.getLeaderboard().getSongHash().toLowerCase());
@@ -83,7 +84,7 @@ public class SongsCommands {
         }
 
         SongsImage.setFilePath(filePath);
-        SongsImage.setScores(scores);
+        SongsImage.setScores((new ArrayList<>(scores)));
         JavaFXUtils.launch(SongsImage.class);
 
         int recentSongsWaitingCounter = 0;
@@ -123,12 +124,12 @@ public class SongsCommands {
         String playerId = player.getId();
         String messageId = String.valueOf(event.getId());
 
-        List<PlayerScore> scores = ss.getTopScoresByPlayerIdAndPage(Long.parseLong(player.getId()), index);
+        List<PlayerScoreSS> scores = ss.getTopScoresByPlayerIdAndPage(Long.parseLong(player.getId()), index);
         if (scores == null || scores.isEmpty()) {
             Messages.sendMessage("Scores could not be fetched. Please try again later.", event.getChannel());
             return;
         }
-        for (PlayerScore score : scores) {
+        for (PlayerScoreSS score : scores) {
             Song song = bs.fetchSongByHash(score.getLeaderboard().getSongHash());
             if (song != null) {
                 score.setCoverURL(song.getVersionByHash(score.getLeaderboard().getSongHash()).getCoverURL());
@@ -155,7 +156,7 @@ public class SongsCommands {
         }
 
         SongsImage.setFilePath(filePath);
-        SongsImage.setScores(scores);
+        SongsImage.setScores(new ArrayList<>(scores));
         JavaFXUtils.launch(SongsImage.class);
 
         int recentSongsWaitingCounter = 0;

@@ -2,7 +2,6 @@ package bot.utils;
 
 import org.apache.commons.lang3.StringUtils;
 
-import java.math.RoundingMode;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.text.DecimalFormat;
@@ -76,9 +75,7 @@ public class Format {
     }
 
     public static int roundDouble(double d) {
-        DecimalFormat df = new DecimalFormat("#.####");
-        df.setRoundingMode(RoundingMode.HALF_UP);
-        return Integer.parseInt(df.format(d));
+        return (int) d;
     }
 
     public static String getSuffix(final int n) {

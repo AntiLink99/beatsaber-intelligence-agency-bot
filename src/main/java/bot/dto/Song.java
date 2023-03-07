@@ -158,14 +158,14 @@ public class Song {
     }
 
     public static class Metadata {
-        public int bpm;
+        public float bpm;
         public int duration;
         public String songName;
         public String songSubName;
         public String songAuthorName;
         public String levelAuthorName;
 
-        public int getBpm() {
+        public float getBpm() {
             return bpm;
         }
 

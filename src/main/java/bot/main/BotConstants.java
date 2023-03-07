@@ -76,7 +76,9 @@ public class BotConstants {
         commands.put("bs recentsong (optional: <ScoreCount>) (optional: <@member>)", "Displays a player card for the recent score set on ScoreSaber. Use the BeatSavior mod to receive more data.");
         commands.put("bs setgridimage <Image URL>", "Sets a background image for the acc grid in 'bs recentsong'. Leave the URL empty to reset the image.");
         commands.put("bs recentsongs (optional: <PageID>) (optional: <@member>)", "Displays the recently set scores of a player.");
+        commands.put("bs recentsongsBL (optional: <PageID>) (optional: <@member>)", "Displays the recently set scores of a player.");
         commands.put("bs topsongs (optional: <PageID>) (optional: <@member>)", "Displays the best scores of a player.");
+        commands.put("bs topsongsBL (optional: <PageID>) (optional: <@member>)", "Displays the best scores of a player.");
         commands.put("bs globalrank (optional: <@member>)", "Shows your global rank in comparison to the two players above and below you on ScoreSaber.");
         commands.put("bs localrank (optional: <@member>)", "Shows your local rank in comparison to the two players above and below you on ScoreSaber.");
         commands.put("bs improvement", "Lists the rank difference between the last seven days for all players.");

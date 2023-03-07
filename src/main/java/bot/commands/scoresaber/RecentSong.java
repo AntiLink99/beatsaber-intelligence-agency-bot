@@ -1,4 +1,4 @@
-package bot.commands;
+package bot.commands.scoresaber;
 
 import bot.api.ApiConstants;
 import bot.api.BeatSaver;
@@ -15,7 +15,7 @@ import bot.dto.player.Player;
 import bot.dto.rankedmaps.BeatSaverRankedMap;
 import bot.dto.rankedmaps.RankedMaps;
 import bot.dto.scoresaber.Leaderboard;
-import bot.dto.scoresaber.PlayerScore;
+import bot.dto.scoresaber.PlayerScoreSS;
 import bot.dto.scoresaber.Score;
 import bot.graphics.AccuracyGrid;
 import bot.main.BotConstants;
@@ -72,13 +72,13 @@ public class RecentSong {
             // ScoreSaber
             int pageNr = getPageNrFromSongIndex(index);
             index = (index - 1) % 8;
-            List<PlayerScore> ssScores = ss.getRecentScoresByPlayerIdAndPage(Long.parseLong(player.getId()), pageNr);
+            List<PlayerScoreSS> ssScores = ss.getRecentScoresByPlayerIdAndPage(Long.parseLong(player.getId()), pageNr);
             if (ssScores == null || ssScores.isEmpty()) {
                 Messages.sendMessage("ScoreSaber didn't respond. Please try again later.", event.getChannel());
                 return;
             }
 
-            PlayerScore recentData = ssScores.get(index); //TODO Nullpointer
+            PlayerScoreSS recentData = ssScores.get(index); //TODO Nullpointer
             Leaderboard recentLeaderboard = recentData.getLeaderboard();
             Score recentScore = recentData.getScore();
 

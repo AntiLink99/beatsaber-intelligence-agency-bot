@@ -4,7 +4,7 @@ public class ScoreSaberMapData {
 
     String id;
     String name;
-    int bpm;
+    float bpm;
     int scores_day;
     int ranked;
     float stars;
@@ -25,7 +25,7 @@ public class ScoreSaberMapData {
         this.name = name;
     }
 
-    public int getBpm() {
+    public float getBpm() {
         return bpm;
     }
 

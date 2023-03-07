@@ -34,9 +34,18 @@ public class ApiConstants {
     public static final String BSAVIOR_LIVESCORES_URL = BSAVIOR_PRE_URL + "/api/livescores/player/";
 
     //BeatLeader (Replays)
-
     public static final String REPLAY_PRE_URL = "https://www.replay.beatleader.xyz/";
 
+    //BeatLeader
+    public static final String BL_PRE_URL = "https://api.beatleader.xyz";
+    public static final String BL_SCORES_URL = "/player/%s/scores?page=%d&sortBy=%s&order=desc&search=&diff=&type=&stars_from=&stars_to=&eventId=";
+    public static String getBeatLeaderTopScoresURL(String playerId, int pageNr) {
+        return String.format(BL_PRE_URL + BL_SCORES_URL, playerId, pageNr, "pp");
+    }
+    public static String getBeatLeaderRecentScoresURL(String playerId, int pageNr) {
+        return String.format(BL_PRE_URL + BL_SCORES_URL, playerId, pageNr, "date");
+    }
+
     // Meme API
-    public static final String MEME_URL = "https://meme-api.herokuapp.com/gimme";
+    public static final String MEME_URL = "https://meme-api.com/gimme";
 }

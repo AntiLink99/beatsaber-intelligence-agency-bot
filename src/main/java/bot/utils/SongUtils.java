@@ -4,12 +4,12 @@ import bot.dto.Song;
 import bot.dto.Song.Version;
 import bot.dto.rankedmaps.BeatSaverRankedMap;
 import bot.dto.rankedmaps.DiffsItem;
-import bot.dto.scoresaber.PlayerScore;
+import bot.dto.scoresaber.PlayerScoreSS;
 import bot.main.BotConstants;
 
 public class SongUtils {
 
-    public static int getNoteCountForBeatSaverMapDiff(Song map, PlayerScore score) {
+    public static int getNoteCountForBeatSaverMapDiff(Song map, PlayerScoreSS score) {
         String playedVersionHash = score.getLeaderboard().getSongHash().toLowerCase();
         int difficulty = score.getLeaderboard().getDifficultyValue();
 

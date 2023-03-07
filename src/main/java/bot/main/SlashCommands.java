@@ -57,10 +57,16 @@ public class SlashCommands {
         final CommandData recentSongsCommand = new CommandData("recentsongs", "Displays the recently set scores of a player.")
                 .addOption(OptionType.INTEGER, "page_id", "The x-th recent page.", false)
                 .addOption(OptionType.USER, "other_user", "An other user than yourself.", false);
+        final CommandData recentSongsCommandBL = new CommandData("recentsongsBL", "Displays the recently set scores of a player.")
+                .addOption(OptionType.INTEGER, "page_id", "The x-th recent page.", false)
+                .addOption(OptionType.USER, "other_user", "An other user than yourself.", false);
 
         final CommandData topSongsCommand = new CommandData("topsongs", "Displays the best scores of a player.")
                 .addOption(OptionType.INTEGER, "page_id", "The x-th recent page.", false)
                 .addOption(OptionType.USER, "member", "An other user than yourself.", false);
+        final CommandData topSongsCommandBL = new CommandData("topsongsBL", "Displays the recently set scores of a player.")
+                .addOption(OptionType.INTEGER, "page_id", "The x-th recent page.", false)
+                .addOption(OptionType.USER, "other_user", "An other user than yourself.", false);
 
 
         final CommandData globalRankCommand = new CommandData("globalrank", "Shows your global rank in comparison to the two players above and below you on ScoreSaber.")
@@ -94,6 +100,8 @@ public class SlashCommands {
                recentSongCommand,
                recentSongsCommand,
                topSongsCommand,
+               recentSongsCommandBL,
+               topSongsCommandBL,
                setGridImageCommand,
                standCommand,
                setSkillCommand,

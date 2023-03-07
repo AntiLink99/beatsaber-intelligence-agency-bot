@@ -1,4 +1,4 @@
-package bot.commands;
+package bot.graphics;
 
 import bot.api.HttpMethods;
 import bot.db.DatabaseManager;

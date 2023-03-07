@@ -1,4 +1,4 @@
-package bot.commands;
+package bot.commands.scoresaber;
 
 import bot.api.BeatSaver;
 import bot.dto.MessageEventDTO;

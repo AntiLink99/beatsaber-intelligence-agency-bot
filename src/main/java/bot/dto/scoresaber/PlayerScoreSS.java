@@ -1,5 +1,7 @@
 package bot.dto.scoresaber;
 
+import bot.dto.LeaderboardService;
+import bot.dto.PlayerScore;
 import com.google.gson.annotations.SerializedName;
 import org.ocpsoft.prettytime.PrettyTime;
 
@@ -11,7 +13,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.Locale;
 
-public class PlayerScore {
+public class PlayerScoreSS implements PlayerScore {
 
 	@SerializedName("score")
 	private Score score;
@@ -21,7 +23,7 @@ public class PlayerScore {
 
 	private final transient DecimalFormat format;
 
-	public PlayerScore() {
+	public PlayerScoreSS() {
 		format = new DecimalFormat("##0.00");
 		format.setDecimalFormatSymbols(DecimalFormatSymbols.getInstance(Locale.ENGLISH));
 	}
@@ -42,7 +44,7 @@ public class PlayerScore {
 		this.coverURL = coverURL;
 	}
 
-	public float getSongStars() {
+	public float getStars() {
 		return songStars;
 	}
 
@@ -56,6 +58,10 @@ public class PlayerScore {
 
 	public Score getScore(){
 		return score;
+	}
+
+	public float getWeight() {
+		return score.getWeight();
 	}
 
 	public Leaderboard getLeaderboard(){
@@ -75,17 +81,47 @@ public class PlayerScore {
 	public String getAccuracyString() {
 		double acc = getAccuracy();
 		if (acc != -1 && !Double.isInfinite(acc)) {
-			return format.format(getAccuracy() * 100d) + "%";
+			return format.format(acc * 100d) + "%";
 		}
 		return "";
 	}
 
-	public String getPpString() {
+	@Override
+	public String getSongName() {
+		return leaderboard.getSongName();
+	}
+
+	@Override
+	public String getSongHash() {
+		return leaderboard.getSongHash();
+	}
+
+	@Override
+	public String getAuthorName() {
+		return leaderboard.getLevelAuthorName();
+	}
+
+	@Override
+	public int getRank() {
+		return score.getRank();
+	}
+
+	public String getPPString() {
 		return format.format(score.getPp()) + "PP";
 	}
 
-	public String getWeightPpString() {
+	public String getWeightedPPString() {
 		return "(" + format.format(score.getPp() * score.getWeight()) + "PP)";
+	}
+
+	@Override
+	public String getDifficultyName() {
+		return leaderboard.getDifficulty().getDifficultyName();
+	}
+
+	@Override
+	public int getDifficultyValue() {
+		return leaderboard.getDifficultyValue();
 	}
 
 	public LocalDateTime getTimeSetLocalDateTime() {
@@ -96,4 +132,15 @@ public class PlayerScore {
 	public String getRelativeTimeString() {
 		return new PrettyTime(Locale.ENGLISH).format(Date.from(getTimeSetLocalDateTime().atZone(ZoneOffset.UTC).toInstant()));
 	}
+
+	@Override
+	public boolean isRanked() {
+		return score.getPp() > 0;
+	}
+
+	@Override
+	public LeaderboardService getService() {
+		return LeaderboardService.SCORESABER;
+	}
+
 }

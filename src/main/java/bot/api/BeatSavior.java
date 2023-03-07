@@ -33,7 +33,6 @@ public class BeatSavior {
     private static class ContentDeserializer<T> implements JsonDeserializer<T> {
         @Override
         public T deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
-            System.out.println("CALLED");
             final Gson gson = new Gson();
             final JsonObject object = json.getAsJsonObject();
             final JsonArray playerMaps = object.get("playerMaps").getAsJsonArray();
@@ -43,11 +42,9 @@ public class BeatSavior {
                         .get("scoreGraphTracker").getAsJsonObject()
                         .get("graph");
                 if (scoreGraph.isJsonObject()) {
-                    System.out.println("object");
                     continue;
                 }
                 if (scoreGraph.isJsonArray()) {
-                    System.out.println("array");
                     JsonArray scoreGraphArray = scoreGraph.getAsJsonArray();
                     LinkedMap<String, Double> newGraph = new LinkedMap<>();
                     for (int h = 0; h < scoreGraphArray.size(); h++) {

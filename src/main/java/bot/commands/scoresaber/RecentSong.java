@@ -11,7 +11,7 @@ import bot.dto.RecentSongData;
 import bot.dto.Song;
 import bot.dto.beatsavior.BeatSaviorPlayerScore;
 import bot.dto.beatsavior.BeatSaviorPlayerScores;
-import bot.dto.player.Player;
+import bot.dto.player.DataBasePlayer;
 import bot.dto.rankedmaps.BeatSaverRankedMap;
 import bot.dto.rankedmaps.RankedMaps;
 import bot.dto.scoresaber.Leaderboard;
@@ -57,7 +57,7 @@ public class RecentSong {
         return rankOnPlayerLeaderboard + suffix + " Best Play";
     }
 
-    public void sendRecentSong(Player player, RankedMaps ranked, int index, MessageEventDTO event) {
+    public void sendRecentSong(DataBasePlayer player, RankedMaps ranked, int index, MessageEventDTO event) {
         ScoreSaber ss = new ScoreSaber();
         BeatSaver bs = new BeatSaver();
         BeatSavior bsavior = new BeatSavior();

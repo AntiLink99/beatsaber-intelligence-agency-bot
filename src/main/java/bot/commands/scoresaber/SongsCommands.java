@@ -5,7 +5,7 @@ import bot.api.ScoreSaber;
 import bot.db.DatabaseManager;
 import bot.dto.MessageEventDTO;
 import bot.dto.Song;
-import bot.dto.player.Player;
+import bot.dto.player.DataBasePlayer;
 import bot.dto.rankedmaps.BeatSaverRankedMap;
 import bot.dto.rankedmaps.RankedMaps;
 import bot.dto.scoresaber.PlayerScoreSS;
@@ -32,7 +32,7 @@ public class SongsCommands {
         this.ranked = ranked;
     }
 
-    public void sendRecentSongs(Player player, int index, MessageEventDTO event) {
+    public void sendRecentSongs(DataBasePlayer player, int index, MessageEventDTO event) {
         ScoreSaber ss = new ScoreSaber();
         BeatSaver bs = new BeatSaver();
         if (player == null) {
@@ -84,7 +84,8 @@ public class SongsCommands {
         }
 
         SongsImage.setFilePath(filePath);
-        SongsImage.setScores((new ArrayList<>(scores)));
+        SongsImage.setPlayer(player);
+        SongsImage.setScores(new ArrayList<>(scores));
         JavaFXUtils.launch(SongsImage.class);
 
         int recentSongsWaitingCounter = 0;
@@ -108,7 +109,7 @@ public class SongsCommands {
 
     }
 
-    public void sendTopSongs(Player player, int index, MessageEventDTO event) {
+    public void sendTopSongs(DataBasePlayer player, int index, MessageEventDTO event) {
         ScoreSaber ss = new ScoreSaber();
         BeatSaver bs = new BeatSaver();
         if (player == null) {
@@ -156,6 +157,7 @@ public class SongsCommands {
         }
 
         SongsImage.setFilePath(filePath);
+        SongsImage.setPlayer(player);
         SongsImage.setScores(new ArrayList<>(scores));
         JavaFXUtils.launch(SongsImage.class);
 

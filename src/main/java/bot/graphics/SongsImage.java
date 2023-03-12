@@ -3,11 +3,9 @@ package bot.graphics;
 import bot.api.ApiConstants;
 import bot.api.HttpMethods;
 import bot.dto.LeaderboardService;
+import bot.dto.LeaderboardServicePlayer;
 import bot.dto.PlayerScore;
-import bot.utils.FontUtils;
-import bot.utils.Format;
-import bot.utils.JavaFXUtils;
-import bot.utils.WebUtils;
+import bot.utils.*;
 import javafx.application.Application;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.SnapshotParameters;
@@ -32,6 +30,7 @@ public class SongsImage extends Application {
 
     private static boolean isFinished = false;
     private static List<PlayerScore> scores;
+    private static LeaderboardServicePlayer player;
     private static String filePath;
     final ImageView baseImage = new ImageView("https://anti.link/img/scoresImage.png"); // Rectangle Image
     final Image starImage = new Image(Objects.requireNonNull(getClass().getClassLoader().getResourceAsStream("star.png")));
@@ -222,13 +221,34 @@ public class SongsImage extends Application {
         }
 
         leaderboardImage.setTranslateX(1480);
-        leaderboardImage.setTranslateY(20);
+        leaderboardImage.setTranslateY(30);
 
-        float SCALE = 1.5f;
-        leaderboardImage.setScaleX(SCALE);
-        leaderboardImage.setScaleY(SCALE);
+        float LEADERBOARD_SCALE = 1.4f;
+        leaderboardImage.setScaleX(LEADERBOARD_SCALE);
+        leaderboardImage.setScaleY(LEADERBOARD_SCALE);
 
         root.getChildren().add(leaderboardImage);
+
+        float PROFILE_SCALE = 1.4f;
+        String profilePic = player.getAvatar();
+        ImageView profilePicView = new ImageView(profilePic);
+        profilePicView.setTranslateX(1485);
+        profilePicView.setTranslateY(350);
+        profilePicView.setScaleX(PROFILE_SCALE);
+        profilePicView.setScaleY(PROFILE_SCALE);
+        root.getChildren().add(profilePicView);
+
+        BufferedImage qrCode = GraphicsUtils.generateQRCode(player.getProfileURL(), 512, 512);
+        if (qrCode != null) {
+            float QR_SCALE = 0.505f;
+            ImageView qrImageView = new ImageView(SwingFXUtils.toFXImage(qrCode, null));
+            qrImageView.setTranslateX(1320);
+            qrImageView.setTranslateY(510);
+            qrImageView.setScaleX(QR_SCALE);
+            qrImageView.setScaleY(QR_SCALE);
+            root.getChildren().add(qrImageView);
+        }
+
         root.autosize();
         final SnapshotParameters snapPara = new SnapshotParameters();
         snapPara.setFill(Color.TRANSPARENT);
@@ -261,5 +281,13 @@ public class SongsImage extends Application {
 
     public static void setFilePath(String filePath) {
         SongsImage.filePath = filePath;
+    }
+
+    public static LeaderboardServicePlayer getPlayer() {
+        return player;
+    }
+
+    public static void setPlayer(LeaderboardServicePlayer player) {
+        SongsImage.player = player;
     }
 }

@@ -4,7 +4,7 @@ import bot.dto.PlayerScore;
 import bot.dto.ScoreSaberMapData;
 import bot.dto.beatleader.scores.PlayerScoreBL;
 import bot.dto.leaderboards.LeaderboardPlayer;
-import bot.dto.player.Player;
+import bot.dto.player.DataBasePlayer;
 import bot.utils.DiscordLogger;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
@@ -28,7 +28,7 @@ public class BeatLeader {
         gson = new Gson();
     }
 
-    public Player getPlayerById(String playerId) {
+    public DataBasePlayer getPlayerById(String playerId) {
         String playerUrl = ApiConstants.SS_PLAYER_PRE_URL + playerId + ApiConstants.SS_PLAYER_POST_URL;
         JsonObject response = http.fetchJsonObject(playerUrl);
 
@@ -38,7 +38,7 @@ public class BeatLeader {
         }
         JsonObject playerInfo = response.getAsJsonObject();
 
-        Player ssPlayer = gson.fromJson(playerInfo.toString(), Player.class);
+        DataBasePlayer ssPlayer = gson.fromJson(playerInfo.toString(), DataBasePlayer.class);
         if (ssPlayer.getHistories().startsWith(",")) {
             ssPlayer.setHistories(ssPlayer.getHistories().substring(1));
         }
@@ -84,7 +84,7 @@ public class BeatLeader {
         return new ArrayList<>();
     }
 
-    public List<LeaderboardPlayer> findLeaderboardEntriesAroundPlayer(Player player, String countryCode, int startPage, int sizeLimit) {
+    public List<LeaderboardPlayer> findLeaderboardEntriesAroundPlayer(DataBasePlayer player, String countryCode, int startPage, int sizeLimit) {
         List<LeaderboardPlayer> entries = new ArrayList<>();
         boolean searchingPlayerData = true;
         for (int i = startPage; searchingPlayerData; i++) {

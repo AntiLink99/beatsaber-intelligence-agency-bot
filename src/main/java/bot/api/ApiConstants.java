@@ -45,6 +45,7 @@ public class ApiConstants {
     public static String getBeatLeaderRecentScoresURL(String playerId, int pageNr) {
         return String.format(BL_PRE_URL + BL_SCORES_URL, playerId, pageNr, "date");
     }
+    public static final String BL_USER_PRE_URL = "https://www.beatleader.xyz/u/";
 
     // Meme API
     public static final String MEME_URL = "https://meme-api.com/gimme";

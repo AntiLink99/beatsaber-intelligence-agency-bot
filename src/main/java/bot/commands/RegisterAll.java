@@ -2,7 +2,7 @@ package bot.commands;
 
 import bot.db.DatabaseManager;
 import bot.dto.MessageEventDTO;
-import bot.dto.player.Player;
+import bot.dto.player.DataBasePlayer;
 import bot.listeners.RegisterAllListener;
 import bot.utils.Format;
 import bot.utils.Messages;
@@ -23,7 +23,7 @@ public class RegisterAll {
     public void registerAllMembers(MessageEventDTO event) {
         TextChannel channel = event.getChannel();
         List<Member> guildMembers = channel.getGuild().getMembers();
-        List<Long> storedUserIds = db.getAllStoredPlayers().stream().map(Player::getDiscordUserId).collect(Collectors.toList());
+        List<Long> storedUserIds = db.getAllStoredPlayers().stream().map(DataBasePlayer::getDiscordUserId).collect(Collectors.toList());
 
         List<Member> missingMembers = guildMembers.stream().filter(m -> !storedUserIds.contains(m.getIdLong()) && !m.getUser().isBot()).collect(Collectors.toList());
         List<String> missingMemberNames = missingMembers.stream().map(Member::getEffectiveName).sorted(String.CASE_INSENSITIVE_ORDER).collect(Collectors.toList());

@@ -1,7 +1,7 @@
 package bot.commands;
 
 import bot.db.DatabaseManager;
-import bot.dto.player.Player;
+import bot.dto.player.DataBasePlayer;
 import bot.dto.player.PlayerImprovement;
 import bot.utils.MapUtils;
 import bot.utils.Messages;
@@ -20,9 +20,9 @@ public class Improvement {
     }
 
     public void sendImprovementMessage(TextChannel channel) {
-        List<Player> storedPlayers = db.getAllStoredPlayers();
+        List<DataBasePlayer> storedPlayers = db.getAllStoredPlayers();
         List<PlayerImprovement> improvements = new ArrayList<>();
-        for (Player storedPlayer : storedPlayers) {
+        for (DataBasePlayer storedPlayer : storedPlayers) {
             List<Integer> historyValues = storedPlayer.getHistoryValues();
 
             if (historyValues == null || historyValues.size() < 7) {

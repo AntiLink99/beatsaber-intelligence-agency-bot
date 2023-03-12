@@ -3,7 +3,7 @@ package bot.graphics;
 import bot.api.ApiConstants;
 import bot.api.HttpMethods;
 import bot.chart.PlayerChart;
-import bot.dto.player.Player;
+import bot.dto.player.DataBasePlayer;
 import bot.utils.FontUtils;
 import bot.utils.JavaFXUtils;
 import bot.utils.WebUtils;
@@ -25,7 +25,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
 public class ProfileImage extends Application {
-    public static Player player;
+    public static DataBasePlayer player;
     public static BufferedImage qrCodeImage;
     public static boolean isFinished = false;
     public static String filePath = "";
@@ -153,11 +153,11 @@ public class ProfileImage extends Application {
         return flagText;
     }
 
-    public static Player getPlayer() {
+    public static DataBasePlayer getPlayer() {
         return player;
     }
 
-    public static void setPlayer(Player player) {
+    public static void setPlayer(DataBasePlayer player) {
         ProfileImage.player = player;
     }
 

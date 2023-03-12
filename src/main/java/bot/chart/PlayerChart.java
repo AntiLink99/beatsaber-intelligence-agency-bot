@@ -1,7 +1,7 @@
 package bot.chart;
 
 import bot.dto.MessageEventDTO;
-import bot.dto.player.Player;
+import bot.dto.player.DataBasePlayer;
 import bot.main.BotConstants;
 import bot.utils.ChartUtils;
 import bot.utils.ListValueUtils;
@@ -30,7 +30,7 @@ public class PlayerChart {
     private final int lineWidthMulti = 5;
     private final Color lineColor = Color.BLUE;
 
-    public void sendChartImage(Player player, MessageEventDTO event) {
+    public void sendChartImage(DataBasePlayer player, MessageEventDTO event) {
         if (player == null) {
             Messages.sendMessage("Could not find player. Please check if you are registered.", event.getChannel());
             return;
@@ -49,7 +49,7 @@ public class PlayerChart {
         }
     }
 
-    public void sendChartImage(List<Player> players, MessageEventDTO event, String input) {
+    public void sendChartImage(List<DataBasePlayer> players, MessageEventDTO event, String input) {
         double max = 1, min = 2000;
 
         if (input != null) {
@@ -79,7 +79,7 @@ public class PlayerChart {
         }
     }
 
-    public XYChart getPlayerChart(List<Player> players, double max, double min) {
+    public XYChart getPlayerChart(List<DataBasePlayer> players, double max, double min) {
         if (players.size() > 1) {
             players = players.stream()
                     .filter(p -> p.getHistoryValues().stream().anyMatch(v -> v <= min && v >= max))
@@ -100,7 +100,7 @@ public class PlayerChart {
         XYChart chart = new XYChartBuilder().width(BotConstants.chartWidth).height(chartHeight).theme(ChartTheme.Matlab).title("Rank change").xAxisTitle("Days").yAxisTitle("Rank").build();
 
         setXYStyler(chart, players, min, max);
-        for (Player player : players) {
+        for (DataBasePlayer player : players) {
             // Series
             List<Integer> history = ListValueUtils.addElementReturnList(player.getHistoryValues(), player.getRank()).stream().map(h -> -h).collect(Collectors.toList());
             List<Integer> time = IntStream.rangeClosed(-history.size() + 1, 0).boxed().collect(Collectors.toList());
@@ -116,7 +116,7 @@ public class PlayerChart {
         return chart;
     }
 
-    private void setXYStyler(XYChart chart, List<Player> players, double min, double max) {
+    private void setXYStyler(XYChart chart, List<DataBasePlayer> players, double min, double max) {
         Font font = new Font("Consolas", Font.BOLD, 20);
         Font titleFont = new Font("Consolas", Font.BOLD, 30);
         Font labelFont = new Font("Consolas", Font.BOLD, 20);
@@ -155,7 +155,7 @@ public class PlayerChart {
         styler.setAxisTickLabelsColor(Color.WHITE);
     }
 
-    public void storePlayerChartToFile(Player player, String filePath) {
+    public void storePlayerChartToFile(DataBasePlayer player, String filePath) {
         List<Integer> rankValues = ListValueUtils.addElementReturnList(player.getHistoryValues(), player.getRank());
         double max = Collections.min(rankValues), min = Collections.max(rankValues);
 
@@ -163,7 +163,7 @@ public class PlayerChart {
         ChartUtils.saveChart(chart, filePath);
     }
 
-    public BufferedImage getPlayerChartImage(Player player) {
+    public BufferedImage getPlayerChartImage(DataBasePlayer player) {
         List<Integer> rankValues = ListValueUtils.addElementReturnList(player.getHistoryValues(), player.getRank());
         double max = Collections.min(rankValues), min = Collections.max(rankValues);
 

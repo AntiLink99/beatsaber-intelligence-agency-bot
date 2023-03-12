@@ -2,7 +2,7 @@ package bot.main;
 
 import bot.api.ScoreSaber;
 import bot.db.DatabaseManager;
-import bot.dto.player.Player;
+import bot.dto.player.DataBasePlayer;
 import bot.roles.RoleManager;
 import bot.roles.RoleManagerBSG;
 import bot.roles.RoleManagerFOAA;
@@ -46,12 +46,12 @@ public class LeaderboardWatcher {
             DiscordLogger.sendLogInChannel(updatingMessage, DiscordLogger.WATCHER_REFRESH);
             try {
                 int fetchCounter = 0;
-                List<Player> oldPlayers = db.getAllStoredPlayers();
-                List<Player> updatedPlayers = new ArrayList<>();
+                List<DataBasePlayer> oldPlayers = db.getAllStoredPlayers();
+                List<DataBasePlayer> updatedPlayers = new ArrayList<>();
                 //Iterate over stored players
-                for (Player storedPlayer : oldPlayers) {
+                for (DataBasePlayer storedPlayer : oldPlayers) {
                     //Fetch player from ScoreSaber API
-                    Player updatedPlayer = ss.getPlayerById(storedPlayer.getId());
+                    DataBasePlayer updatedPlayer = ss.getPlayerById(storedPlayer.getId());
                     if (updatedPlayer == null) {
                         continue;
                     }
@@ -91,7 +91,7 @@ public class LeaderboardWatcher {
         };
     }
 
-    private void handleFOAAPlayerUpdate(TextChannel foaaOutput, Player updatedPlayer, Player storedPlayer) {
+    private void handleFOAAPlayerUpdate(TextChannel foaaOutput, DataBasePlayer updatedPlayer, DataBasePlayer storedPlayer) {
             Member member = DiscordUtils.getMemberByChannelAndId(foaaOutput, updatedPlayer.getDiscordUserId());
             if (member != null && RoleManagerFOAA.isNewMilestone(updatedPlayer.getRank(), member)) {
                 //Log
@@ -109,13 +109,13 @@ public class LeaderboardWatcher {
             }
     }
 
-    private void handleBSGPlayerUpdate(TextChannel bsgOutput, List<Player> updatedPlayers, List<Player> oldPlayers) {
+    private void handleBSGPlayerUpdate(TextChannel bsgOutput, List<DataBasePlayer> updatedPlayers, List<DataBasePlayer> oldPlayers) {
         updatedPlayers = updatedPlayers.stream().filter(player -> "DE".equals(player.getCountry())).collect(Collectors.toList());
         oldPlayers = oldPlayers.stream().filter(player -> "DE".equals(player.getCountry())).collect(Collectors.toList());
 
         List<Member> bsgMembers = bsgOutput.getGuild().loadMembers().get();
-        for (Player updatedPlayer : updatedPlayers) {
-            Player oldPlayer = oldPlayers.stream()
+        for (DataBasePlayer updatedPlayer : updatedPlayers) {
+            DataBasePlayer oldPlayer = oldPlayers.stream()
                     .filter(p -> p.getPlayerIdLong() == updatedPlayer.getPlayerIdLong())
                     .findFirst()
                     .orElse(null);
@@ -156,10 +156,10 @@ public class LeaderboardWatcher {
                 System.out.println("Player " + updatedPlayer.getName() + " improved!");
                 String improvementMessage = Format.underline(Format.bold(updatedPlayer.getName())) + " has advanced from rank " + Format.bold("#" + oldPlayer.getCountryRank() + " DE") + " to rank " + Format.bold("#" + updatedPlayer.getCountryRank() + " DE") + "! (" + updatedPlayer.getPp() + "pp)";
 
-                List<Player> snipedPlayers = findSnipedPlayers(updatedPlayer, oldPlayer, updatedPlayers, oldPlayers);
+                List<DataBasePlayer> snipedPlayers = findSnipedPlayers(updatedPlayer, oldPlayer, updatedPlayers, oldPlayers);
                 StringBuilder snipeMessages = new StringBuilder();
                 for (int i = 0; i < snipedPlayers.size(); i++) {
-                    Player snipedPlayer = snipedPlayers.get(i);
+                    DataBasePlayer snipedPlayer = snipedPlayers.get(i);
                     snipeMessages.append("\n...and surpassed ")
                             .append("#").append(snipedPlayer.getCountryRank()).append(" ")
                             .append(Format.link(Format.bold(snipedPlayer.getName()), snipedPlayer.getProfileURL()))
@@ -176,16 +176,16 @@ public class LeaderboardWatcher {
         }
     }
 
-    private List<Player> findSnipedPlayers(Player updatedPlayerWhoAdvanced, Player oldPlayerWhoAdvanced, List<Player> updatedPlayers, List<Player> oldPlayers) {
-        List<Player> snipedPlayers = new ArrayList<>();
+    private List<DataBasePlayer> findSnipedPlayers(DataBasePlayer updatedPlayerWhoAdvanced, DataBasePlayer oldPlayerWhoAdvanced, List<DataBasePlayer> updatedPlayers, List<DataBasePlayer> oldPlayers) {
+        List<DataBasePlayer> snipedPlayers = new ArrayList<>();
 
         long playerId = updatedPlayerWhoAdvanced.getPlayerIdLong();
 
-        for (Player updatedOtherPlayer : updatedPlayers) {
+        for (DataBasePlayer updatedOtherPlayer : updatedPlayers) {
             if (updatedOtherPlayer.getPlayerIdLong() == playerId) {
                 continue;
             }
-            Player oldOtherPlayer = oldPlayers.stream()
+            DataBasePlayer oldOtherPlayer = oldPlayers.stream()
                     .filter(op -> op.getPlayerIdLong() == updatedOtherPlayer.getPlayerIdLong())
                     .findFirst()
                     .orElse(null);

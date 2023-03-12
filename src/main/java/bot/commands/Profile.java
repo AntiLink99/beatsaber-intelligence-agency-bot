@@ -2,7 +2,7 @@ package bot.commands;
 
 import bot.api.ApiConstants;
 import bot.dto.MessageEventDTO;
-import bot.dto.player.Player;
+import bot.dto.player.DataBasePlayer;
 import bot.graphics.GraphicsConstants;
 import bot.graphics.ProfileImage;
 import bot.main.BotConstants;
@@ -16,7 +16,7 @@ import java.util.concurrent.TimeUnit;
 
 public class Profile {
 
-    public void sendProfileImage(Player player, MessageEventDTO event) {
+    public void sendProfileImage(DataBasePlayer player, MessageEventDTO event) {
         if (player == null) {
             System.out.println("no player");
             return;

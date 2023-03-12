@@ -16,4 +16,5 @@ public interface PlayerScore {
      float getWeight();
      String getCoverURL();
      LeaderboardService getService();
+     LeaderboardServicePlayer getLeaderboardPlayer();
 }

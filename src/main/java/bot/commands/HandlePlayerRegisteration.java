@@ -2,7 +2,7 @@ package bot.commands;
 
 import bot.db.DatabaseManager;
 import bot.dto.MessageEventDTO;
-import bot.dto.player.Player;
+import bot.dto.player.DataBasePlayer;
 import bot.main.BotConstants;
 import bot.roles.RoleManager;
 import bot.utils.Messages;
@@ -17,7 +17,7 @@ public class HandlePlayerRegisteration {
         this.db = db;
     }
 
-    public boolean registerPlayer(Player player, TextChannel channel) {
+    public boolean registerPlayer(DataBasePlayer player, TextChannel channel) {
         if (player == null) {
             Messages.sendMessage("No player given. Check for whitespace mistakes.", channel);
             return false;

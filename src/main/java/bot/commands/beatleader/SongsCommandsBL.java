@@ -2,9 +2,11 @@ package bot.commands.beatleader;
 
 import bot.api.BeatLeader;
 import bot.db.DatabaseManager;
+import bot.dto.LeaderboardServicePlayer;
 import bot.dto.MessageEventDTO;
 import bot.dto.PlayerScore;
-import bot.dto.player.Player;
+import bot.dto.beatleader.scores.Player;
+import bot.dto.player.DataBasePlayer;
 import bot.dto.rankedmaps.RankedMaps;
 import bot.graphics.SongsImage;
 import bot.main.BotConstants;
@@ -28,7 +30,7 @@ public class SongsCommandsBL {
         this.ranked = ranked;
     }
 
-    public void sendRecentSongs(Player player, int index, MessageEventDTO event) {
+    public void sendRecentSongs(DataBasePlayer player, int index, MessageEventDTO event) {
         if (player == null) {
             Messages.sendMessage("Player could not be found.", event.getChannel());
             return;
@@ -57,6 +59,8 @@ public class SongsCommandsBL {
 
         SongsImage.setFilePath(filePath);
         SongsImage.setScores(scores);
+        LeaderboardServicePlayer imagePlayer = scores.get(0) != null ? scores.get(0).getLeaderboardPlayer() : new Player();
+        SongsImage.setPlayer(imagePlayer);
         JavaFXUtils.launch(SongsImage.class);
 
         int recentSongsWaitingCounter = 0;
@@ -80,7 +84,7 @@ public class SongsCommandsBL {
 
     }
 
-    public void sendTopSongs(Player player, int index, MessageEventDTO event) {
+    public void sendTopSongs(DataBasePlayer player, int index, MessageEventDTO event) {
         if (player == null) {
             Messages.sendMessage("Player could not be found.", event.getChannel());
             return;
@@ -108,6 +112,8 @@ public class SongsCommandsBL {
         }
 
         SongsImage.setFilePath(filePath);
+        LeaderboardServicePlayer imagePlayer = scores.get(0) != null ? scores.get(0).getLeaderboardPlayer() : new Player();
+        SongsImage.setPlayer(imagePlayer);
         SongsImage.setScores(scores);
         JavaFXUtils.launch(SongsImage.class);
 

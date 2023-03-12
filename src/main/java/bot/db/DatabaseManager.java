@@ -1,6 +1,6 @@
 package bot.db;
 
-import bot.dto.player.Player;
+import bot.dto.player.DataBasePlayer;
 import bot.dto.player.PlayerSkills;
 import bot.utils.DiscordLogger;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -35,7 +35,7 @@ public class DatabaseManager {
         }
     }
 
-    public boolean savePlayer(Player player) {
+    public boolean savePlayer(DataBasePlayer player) {
         if (con == null) {
             return false;
         }
@@ -88,7 +88,7 @@ public class DatabaseManager {
         return false;
     }
 
-    public void updatePlayer(Player newPlayer) {
+    public void updatePlayer(DataBasePlayer newPlayer) {
         if (con == null) {
             return;
         }
@@ -116,17 +116,17 @@ public class DatabaseManager {
         }
     }
 
-    public List<Player> getAllStoredPlayers() {
+    public List<DataBasePlayer> getAllStoredPlayers() {
         if (con == null) {
             return null;
         }
-        List<Player> players = new ArrayList<>();
+        List<DataBasePlayer> players = new ArrayList<>();
         PreparedStatement stmt = null;
         try {
             stmt = con.prepareStatement(DBConstants.SELECT_PLAYER_STMT);
             ResultSet rs = stmt.executeQuery();
             while (rs != null && rs.next()) {
-                Player player = new Player();
+                DataBasePlayer player = new DataBasePlayer();
                 player.setId(rs.getString("player_id"));
                 player.setName(rs.getString("player_name"));
                 player.setProfilePicture(rs.getString("player_avatar"));
@@ -150,7 +150,7 @@ public class DatabaseManager {
         return players;
     }
 
-    public Player getPlayerByName(String playerName) {
+    public DataBasePlayer getPlayerByName(String playerName) {
         if (con == null) {
             return null;
         }
@@ -161,7 +161,7 @@ public class DatabaseManager {
 
             ResultSet rs = stmt.executeQuery();
             if (rs != null && rs.next()) {
-                Player player = new Player();
+                DataBasePlayer player = new DataBasePlayer();
                 player.setId(rs.getString("player_id"));
                 player.setName(rs.getString("player_name"));
                 player.setProfilePicture(rs.getString("player_avatar"));
@@ -181,7 +181,7 @@ public class DatabaseManager {
         return null;
     }
 
-    public Player getPlayerByDiscordId(long discordUserId) {
+    public DataBasePlayer getPlayerByDiscordId(long discordUserId) {
         if (con == null) {
             return null;
         }
@@ -192,7 +192,7 @@ public class DatabaseManager {
 
             ResultSet rs = stmt.executeQuery();
             if (rs != null && rs.next()) {
-                Player player = new Player();
+                DataBasePlayer player = new DataBasePlayer();
                 player.setId(rs.getString("player_id"));
                 player.setName(rs.getString("player_name"));
                 player.setProfilePicture(rs.getString("player_avatar"));

@@ -3,7 +3,7 @@ package bot.graphics;
 import bot.api.HttpMethods;
 import bot.db.DatabaseManager;
 import bot.dto.MessageEventDTO;
-import bot.dto.player.Player;
+import bot.dto.player.DataBasePlayer;
 import bot.utils.Messages;
 
 import javax.imageio.ImageIO;
@@ -59,14 +59,14 @@ public class AccGridImage {
             return;
         }
 
-        Player storedPlayer = db.getPlayerByDiscordId(event.getAuthor().getIdLong());
+        DataBasePlayer storedPlayer = db.getPlayerByDiscordId(event.getAuthor().getIdLong());
         storedPlayer.setCustomAccGridImage(urlString);
         db.updatePlayer(storedPlayer);
         Messages.sendMessage("Image URL was updated successfully!", event.getChannel());
     }
 
     public void resetImage(MessageEventDTO event) {
-        Player storedPlayer = db.getPlayerByDiscordId(event.getAuthor().getIdLong());
+        DataBasePlayer storedPlayer = db.getPlayerByDiscordId(event.getAuthor().getIdLong());
         storedPlayer.setCustomAccGridImage(null);
         db.updatePlayer(storedPlayer);
         Messages.sendMessage("Image URL was reset successfully!", event.getChannel());

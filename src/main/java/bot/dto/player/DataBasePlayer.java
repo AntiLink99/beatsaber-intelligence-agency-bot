@@ -1,11 +1,12 @@
 package bot.dto.player;
 
 import bot.api.ApiConstants;
+import bot.dto.LeaderboardServicePlayer;
 
 import java.io.Serializable;
 import java.util.List;
 
-public class Player implements Serializable {
+public class DataBasePlayer implements Serializable, LeaderboardServicePlayer {
 
     private static final long serialVersionUID = 1L;
 
@@ -21,6 +22,11 @@ public class Player implements Serializable {
     private List<Integer> historyValues;
     private String histories;
     private transient String customAccGridImage;
+
+    @Override
+    public String getAvatar() {
+        return profilePicture;
+    }
 
     public String getId() {
         return id;

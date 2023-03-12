@@ -3,7 +3,7 @@ package bot.listeners;
 import bot.api.ApiConstants;
 import bot.api.ScoreSaber;
 import bot.db.DatabaseManager;
-import bot.dto.player.Player;
+import bot.dto.player.DataBasePlayer;
 import bot.utils.Messages;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.MessageChannel;
@@ -68,7 +68,7 @@ public class RegisterAllListener extends ListenerAdapter {
                     return;
                 }
                 String playerId = content.replace(ApiConstants.USER_PRE_URL, "");
-                Player player = ss.getPlayerById(playerId);
+                DataBasePlayer player = ss.getPlayerById(playerId);
                 if (player == null) {
                     Messages.sendMessage("Could not find a player with this URL.", channel);
                     return;

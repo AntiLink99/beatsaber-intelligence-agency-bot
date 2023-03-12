@@ -2,7 +2,7 @@ package bot.utils;
 
 import bot.api.ApiConstants;
 import bot.dto.RecentSongData;
-import bot.dto.player.Player;
+import bot.dto.player.DataBasePlayer;
 import bot.listeners.EmbedButtonListener;
 import bot.main.BotConstants;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -102,7 +102,7 @@ public class Messages {
         }
     }
 
-    public static void sendMilestoneMessage(Player player, TextChannel channel) {
+    public static void sendMilestoneMessage(DataBasePlayer player, TextChannel channel) {
         try {
             String roleName = BotConstants.topRolePrefix + ListValueUtils.findFoaaMilestoneForRank(player.getRank());
             List<Role> roles = channel.getGuild().getRolesByName(roleName, true);

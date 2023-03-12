@@ -10,7 +10,7 @@ import bot.commands.beatleader.SongsCommandsBL;
 import bot.commands.scoresaber.*;
 import bot.db.DatabaseManager;
 import bot.dto.MessageEventDTO;
-import bot.dto.player.Player;
+import bot.dto.player.DataBasePlayer;
 import bot.dto.player.PlayerSkills;
 import bot.dto.rankedmaps.RankedMaps;
 import bot.graphics.AccGridImage;
@@ -181,7 +181,7 @@ public class BeatSaberBot extends ListenerAdapter {
             db.connectToDatabase();
             fetchRankedMapsIfNonExistent(channel);
             String msg = StringUtils.join(msgParts, " ");
-            Player commandPlayer = getCommandPlayer(msgParts, channel, author.getUser());
+            DataBasePlayer commandPlayer = getCommandPlayer(msgParts, channel, author.getUser());
 
             DiscordLogger.sendLogInChannel(Format.code("Command: " + msg + "\nRequester: " + author.getEffectiveName() + "\nGuild: " + guild.getName()), "info");
             String command = msgParts.get(1).toLowerCase();
@@ -208,7 +208,7 @@ public class BeatSaberBot extends ListenerAdapter {
                     break;
                 }
                 case "chartall":
-                    List<Player> storedPlayers = db.getAllStoredPlayers();
+                    List<DataBasePlayer> storedPlayers = db.getAllStoredPlayers();
                     storedPlayers.removeIf(p -> channel.getGuild().getMemberById(p.getDiscordUserId()) == null);
                     new PlayerChart().sendChartImage(storedPlayers, event, (msgParts.size() >= 3 ? msgParts.get(2) : null));
                     break;
@@ -463,8 +463,8 @@ public class BeatSaberBot extends ListenerAdapter {
         DiscordLogger.sendLogInChannel(Format.code("Left guild \"" + event.getGuild().getName() + "\""), DiscordLogger.GUILDS);
     }
 
-    private Player getCommandPlayer(List<String> msgParts, TextChannel channel, User author) {
-        Player player = null;
+    private DataBasePlayer getCommandPlayer(List<String> msgParts, TextChannel channel, User author) {
+        DataBasePlayer player = null;
         String lastArgument = msgParts.get(msgParts.size() - 1);
 
         if (Format.isUrl(lastArgument)) {
@@ -496,13 +496,13 @@ public class BeatSaberBot extends ListenerAdapter {
         System.out.println("READY!");
     }
 
-    private Player getScoreSaberPlayerFromUrl(String profileUrl) throws FileNotFoundException {
+    private DataBasePlayer getScoreSaberPlayerFromUrl(String profileUrl) throws FileNotFoundException {
         Matcher matcher = scoreSaberIDPattern.matcher(profileUrl);
         if (!matcher.find()) {
             return null;
         }
         String playerId = matcher.group(1);
-        Player player = ss.getPlayerById(playerId);
+        DataBasePlayer player = ss.getPlayerById(playerId);
         if (player == null) {
             throw new FileNotFoundException("Player could not be found!");
         }
@@ -510,7 +510,7 @@ public class BeatSaberBot extends ListenerAdapter {
     }
 
     @Deprecated
-    private void sendRecentSongsIfTwitchVOD(String msg, MessageEventDTO event, Player commandPlayer) {
+    private void sendRecentSongsIfTwitchVOD(String msg, MessageEventDTO event, DataBasePlayer commandPlayer) {
         Matcher matcher = twitchVODPattern.matcher(msg);
         if (!matcher.find()) {
             return;

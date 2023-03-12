@@ -1,7 +1,9 @@
 package bot.dto.scoresaber;
 
 import bot.dto.LeaderboardService;
+import bot.dto.LeaderboardServicePlayer;
 import bot.dto.PlayerScore;
+import bot.dto.player.DataBasePlayer;
 import com.google.gson.annotations.SerializedName;
 import org.ocpsoft.prettytime.PrettyTime;
 
@@ -22,6 +24,8 @@ public class PlayerScoreSS implements PlayerScore {
 	private Leaderboard leaderboard;
 
 	private final transient DecimalFormat format;
+
+	LeaderboardServicePlayer dbPlayer;
 
 	public PlayerScoreSS() {
 		format = new DecimalFormat("##0.00");
@@ -86,22 +90,18 @@ public class PlayerScoreSS implements PlayerScore {
 		return "";
 	}
 
-	@Override
 	public String getSongName() {
 		return leaderboard.getSongName();
 	}
 
-	@Override
 	public String getSongHash() {
 		return leaderboard.getSongHash();
 	}
 
-	@Override
 	public String getAuthorName() {
 		return leaderboard.getLevelAuthorName();
 	}
 
-	@Override
 	public int getRank() {
 		return score.getRank();
 	}
@@ -114,12 +114,10 @@ public class PlayerScoreSS implements PlayerScore {
 		return "(" + format.format(score.getPp() * score.getWeight()) + "PP)";
 	}
 
-	@Override
 	public String getDifficultyName() {
 		return leaderboard.getDifficulty().getDifficultyName();
 	}
 
-	@Override
 	public int getDifficultyValue() {
 		return leaderboard.getDifficultyValue();
 	}
@@ -133,14 +131,20 @@ public class PlayerScoreSS implements PlayerScore {
 		return new PrettyTime(Locale.ENGLISH).format(Date.from(getTimeSetLocalDateTime().atZone(ZoneOffset.UTC).toInstant()));
 	}
 
-	@Override
 	public boolean isRanked() {
 		return score.getPp() > 0;
 	}
 
-	@Override
 	public LeaderboardService getService() {
 		return LeaderboardService.SCORESABER;
 	}
 
+	@Override
+	public LeaderboardServicePlayer getLeaderboardPlayer() {
+		return dbPlayer;
+	}
+
+	public void setLeaderboardPlayer(DataBasePlayer player) {
+		this.dbPlayer = player;
+	}
 }

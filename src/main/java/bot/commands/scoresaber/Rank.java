@@ -5,7 +5,7 @@ import bot.api.ScoreSaber;
 import bot.dto.MessageEventDTO;
 import bot.dto.leaderboards.LeaderboardPlayer;
 import bot.dto.leaderboards.LeaderboardType;
-import bot.dto.player.Player;
+import bot.dto.player.DataBasePlayer;
 import bot.utils.Format;
 import bot.utils.Messages;
 
@@ -15,9 +15,9 @@ import java.util.Locale;
 
 public class Rank {
 
-    private final Player player;
+    private final DataBasePlayer player;
 
-    public Rank(Player player) {
+    public Rank(DataBasePlayer player) {
         this.player = player;
         if (player == null) {
             throw new NullPointerException("Command player not found.");
@@ -43,7 +43,7 @@ public class Rank {
         sendRank(player, 1, 10000, "de,at,ch", LeaderboardType.DACH, event);
     }
 
-    private void sendRank(Player player, int startPage, int sizeLimit, String countryCode, LeaderboardType leaderboardType, MessageEventDTO event) {
+    private void sendRank(DataBasePlayer player, int startPage, int sizeLimit, String countryCode, LeaderboardType leaderboardType, MessageEventDTO event) {
         ScoreSaber ss = new ScoreSaber();
         List<LeaderboardPlayer> leaderboardEntries = ss.findLeaderboardEntriesAroundPlayer(player, countryCode, startPage, sizeLimit);
         if (leaderboardEntries == null) {

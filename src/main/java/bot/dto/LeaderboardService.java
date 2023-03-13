@@ -1,5 +1,5 @@
 package bot.dto;
 
 public enum LeaderboardService {
-    SCORESABER, BEATLEADER
+    SCORESABER, BEATLEADER, ACCSABER
 }

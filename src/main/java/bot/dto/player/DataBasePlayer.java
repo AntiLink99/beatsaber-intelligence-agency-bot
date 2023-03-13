@@ -1,6 +1,7 @@
 package bot.dto.player;
 
 import bot.api.ApiConstants;
+import bot.dto.LeaderboardService;
 import bot.dto.LeaderboardServicePlayer;
 
 import java.io.Serializable;
@@ -22,6 +23,8 @@ public class DataBasePlayer implements Serializable, LeaderboardServicePlayer {
     private List<Integer> historyValues;
     private String histories;
     private transient String customAccGridImage;
+
+    private transient LeaderboardService service = LeaderboardService.SCORESABER;
 
     @Override
     public String getAvatar() {
@@ -128,7 +131,14 @@ public class DataBasePlayer implements Serializable, LeaderboardServicePlayer {
     }
 
     public String getProfileURL() {
-        return ApiConstants.USER_PRE_URL + this.id;
+        if (service == LeaderboardService.SCORESABER) {
+            return ApiConstants.USER_PRE_URL + this.id;
+        }
+        return ApiConstants.getAccSaberUserURL(this.id);
+    }
+
+    public void setService(LeaderboardService service) {
+        this.service = service;
     }
 
 }

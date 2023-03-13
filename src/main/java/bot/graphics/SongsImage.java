@@ -39,8 +39,18 @@ public class SongsImage extends Application {
     public void start(Stage primaryStage) throws Exception {
         setFinished(false);
 
-        final boolean isScoreSaber = LeaderboardService.SCORESABER.equals(scores.get(0).getService());
-        final String leaderboardIconUrl = isScoreSaber ? "https://anti.link/img/scoresaber.png" : "https://anti.link/img/beatleader.png";
+        String leaderboardIconUrl = "https://anti.link/img/icons/";
+        switch(scores.get(0).getService()) {
+            case SCORESABER:
+                leaderboardIconUrl += "scoresaber.png";
+                break;
+            case BEATLEADER:
+                leaderboardIconUrl += "beatleader.png";
+                break;
+            case ACCSABER:
+                leaderboardIconUrl += "accsaber.png";
+                break;
+        }
         final ImageView leaderboardImage = new ImageView(new Image(leaderboardIconUrl ,200, 200, false, false));
 
         Pane root = new Pane();
@@ -184,35 +194,38 @@ public class SongsImage extends Application {
                 ppWeightText.setFill(Color.rgb(24, 161, 56));
                 ppWeightText.setEffect(textShadow);
 
+                root.getChildren().addAll(starsText, star, ppText, ppWeightText);
+
                 // Leaderboard
-                Text leaderboardText = new Text(25, rightTextsY - 20, rankOnPlayerLeaderboard + ".");
-                boolean isTopTenPlayerScore = rankOnPlayerLeaderboard <= 10;
-                boolean isTopThreePlayerScore = rankOnPlayerLeaderboard <= 3;
+                if (score.getService() != LeaderboardService.ACCSABER && rankOnPlayerLeaderboard > 0) {
+                    Text leaderboardText = new Text(25, rightTextsY - 20, rankOnPlayerLeaderboard + ".");
+                    boolean isTopTenPlayerScore = rankOnPlayerLeaderboard <= 10;
+                    boolean isTopThreePlayerScore = rankOnPlayerLeaderboard <= 3;
 
-                int playerRankYOffset = isTopTenPlayerScore ? (11 - rankOnPlayerLeaderboard) * -2 : 0;
-                leaderboardText.setY(leaderboardText.getY() - playerRankYOffset);
-                int additionalFontSize = isTopTenPlayerScore ? (11 - rankOnPlayerLeaderboard) * 2 : 0;
+                    int playerRankYOffset = isTopTenPlayerScore ? (11 - rankOnPlayerLeaderboard) * -2 : 0;
+                    leaderboardText.setY(leaderboardText.getY() - playerRankYOffset);
+                    int additionalFontSize = isTopTenPlayerScore ? (11 - rankOnPlayerLeaderboard) * 2 : 0;
 
-                leaderboardText.setFont(FontUtils.consolasBold(30 + additionalFontSize));
-                Color playerRankTextColor = isTopThreePlayerScore ? Color.BLACK : Color.WHITE;
-                leaderboardText.setFill(playerRankTextColor);
-                leaderboardText.setStroke(playerRankShadowColor);
-                leaderboardText.setStroke(Color.BLACK);
-                leaderboardText.setStrokeType(StrokeType.OUTSIDE);
-                leaderboardText.setStrokeWidth(isTopThreePlayerScore ? 2 : 5);
+                    leaderboardText.setFont(FontUtils.consolasBold(30 + additionalFontSize));
+                    Color playerRankTextColor = isTopThreePlayerScore ? Color.BLACK : Color.WHITE;
+                    leaderboardText.setFill(playerRankTextColor);
+                    leaderboardText.setStroke(playerRankShadowColor);
+                    leaderboardText.setStroke(Color.BLACK);
+                    leaderboardText.setStrokeType(StrokeType.OUTSIDE);
+                    leaderboardText.setStrokeWidth(isTopThreePlayerScore ? 2 : 5);
 
-                DropShadow leaderboardTextShadow = new DropShadow();
-                leaderboardTextShadow.setColor(playerRankShadowColor);
-                leaderboardTextShadow.setSpread(isTopThreePlayerScore ? 0.9 : 0.6);
-                leaderboardTextShadow.setRadius(10);
-                if (isTopThreePlayerScore) {
-                    Glow playerRankFlow = new Glow();
-                    playerRankFlow.setLevel(0.5);
-                    leaderboardTextShadow.setInput(glow);
+                    DropShadow leaderboardTextShadow = new DropShadow();
+                    leaderboardTextShadow.setColor(playerRankShadowColor);
+                    leaderboardTextShadow.setSpread(isTopThreePlayerScore ? 0.9 : 0.6);
+                    leaderboardTextShadow.setRadius(10);
+                    if (isTopThreePlayerScore) {
+                        Glow playerRankFlow = new Glow();
+                        playerRankFlow.setLevel(0.5);
+                        leaderboardTextShadow.setInput(glow);
+                    }
+                    leaderboardText.setEffect(leaderboardTextShadow);
+                    root.getChildren().addAll(leaderboardText);
                 }
-                leaderboardText.setEffect(leaderboardTextShadow);
-
-                root.getChildren().addAll(starsText, star, ppText, ppWeightText, leaderboardText);
                 float SCALE = 1f;
                 root.setScaleY(SCALE);
                 root.setScaleX(SCALE);

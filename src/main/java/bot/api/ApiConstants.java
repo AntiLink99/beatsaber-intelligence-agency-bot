@@ -47,6 +47,19 @@ public class ApiConstants {
     }
     public static final String BL_USER_PRE_URL = "https://www.beatleader.xyz/u/";
 
+    //Acc Saber
+    public static final String ACC_PRE_URL = "https://accsaber.com";
+    public static final String ACC_SCORES_URL = "/profile/%s/overall/scores?page=%d&_data=routes%%2Fprofile%%2F%%24userId%%2F%%24category%%2Fscores&sortBy=%s&reverse";
+    public static String getAccSaberTopScoresURL(String playerId, int pageNr) {
+        return String.format(ACC_PRE_URL + ACC_SCORES_URL, playerId, pageNr, "ap");
+    }
+    public static String getAccSaberRecentScoresURL(String playerId, int pageNr) {
+        return String.format(ACC_PRE_URL + ACC_SCORES_URL, playerId, pageNr, "timeSet");
+    }
+    public static final String ACC_USER_URL = "/profile/%s/overall/scores";
+    public static String getAccSaberUserURL(String playerId) {
+        return String.format(ACC_PRE_URL + ACC_USER_URL, playerId);
+    }
     // Meme API
     public static final String MEME_URL = "https://meme-api.com/gimme";
 }

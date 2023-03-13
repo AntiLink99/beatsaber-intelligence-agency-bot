@@ -6,6 +6,7 @@ import bot.api.ScoreSaber;
 import bot.chart.PlayerChart;
 import bot.chart.RadarStatsChart;
 import bot.commands.*;
+import bot.commands.accsaber.SongsCommandsACC;
 import bot.commands.beatleader.SongsCommandsBL;
 import bot.commands.scoresaber.*;
 import bot.db.DatabaseManager;
@@ -297,7 +298,12 @@ public class BeatSaberBot extends ListenerAdapter {
                 }
                 case "recentsongsbl": {
                     int index = getIndexFromMsgParts(msgParts);
-                    new SongsCommandsBL(db, ranked).sendRecentSongs(commandPlayer, index, event);
+                    new SongsCommandsBL(db).sendRecentSongs(commandPlayer, index, event);
+                    return;
+                }
+                case "recentsongsacc": {
+                    int index = getIndexFromMsgParts(msgParts);
+                    new SongsCommandsACC(db).sendRecentSongs(commandPlayer, index, event);
                     return;
                 }
                 case "topsongs": {
@@ -321,7 +327,7 @@ public class BeatSaberBot extends ListenerAdapter {
                             index = Integer.parseInt(indexOrMemberMention);
                         }
                     }
-                    new SongsCommandsBL(db, ranked).sendTopSongs(commandPlayer, index, event);
+                    new SongsCommandsBL(db).sendTopSongs(commandPlayer, index, event);
                     return;
                 }
                 case "localrank": {

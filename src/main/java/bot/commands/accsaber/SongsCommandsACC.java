@@ -1,7 +1,9 @@
-package bot.commands.beatleader;
+package bot.commands.accsaber;
 
+import bot.api.AccSaber;
 import bot.api.BeatLeader;
 import bot.db.DatabaseManager;
+import bot.dto.LeaderboardService;
 import bot.dto.LeaderboardServicePlayer;
 import bot.dto.MessageEventDTO;
 import bot.dto.PlayerScore;
@@ -18,12 +20,11 @@ import java.util.concurrent.TimeUnit;
 
 //TODO Redundanzen zusammenfassen
 // TODO RecentSong RecentSongs TopSongs
-public class SongsCommandsBL {
-    //TODO: TopSongs & RecentSongs redundant code
+public class SongsCommandsACC {
 
     final DatabaseManager db;
 
-    public SongsCommandsBL(DatabaseManager db) {
+    public SongsCommandsACC(DatabaseManager db) {
         this.db = db;
     }
 
@@ -32,17 +33,18 @@ public class SongsCommandsBL {
             Messages.sendMessage("Player could not be found.", event.getChannel());
             return;
         }
-        if (index > 50 || index < 1) {
-            Messages.sendMessage("The value provided has to be an integer between 1 and 50.", event.getChannel());
+        if (index > 6 || index < 1) {
+            Messages.sendMessage("The value provided has to be an integer between 1 and 6.", event.getChannel());
             return;
         }
 
-        BeatLeader bl = new BeatLeader();
+        AccSaber as = new AccSaber();
 
+        player.setService(LeaderboardService.ACCSABER);
         String playerId = player.getId();
         String messageId = String.valueOf(event.getId());
 
-        List<PlayerScore> scores = bl.getRecentScoresByPlayerIdAndPage(Long.parseLong(player.getId()), index);
+        List<PlayerScore> scores = as.getRecentScoresByPlayerIdAndPage(Long.parseLong(player.getId()), index);
         if (scores == null || scores.isEmpty()) {
             Messages.sendMessage("Scores could not be fetched. Please try again later.", event.getChannel());
             return;
@@ -56,8 +58,7 @@ public class SongsCommandsBL {
 
         SongsImage.setFilePath(filePath);
         SongsImage.setScores(scores);
-        LeaderboardServicePlayer imagePlayer = scores.get(0) != null ? scores.get(0).getLeaderboardPlayer() : new Player();
-        SongsImage.setPlayer(imagePlayer);
+        SongsImage.setPlayer(player);
         JavaFXUtils.launch(SongsImage.class);
 
         int recentSongsWaitingCounter = 0;

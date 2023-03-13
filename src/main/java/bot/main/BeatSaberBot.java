@@ -330,6 +330,18 @@ public class BeatSaberBot extends ListenerAdapter {
                     new SongsCommandsBL(db).sendTopSongs(commandPlayer, index, event);
                     return;
                 }
+                case "topsongsacc": {
+                    int index = 1;
+                    if (msgParts.size() == 3) {
+                        String[] arguments = msgParts.get(2).split(" ");
+                        String indexOrMemberMention = arguments[0];
+                        if (NumberUtils.isCreatable(indexOrMemberMention)) {
+                            index = Integer.parseInt(indexOrMemberMention);
+                        }
+                    }
+                    new SongsCommandsACC(db).sendTopSongs(commandPlayer, index, event);
+                    return;
+                }
                 case "localrank": {
                     new Rank(commandPlayer).sendLocalRank(event);
                     break;

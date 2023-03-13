@@ -26,7 +26,12 @@ public class AccSaber {
     public List<PlayerScore> getTopScoresByPlayerIdAndPage(long playerId, int pageNr) {
         int page = 1; //TODO Change this when AccSaber allows Limit, 40 Scores
         String url = ApiConstants.getAccSaberTopScoresURL(String.valueOf(playerId), page);
-        return getPlayerScores(url);
+        List<PlayerScore> recentScores = getPlayerScores(url);
+        if (recentScores != null) {
+            int offset = pageNr - 1;
+            return recentScores.subList(8 * offset, 8 + 8 * offset);
+        }
+        return Collections.emptyList();
     }
 
     public List<PlayerScore> getRecentScoresByPlayerIdAndPage(long playerId, int pageNr) {

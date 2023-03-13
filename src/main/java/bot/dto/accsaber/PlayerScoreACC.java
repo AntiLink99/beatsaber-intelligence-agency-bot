@@ -222,7 +222,7 @@ public class PlayerScoreACC implements PlayerScore {
 
 	@Override
 	public String getAuthorName() {
-		return songAuthorName;
+		return levelAuthorName;
 	}
 
 

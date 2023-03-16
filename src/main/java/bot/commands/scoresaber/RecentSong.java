@@ -4,7 +4,7 @@ import bot.api.ApiConstants;
 import bot.api.BeatSaver;
 import bot.api.BeatSavior;
 import bot.api.ScoreSaber;
-import bot.chart.AccuracyChart;
+import bot.commands.chart.AccuracyChart;
 import bot.db.DatabaseManager;
 import bot.dto.MessageEventDTO;
 import bot.dto.RecentSongData;
@@ -239,7 +239,7 @@ public class RecentSong {
                     gridWaitingCounter++;
                 }
                 if (gridImage.exists()) {
-                    Messages.sendImage(gridImage, "accGrid_" + playerId + "_" + event.getId() + ".png", event.getChannel());
+                    Messages.sendImage(gridImage, "accGrid_" + playerId + "_" + event.getId() + ".png", event);
                     gridImage.delete();
                 } else {
                     DiscordLogger.sendLogInChannel("Image wasnt generated. accGrid_" + playerId + "_" + event.getId() + ".png", DiscordLogger.ERRORS);

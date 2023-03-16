@@ -103,7 +103,7 @@ public class SongsCommands {
             recentSongsWaitingCounter++;
         }
         if (recentSongsImage.exists()) {
-            Messages.sendImage(recentSongsImage, "recentSongs_" + playerId + "_" + messageId + ".png", event.getChannel());
+            Messages.sendImage(recentSongsImage, "recentSongs_" + playerId + "_" + messageId + ".png", event);
             recentSongsImage.delete();
         }
 
@@ -176,7 +176,7 @@ public class SongsCommands {
             recentSongsWaitingCounter++;
         }
         if (topSongsImage.exists()) {
-            Messages.sendImage(topSongsImage, "topSongsImage_" + playerId + "_" + messageId + ".png", event.getChannel());
+            Messages.sendImage(topSongsImage, "topSongsImage_" + playerId + "_" + messageId + ".png", event);
             topSongsImage.delete();
         }
 

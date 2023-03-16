@@ -1,4 +1,4 @@
-package bot.chart;
+package bot.commands.chart;
 
 import bot.dto.MessageEventDTO;
 import bot.dto.beatsavior.BeatSaviorPlayerScore;
@@ -23,11 +23,11 @@ public class AccuracyChart {
     public static void sendChartImage(BeatSaviorPlayerScore score, String playerName, String diffName, MessageEventDTO event) {
 
         XYChart chart = AccuracyChart.getAccuracyChart(score, playerName, diffName);
-        String filename = BotConstants.RESOURCES_PATH+"accuracyChart_" + score.getPlayerID();
+        String filename = BotConstants.RESOURCES_PATH + "accuracyChart_" + score.getPlayerID();
         ChartUtils.saveChart(chart, filename);
         File image = new File(filename + ".png");
         if (image.exists()) {
-            Messages.sendImage(image, "accuracyChart_" + score.getPlayerID() + ".png", event.getChannel());
+            Messages.sendImage(image, "accuracyChart_" + score.getPlayerID() + ".png", event);
             image.delete();
         }
     }
@@ -39,7 +39,13 @@ public class AccuracyChart {
         double[] songTimeValues = accuracyGraph.keySet().stream().mapToDouble(Double::valueOf).toArray();
 
         // Create Chart
-        XYChart chart = new XYChartBuilder().width(BotConstants.chartWidth).theme(ChartTheme.Matlab).title("Accuracy Plot").xAxisTitle("Time").yAxisTitle("Accuracy").build();
+        XYChart chart = new XYChartBuilder()
+                .width(BotConstants.chartWidth)
+                .theme(ChartTheme.Matlab)
+                .title("Accuracy Plot")
+                .xAxisTitle("Time")
+                .yAxisTitle("Accuracy")
+                .build();
 
         Font font = new Font("Consolas", Font.BOLD, 20);
         Font titleFont = new Font("Consolas", Font.BOLD, 30);

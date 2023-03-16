@@ -50,7 +50,7 @@ public class Profile {
             profileWaitingCounter++;
         }
         if (profileFile.exists()) {
-            Messages.sendImage(profileFile, fileName, event.getChannel());
+            Messages.sendImage(profileFile, fileName, event);
             profileFile.delete();
         }
     }

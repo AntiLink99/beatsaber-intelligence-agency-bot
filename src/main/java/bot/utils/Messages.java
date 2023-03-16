@@ -1,6 +1,9 @@
 package bot.utils;
 
 import bot.api.ApiConstants;
+import bot.dto.LeaderboardService;
+import bot.dto.MessageEventDTO;
+import bot.dto.MessageEventType;
 import bot.dto.RecentSongData;
 import bot.dto.player.DataBasePlayer;
 import bot.listeners.EmbedButtonListener;
@@ -9,6 +12,7 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.Button;
+import net.dv8tion.jda.api.interactions.components.ButtonStyle;
 import org.apache.commons.io.FileUtils;
 
 import java.awt.*;
@@ -89,8 +93,8 @@ public class Messages {
         imageFile.delete();
     }
 
-    public static void sendImage(File image, String title, TextChannel channel) {
-        channel.sendFile(image, title).queue();
+    public static void sendImage(File image, String title, MessageEventDTO event) {
+        event.getChannel().sendFile(image, title).queue();
         image.delete();
     }
 
@@ -222,5 +226,26 @@ public class Messages {
         } catch (Exception e) {
             System.out.println("Could not send message because of lacking permissions: " + e.getMessage());
         }
+    }
+
+    public static long sendAskServiceMessage(MessageEventDTO event) {
+        EmbedBuilder builder = new EmbedBuilder();
+        builder.setTitle("Which service do you want to use?");
+        builder.setColor(embedColor);
+
+        List<Button> buttons = new ArrayList<>();
+        buttons.add(Button.of(ButtonStyle.PRIMARY, LeaderboardService.BEATLEADER.name(), "BeatLeader"));
+        buttons.add(Button.of(ButtonStyle.DANGER, LeaderboardService.SCORESABER.name(), "ScoreSaber"));
+        buttons.add(Button.of(ButtonStyle.SUCCESS, LeaderboardService.ACCSABER.name(), "AccSaber"));
+
+        if (event.getType() == MessageEventType.SLASH) {
+             return event.getSlashCommandIfExists().replyEmbeds(builder.build())
+                     .setEphemeral(true)
+                    .addActionRows(ActionRow.of(buttons))
+                    .complete().getInteraction().getIdLong();
+        }
+        return event.getMessage().replyEmbeds(builder.build())
+                    .setActionRows(ActionRow.of(buttons))
+                    .complete().getIdLong();
     }
 }

@@ -6,6 +6,7 @@ import bot.utils.Messages;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
+import net.dv8tion.jda.api.hooks.EventListener;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.Button;
@@ -19,7 +20,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-public class EmbedButtonListener extends ListenerAdapter {
+public class EmbedButtonListener extends ListenerAdapter implements EventListener {
     private final Message reactionMessage;
     private final String embedTitle;
     private final LinkedMap<String, String> keyValuePairs;
@@ -41,7 +42,7 @@ public class EmbedButtonListener extends ListenerAdapter {
                 reactionMessage.getJDA().removeEventListener(EmbedButtonListener.this);
                 Messages.editMessageStringMap(reactionMessage.getIdLong(), Collections.emptyMap(), "⚔️ Your session has expired. ⚔️", "", isInline, reactionMessage.getTextChannel());
             }
-        }, 300 * 1000);
+        }, 30 * 1000);
     }
 
     @Override

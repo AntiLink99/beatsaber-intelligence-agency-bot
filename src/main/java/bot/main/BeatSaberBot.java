@@ -1,20 +1,23 @@
 package bot.main;
 
-import bot.api.ApiConstants;
 import bot.api.BeatSaver;
 import bot.api.ScoreSaber;
-import bot.chart.PlayerChart;
-import bot.chart.RadarStatsChart;
 import bot.commands.*;
-import bot.commands.accsaber.SongsCommandsACC;
-import bot.commands.beatleader.SongsCommandsBL;
-import bot.commands.scoresaber.*;
+import bot.commands.chart.PlayerChart;
+import bot.commands.chart.RadarStatsChart;
+import bot.commands.scoresaber.Qualified;
+import bot.commands.scoresaber.Rank;
+import bot.commands.scoresaber.Ranked;
+import bot.commands.scoresaber.RecentSong;
 import bot.db.DatabaseManager;
 import bot.dto.MessageEventDTO;
 import bot.dto.player.DataBasePlayer;
 import bot.dto.player.PlayerSkills;
 import bot.dto.rankedmaps.RankedMaps;
 import bot.graphics.AccGridImage;
+import bot.listeners.PlayerChartListener;
+import bot.listeners.SongsCommandsListener;
+import bot.listeners.SongsCommandsType;
 import bot.utils.*;
 import javafx.application.Platform;
 import net.dv8tion.jda.api.JDA;
@@ -30,8 +33,6 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.commands.Command;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
-import net.dv8tion.jda.api.interactions.commands.build.BaseCommand;
-import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.utils.cache.CacheFlag;
 import org.apache.commons.lang3.StringUtils;
@@ -41,11 +42,8 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class BeatSaberBot extends ListenerAdapter {
@@ -58,9 +56,6 @@ public class BeatSaberBot extends ListenerAdapter {
     static boolean hasStarted = false;
     static long applicationId = -1;
 
-    final Pattern scoreSaberIDPattern = Pattern.compile(ApiConstants.USER_ID_REGEX);
-    final Pattern twitchVODPattern = Pattern.compile(ApiConstants.TWITCH_ID_REGEX);
-
     public static void main(String[] args) {
         DatabaseManager db = new DatabaseManager();
         ScoreSaber ss = new ScoreSaber();
@@ -72,6 +67,7 @@ public class BeatSaberBot extends ListenerAdapter {
                     .enableIntents(GatewayIntent.DIRECT_MESSAGES, GatewayIntent.GUILD_MESSAGES, GatewayIntent.GUILD_MEMBERS)
                     .disableCache(CacheFlag.VOICE_STATE, CacheFlag.EMOTE)
                     .setActivity(Activity.playing(BotConstants.PLAYING));
+
             JDA jda = builder.build();
             System.out.println("Awaiting JDA ready status...");
             jda.awaitReady();
@@ -90,21 +86,13 @@ public class BeatSaberBot extends ListenerAdapter {
             LeaderboardWatcher watcher = new LeaderboardWatcher(db, ss, jda);
             watcher.createNewLeaderboardWatcher();
             watcher.start();
+
+            jda.getGuilds().forEach(BeatSaberBot::setupCommands);
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    public static void printSlashInfoMessage(Guild g) {
-        TextChannel channel = g.getSystemChannel();
-        if (channel == null) {
-            channel = g.getCommunityUpdatesChannel();
-            if (channel == null) {
-                channel = g.getTextChannels().get(0);
-            }
-        }
-        Messages.sendPlainMessage("Hello people! Starting **September 1st**, Discord will force bots to only listen to slash commands.\n**Please try to use slash commands from now on.** I will try to look for a workaround, but this is the only way for now.\n\n**If the commands do not show up, make sure the bot has the correct permissions or re-invite it.** \nIf you encounter any issues let me know: __AntiLink#1337__ 👏", channel);
-    }
     @Override
     public void onSlashCommand(SlashCommandEvent event) {
         if (!event.isFromGuild() || event.getUser().isBot()) {
@@ -113,7 +101,6 @@ public class BeatSaberBot extends ListenerAdapter {
         String message = parseCommandsForHandler(event);
         List<String> msgParts = Arrays.asList(("ru " + message).split(" "));
         event.getHook().setEphemeral(true);
-        event.deferReply(true).queue();
         try {
             handleCommand(msgParts, new MessageEventDTO(event));
         } catch (IOException e) {
@@ -136,19 +123,15 @@ public class BeatSaberBot extends ListenerAdapter {
     }
 
     private static void setupCommands(Guild guild) {
-        DiscordLogger.sendLogInChannel("Settings up slash commands for Guild: " + guild.getName(), DiscordLogger.INFO);
-        List<CommandData> wantedCommands = new ArrayList<>(SlashCommands.getCurrentCommands());
-        List<String> wantedCommandNames = wantedCommands.stream().map(BaseCommand::getName).collect(Collectors.toList());
+        DiscordLogger.sendLogInChannel("Removing slash commands for Guild: " + guild.getName(), DiscordLogger.INFO);
 
         List<Command> commands = guild.retrieveCommands().complete();
         for (Command command : commands) {
-            boolean commandIsAlreadyOnGuild = wantedCommandNames.contains(command.getName());
-            if (commandIsAlreadyOnGuild) {
-                System.out.println("Deleting command " + command.getName());
+            if (command.getApplicationIdLong() == guild.getJDA().getSelfUser().getIdLong()) {
+                System.out.println("Deleting command " + command.getName() +" on guild " + guild.getName());
                 guild.deleteCommandById(command.getId()).complete();
             }
         }
-        guild.updateCommands().addCommands(wantedCommands).queue();
     }
 
     @Override
@@ -205,7 +188,7 @@ public class BeatSaberBot extends ListenerAdapter {
                     new Improvement(db).sendImprovementMessage(channel);
                     break;
                 case "chart": {
-                    new PlayerChart().sendChartImage(commandPlayer, event);
+                    event.getJDA().addEventListener(new PlayerChartListener(commandPlayer, event));
                     break;
                 }
                 case "chartall":
@@ -293,53 +276,12 @@ public class BeatSaberBot extends ListenerAdapter {
                     break;
                 case "recentsongs": {
                     int index = getIndexFromMsgParts(msgParts);
-                    new SongsCommands(db, ranked).sendRecentSongs(commandPlayer, index, event);
-                    return;
-                }
-                case "recentsongsbl": {
-                    int index = getIndexFromMsgParts(msgParts);
-                    new SongsCommandsBL(db).sendRecentSongs(commandPlayer, index, event);
-                    return;
-                }
-                case "recentsongsacc": {
-                    int index = getIndexFromMsgParts(msgParts);
-                    new SongsCommandsACC(db).sendRecentSongs(commandPlayer, index, event);
+                    event.getJDA().addEventListener(new SongsCommandsListener(SongsCommandsType.RECENT, commandPlayer, index, event, db, ranked));
                     return;
                 }
                 case "topsongs": {
-                    int index = 1;
-                    if (msgParts.size() == 3) {
-                        String[] arguments = msgParts.get(2).split(" ");
-                        String indexOrMemberMention = arguments[0];
-                        if (NumberUtils.isCreatable(indexOrMemberMention)) {
-                            index = Integer.parseInt(indexOrMemberMention);
-                        }
-                    }
-                    new SongsCommands(db, ranked).sendTopSongs(commandPlayer, index, event);
-                    return;
-                }
-                case "topsongsbl": {
-                    int index = 1;
-                    if (msgParts.size() == 3) {
-                        String[] arguments = msgParts.get(2).split(" ");
-                        String indexOrMemberMention = arguments[0];
-                        if (NumberUtils.isCreatable(indexOrMemberMention)) {
-                            index = Integer.parseInt(indexOrMemberMention);
-                        }
-                    }
-                    new SongsCommandsBL(db).sendTopSongs(commandPlayer, index, event);
-                    return;
-                }
-                case "topsongsacc": {
-                    int index = 1;
-                    if (msgParts.size() == 3) {
-                        String[] arguments = msgParts.get(2).split(" ");
-                        String indexOrMemberMention = arguments[0];
-                        if (NumberUtils.isCreatable(indexOrMemberMention)) {
-                            index = Integer.parseInt(indexOrMemberMention);
-                        }
-                    }
-                    new SongsCommandsACC(db).sendTopSongs(commandPlayer, index, event);
+                    int index = getIndexFromMsgParts(msgParts);
+                    event.getJDA().addEventListener(new SongsCommandsListener(SongsCommandsType.TOP, commandPlayer, index, event, db, ranked));
                     return;
                 }
                 case "localrank": {
@@ -473,7 +415,6 @@ public class BeatSaberBot extends ListenerAdapter {
     @Override
     public void onGuildJoin(GuildJoinEvent event) {
         DiscordLogger.sendLogInChannel(Format.code("Joined guild \"" + event.getGuild().getName() + "\""), DiscordLogger.GUILDS);
-        setupCommands(event.getGuild());
     }
 
     @Override
@@ -515,42 +456,16 @@ public class BeatSaberBot extends ListenerAdapter {
     }
 
     private DataBasePlayer getScoreSaberPlayerFromUrl(String profileUrl) throws FileNotFoundException {
-        Matcher matcher = scoreSaberIDPattern.matcher(profileUrl);
-        if (!matcher.find()) {
-            return null;
+        String id = profileUrl
+                .replace("https://scoresaber.com/u/", "")
+                .replace("https://www.beatleader.xyz/u/", "");
+        if (id.isEmpty()) {
+            throw new FileNotFoundException("Player could not be found!");
         }
-        String playerId = matcher.group(1);
-        DataBasePlayer player = ss.getPlayerById(playerId);
+        DataBasePlayer player = ss.getPlayerById(id);
         if (player == null) {
             throw new FileNotFoundException("Player could not be found!");
         }
         return player;
-    }
-
-    @Deprecated
-    private void sendRecentSongsIfTwitchVOD(String msg, MessageEventDTO event, DataBasePlayer commandPlayer) {
-        Matcher matcher = twitchVODPattern.matcher(msg);
-        if (!matcher.find()) {
-            return;
-        }
-        String vodId = matcher.group(1);
-        if (commandPlayer != null) {
-            Messages.sendTempMessage("Loading set scores for Twitch video '" + vodId + "'...", 5, event.getChannel());
-            int index = -1;
-            switch (vodId) {
-                case "1568529890":
-                    index = 1;
-                    break;
-                case "1548336392":
-                    index = 5;
-                    break;
-                case "1546471726":
-                    index = 2;
-                    break;
-            }
-            if (index > 0) {
-                new SongsCommands(db, ranked).sendRecentSongs(commandPlayer, index, event);
-            }
-        }
     }
 }

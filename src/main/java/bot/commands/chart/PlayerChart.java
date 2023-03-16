@@ -1,10 +1,10 @@
-package bot.chart;
+package bot.commands.chart;
 
+import bot.dto.LeaderboardService;
 import bot.dto.MessageEventDTO;
 import bot.dto.player.DataBasePlayer;
 import bot.main.BotConstants;
 import bot.utils.ChartUtils;
-import bot.utils.ListValueUtils;
 import bot.utils.Messages;
 import org.knowm.xchart.XYChart;
 import org.knowm.xchart.XYChartBuilder;
@@ -28,23 +28,24 @@ public class PlayerChart {
 
     private int lineWidthSingle = 10;
     private final int lineWidthMulti = 5;
-    private final Color lineColor = Color.BLUE;
+    private Color lineColor = Color.BLUE;
+    private final Color DISCORD_COLOR = new Color(49, 51, 56);
 
-    public void sendChartImage(DataBasePlayer player, MessageEventDTO event) {
+    public void sendChartImage(DataBasePlayer player, Color lineColor, LeaderboardService service, MessageEventDTO event) {
         if (player == null) {
             Messages.sendMessage("Could not find player. Please check if you are registered.", event.getChannel());
             return;
         }
-
         if (player.getHistoryValues() == null) {
             Messages.sendMessage("Could not find history values for user. Please update the user with \"ru update\".", event.getChannel());
             return;
         }
+        this.lineColor = lineColor;
         String filepath = BotConstants.RESOURCES_PATH + player.getId();
-        storePlayerChartToFile(player, filepath);
+        storePlayerChartToFile(player, service, filepath);
         File image = new File(filepath + ".png");
         if (image.exists()) {
-            Messages.sendImage(image, player.getName() + ".png", event.getChannel());
+            Messages.sendImage(image, player.getName() + ".png", event);
             image.delete();
         }
     }
@@ -68,18 +69,18 @@ public class PlayerChart {
             }
         }
 
-        XYChart chart = getPlayerChart(players, max, min);
+        XYChart chart = getPlayerChart(players, max, min, LeaderboardService.SCORESABER);
         String filename = BotConstants.RESOURCES_PATH + "players";
 
         ChartUtils.saveChart(chart, filename);
         File image = new File(filename + ".png");
         if (image.exists()) {
-            Messages.sendImage(image, "players.png", event.getChannel());
+            Messages.sendImage(image, "players.png", event);
             image.delete();
         }
     }
 
-    public XYChart getPlayerChart(List<DataBasePlayer> players, double max, double min) {
+    public XYChart getPlayerChart(List<DataBasePlayer> players, double max, double min, LeaderboardService service) {
         if (players.size() > 1) {
             players = players.stream()
                     .filter(p -> p.getHistoryValues().stream().anyMatch(v -> v <= min && v >= max))
@@ -87,22 +88,29 @@ public class PlayerChart {
         }
         // Create Chart
         int highestRank = Collections.min(players.stream()
-                .map(p -> Collections.min(ListValueUtils.addElementReturnList(p.getHistoryValues(), p.getRank())))
+                .map(p -> Collections.min(p.getHistoryValues()))
                 .collect(Collectors.toList()));
         int lowestRank = Collections.max(players.stream()
-                .map(p -> Collections.max(ListValueUtils.addElementReturnList(p.getHistoryValues(), p.getRank())))
+                .map(p -> Collections.max(p.getHistoryValues()))
                 .collect(Collectors.toList()));
 
         int chartHeight = (int) ((lowestRank - highestRank) * 0.25 + 800);
         if (chartHeight > 1200) {
             chartHeight = 1200;
         }
-        XYChart chart = new XYChartBuilder().width(BotConstants.chartWidth).height(chartHeight).theme(ChartTheme.Matlab).title("Rank change").xAxisTitle("Days").yAxisTitle("Rank").build();
+        XYChart chart = new XYChartBuilder()
+                .width(BotConstants.chartWidth)
+                .height(chartHeight)
+                .theme(ChartTheme.Matlab)
+                .title("Rank Change - " + service.name())
+                .xAxisTitle("Days")
+                .yAxisTitle("Rank")
+                .build();
 
         setXYStyler(chart, players, min, max);
         for (DataBasePlayer player : players) {
             // Series
-            List<Integer> history = ListValueUtils.addElementReturnList(player.getHistoryValues(), player.getRank()).stream().map(h -> -h).collect(Collectors.toList());
+            List<Integer> history = player.getHistoryValues().stream().map(h -> -h).collect(Collectors.toList());
             List<Integer> time = IntStream.rangeClosed(-history.size() + 1, 0).boxed().collect(Collectors.toList());
             XYSeries series = chart.addSeries(player.getName(), time, history);
             if (players.size() == 1) {
@@ -130,46 +138,47 @@ public class PlayerChart {
         styler.setYAxisMax(-max);
 
         styler.setDefaultSeriesRenderStyle(XYSeriesRenderStyle.Line)
-            .setPlotGridLinesVisible(false)
-            .setMarkerSize(15)
-            .setPlotContentSize(.95)
+                .setPlotGridLinesVisible(false)
+                .setMarkerSize(15)
+                .setPlotContentSize(.95)
+                .setPlotBorderVisible(false)
 
-            .setBaseFont(font)
-            .setLegendFont(legendFont)
-            .setChartTitleFont(titleFont);
+                .setBaseFont(font)
+                .setLegendFont(legendFont)
+                .setChartTitleFont(titleFont);
 
         styler.setAxisTickLabelsFont(labelFont)
-            .setAxisTitleFont(labelTitleFont)
-            .setDecimalPattern("######");
+                .setAxisTitleFont(labelTitleFont)
+                .setDecimalPattern("######");
 
         styler.setLegendPosition(LegendPosition.OutsideS)
-            .setLegendLayout(LegendLayout.Horizontal);
+                .setLegendLayout(LegendLayout.Horizontal);
 
         styler.setLegendSeriesLineLength(20)
-            .setLegendBorderColor(Color.DARK_GRAY)
-            .setLegendBackgroundColor(Color.DARK_GRAY)
-
-            .setChartBackgroundColor(Color.DARK_GRAY)
-            .setChartFontColor(Color.WHITE);
+                .setLegendBorderColor(DISCORD_COLOR)
+                .setLegendBackgroundColor(DISCORD_COLOR)
+                .setChartBackgroundColor(DISCORD_COLOR)
+                .setPlotBackgroundColor(DISCORD_COLOR)
+                .setChartFontColor(Color.WHITE);
 
         styler.setAxisTickLabelsColor(Color.WHITE);
     }
 
-    public void storePlayerChartToFile(DataBasePlayer player, String filePath) {
-        List<Integer> rankValues = ListValueUtils.addElementReturnList(player.getHistoryValues(), player.getRank());
+    public void storePlayerChartToFile(DataBasePlayer player, LeaderboardService service, String filePath) {
+        List<Integer> rankValues = player.getHistoryValues();
         double max = Collections.min(rankValues), min = Collections.max(rankValues);
 
-        XYChart chart = getPlayerChart(Collections.singletonList(player), max, min);
+        XYChart chart = getPlayerChart(Collections.singletonList(player), max, min, service);
         ChartUtils.saveChart(chart, filePath);
     }
 
     public BufferedImage getPlayerChartImage(DataBasePlayer player) {
-        List<Integer> rankValues = ListValueUtils.addElementReturnList(player.getHistoryValues(), player.getRank());
+        List<Integer> rankValues = player.getHistoryValues();
         double max = Collections.min(rankValues), min = Collections.max(rankValues);
 
         setLineWidthSingle(30);
 
-        XYChart chart = getPlayerChart(Collections.singletonList(player), max, min);
+        XYChart chart = getPlayerChart(Collections.singletonList(player), max, min, LeaderboardService.SCORESABER);
         chart.getStyler()
                 .setMarkerSize(100)
                 .setLegendVisible(false)
@@ -182,7 +191,7 @@ public class PlayerChart {
                 .setInfoPanelVisible(false);
 
         Font labelFont = new Font("Consolas", Font.BOLD, 40);
-        Color transparent = new Color(0f,0f,0f,.0f );
+        Color transparent = new Color(0f, 0f, 0f, .0f);
         chart.getStyler()
                 .setAxisTickLabelsFont(labelFont)
                 .setLegendBorderColor(transparent)

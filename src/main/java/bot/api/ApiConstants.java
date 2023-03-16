@@ -2,7 +2,6 @@ package bot.api;
 
 public class ApiConstants {
 
-    public static final String USER_ID_REGEX = "scoresaber\\.com\\/u\\/(\\d+)";
     public static final String TWITCH_ID_REGEX = "twitch\\.tv\\/videos\\/(\\d+)";
     // ScoreSaber
     public static final String SS_PRE_URL = "https://scoresaber.com";
@@ -39,16 +38,22 @@ public class ApiConstants {
     //BeatLeader
     public static final String BL_PRE_URL = "https://api.beatleader.xyz";
     public static final String BL_SCORES_URL = "/player/%s/scores?page=%d&sortBy=%s&order=desc&search=&diff=&type=&stars_from=&stars_to=&eventId=";
+    public static final String BL_USER_HISTORY_URL = "/player/%s/history?count=30";
     public static String getBeatLeaderTopScoresURL(String playerId, int pageNr) {
         return String.format(BL_PRE_URL + BL_SCORES_URL, playerId, pageNr, "pp");
     }
     public static String getBeatLeaderRecentScoresURL(String playerId, int pageNr) {
         return String.format(BL_PRE_URL + BL_SCORES_URL, playerId, pageNr, "date");
     }
+    public static String getBeatLeaderPlayerHistoryURL(String playerId) {
+        return String.format(BL_PRE_URL + BL_USER_HISTORY_URL, playerId);
+    }
     public static final String BL_USER_PRE_URL = "https://www.beatleader.xyz/u/";
+
 
     //Acc Saber
     public static final String ACC_PRE_URL = "https://accsaber.com";
+    public static final String ACC_API_PRE_URL = "https://api.accsaber.com";
     public static final String ACC_SCORES_URL = "/profile/%s/overall/scores?page=%d&_data=routes%%2Fprofile%%2F%%24userId%%2F%%24category%%2Fscores&sortBy=%s&reverse";
     public static String getAccSaberTopScoresURL(String playerId, int pageNr) {
         return String.format(ACC_PRE_URL + ACC_SCORES_URL, playerId, pageNr, "ap");
@@ -59,6 +64,10 @@ public class ApiConstants {
     public static final String ACC_USER_URL = "/profile/%s/overall/scores";
     public static String getAccSaberUserURL(String playerId) {
         return String.format(ACC_PRE_URL + ACC_USER_URL, playerId);
+    }
+    public static final String ACC_API_USER_HISTORY = "/players/%s/recent-rank-history";
+    public static String getAccSaberUserHistoryURL(String playerId) {
+        return String.format(ACC_API_PRE_URL + ACC_API_USER_HISTORY, playerId);
     }
     // Meme API
     public static final String MEME_URL = "https://meme-api.com/gimme";

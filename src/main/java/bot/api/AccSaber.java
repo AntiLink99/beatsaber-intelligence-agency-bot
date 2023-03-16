@@ -9,9 +9,7 @@ import com.google.gson.reflect.TypeToken;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 public class AccSaber {
 
@@ -55,5 +53,23 @@ public class AccSaber {
             return gson.fromJson(topScores.toString(), listType);
         }
         return new ArrayList<>();
+    }
+
+    public Map<String, Integer> getPlayerHistoryValues(String playerId) {
+        String url = ApiConstants.getAccSaberUserHistoryURL(String.valueOf(playerId));
+        Map<String, Integer> historyValues = getPlayerHistory(url);
+        if (historyValues != null) {
+            return historyValues;
+        }
+        return Collections.emptyMap();
+    }
+
+    private Map<String, Integer> getPlayerHistory(String url) {
+        JsonObject response = http.fetchJsonObject(url);
+        if (response != null) {
+            Type listType = new TypeToken<Map<String, Integer>>() {}.getType();
+            return gson.fromJson(response.toString(), listType);
+        }
+        return new HashMap<>();
     }
 }

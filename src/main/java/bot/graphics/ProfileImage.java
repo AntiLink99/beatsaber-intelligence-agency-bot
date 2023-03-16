@@ -2,7 +2,7 @@ package bot.graphics;
 
 import bot.api.ApiConstants;
 import bot.api.HttpMethods;
-import bot.chart.PlayerChart;
+import bot.commands.chart.PlayerChart;
 import bot.dto.player.DataBasePlayer;
 import bot.utils.FontUtils;
 import bot.utils.JavaFXUtils;

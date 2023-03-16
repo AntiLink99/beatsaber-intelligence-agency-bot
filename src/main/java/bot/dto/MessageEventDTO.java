@@ -16,6 +16,8 @@ public class MessageEventDTO {
     private long id;
     private Member author;
     private JDA jda;
+    SlashCommandEvent slashCommandIfExists;
+    MessageEventType type;
 
     public MessageEventDTO(MessageReceivedEvent event) {
         this.channel = event.getTextChannel();
@@ -24,6 +26,7 @@ public class MessageEventDTO {
         this.author = event.getMember();
         this.id = event.getMessageIdLong();
         this.jda = event.getJDA();
+        this.type = MessageEventType.TEXT;
     }
 
     public MessageEventDTO(SlashCommandEvent event) {
@@ -32,6 +35,8 @@ public class MessageEventDTO {
         this.id = event.getIdLong();
         this.author = event.getMember();
         this.jda = event.getJDA();
+        this.slashCommandIfExists = event;
+        this.type = MessageEventType.SLASH;
     }
 
     public TextChannel getChannel() {
@@ -80,5 +85,21 @@ public class MessageEventDTO {
 
     public void setId(long id) {
         this.id = id;
+    }
+
+    public SlashCommandEvent getSlashCommandIfExists() {
+        return slashCommandIfExists;
+    }
+
+    public void setSlashCommandIfExists(SlashCommandEvent slashCommandIfExists) {
+        this.slashCommandIfExists = slashCommandIfExists;
+    }
+
+    public MessageEventType getType() {
+        return type;
+    }
+
+    public void setType(MessageEventType type) {
+        this.type = type;
     }
 }

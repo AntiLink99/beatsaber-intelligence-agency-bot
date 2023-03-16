@@ -75,7 +75,7 @@ public class SongsCommandsBL {
             recentSongsWaitingCounter++;
         }
         if (recentSongsImage.exists()) {
-            Messages.sendImage(recentSongsImage, "recentSongs_" + playerId + "_" + messageId + ".png", event.getChannel());
+            Messages.sendImage(recentSongsImage, "recentSongs_" + playerId + "_" + messageId + ".png", event);
             recentSongsImage.delete();
         }
 
@@ -129,7 +129,7 @@ public class SongsCommandsBL {
             recentSongsWaitingCounter++;
         }
         if (recentSongsImage.exists()) {
-            Messages.sendImage(recentSongsImage, "topSongs_" + playerId + "_" + messageId + ".png", event.getChannel());
+            Messages.sendImage(recentSongsImage, "topSongs_" + playerId + "_" + messageId + ".png", event);
             recentSongsImage.delete();
         }
 

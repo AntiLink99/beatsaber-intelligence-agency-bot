@@ -1,6 +1,7 @@
 package bot.api;
 
 import bot.dto.PlayerScore;
+import bot.dto.beatleader.history.PlayerHistoryItem;
 import bot.dto.beatleader.scores.PlayerScoreBL;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
@@ -39,6 +40,20 @@ public class BeatLeader {
             JsonArray topScores = response.getAsJsonArray("data");
             Type listType = new TypeToken<List<PlayerScoreBL>>() {}.getType();
             return gson.fromJson(topScores.toString(), listType);
+        }
+        return new ArrayList<>();
+    }
+
+    public List<PlayerHistoryItem> getPlayerHistoryById(long playerId) {
+        String url = ApiConstants.getBeatLeaderPlayerHistoryURL(String.valueOf(playerId));
+        return getPlayerHistory(url);
+    }
+
+    private List<PlayerHistoryItem> getPlayerHistory(String url) {
+        JsonArray response = http.fetchJsonArray(url);
+        if (response != null) {
+            Type listType = new TypeToken<List<PlayerHistoryItem>>() {}.getType();
+            return gson.fromJson(response.toString(), listType);
         }
         return new ArrayList<>();
     }

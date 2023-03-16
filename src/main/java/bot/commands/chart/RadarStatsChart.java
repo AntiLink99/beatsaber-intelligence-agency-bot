@@ -1,4 +1,4 @@
-package bot.chart;
+package bot.commands.chart;
 
 import bot.dto.MessageEventDTO;
 import bot.dto.player.PlayerSkills;
@@ -23,7 +23,7 @@ public class RadarStatsChart {
         ChartUtils.saveChart(chart, filename);
         File image = new File(filename + ".png");
         if (image.exists()) {
-            Messages.sendImage(image, "players.png", event.getChannel());
+            Messages.sendImage(image, "players.png", event);
             image.delete();
         }
     }

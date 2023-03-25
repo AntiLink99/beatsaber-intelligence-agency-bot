@@ -24,12 +24,11 @@ jobs:
 
       - name: Deploy to server and restart the application
         env:
-          PRIVATE_KEY: ${{ secrets.SERVER_SSH_PRIVATE_KEY }}
+          PASSWORD: ${{ secrets.SERVER_PASSWORD }}
           HOST: ${{ secrets.SERVER_HOST }}
           USER: ${{ secrets.SERVER_USER }}
           TARGET_DIR: ${{ secrets.SERVER_TARGET_DIR }}
         run: |
-          echo "$PRIVATE_KEY" > private_key.pem
-          chmod 600 private_key.pem
-          scp -i private_key.pem -o StrictHostKeyChecking=no -r target/*.jar $USER@$HOST:$TARGET_DIR
-          ssh -i private_key.pem -o StrictHostKeyChecking=no $USER@$HOST "pkill -f 'java -jar' || true; cd $TARGET_DIR && ./execute.sh &"
+          sudo apt-get install -y sshpass
+          sshpass -p "$PASSWORD" scp -o StrictHostKeyChecking=no -r target/*.jar $USER@$HOST:$TARGET_DIR
+          sshpass -p "$PASSWORD" ssh -o StrictHostKeyChecking=no $USER@$HOST "pkill -f 'java -jar' || true; cd $TARGET_DIR && ./execute.sh &"

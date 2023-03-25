@@ -39,6 +39,7 @@ public class ApiConstants {
     public static final String BL_PRE_URL = "https://api.beatleader.xyz";
     public static final String BL_SCORES_URL = "/player/%s/scores?page=%d&sortBy=%s&order=desc&search=&diff=&type=&stars_from=&stars_to=&eventId=";
     public static final String BL_USER_HISTORY_URL = "/player/%s/history?count=30";
+    public static final String BL_USER_PLAYER_BY_DISCORD_URL = "/player/discord/%d";
     public static String getBeatLeaderTopScoresURL(String playerId, int pageNr) {
         return String.format(BL_PRE_URL + BL_SCORES_URL, playerId, pageNr, "pp");
     }
@@ -47,6 +48,9 @@ public class ApiConstants {
     }
     public static String getBeatLeaderPlayerHistoryURL(String playerId) {
         return String.format(BL_PRE_URL + BL_USER_HISTORY_URL, playerId);
+    }
+    public static String getBeatLeaderPlayerByDiscordURL(long discordId) {
+        return String.format(BL_PRE_URL + BL_USER_PLAYER_BY_DISCORD_URL, discordId);
     }
     public static final String BL_USER_PRE_URL = "https://www.beatleader.xyz/u/";
 

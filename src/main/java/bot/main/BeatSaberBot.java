@@ -69,6 +69,7 @@ public class BeatSaberBot extends ListenerAdapter {
                     .setActivity(Activity.playing(BotConstants.PLAYING));
 
             JDA jda = builder.build();
+
             System.out.println("Awaiting JDA ready status...");
             jda.awaitReady();
 
@@ -87,7 +88,8 @@ public class BeatSaberBot extends ListenerAdapter {
             watcher.createNewLeaderboardWatcher();
             watcher.start();
 
-            jda.getGuilds().forEach(BeatSaberBot::setupCommands);
+            jda.retrieveCommands().complete().forEach(c -> c.delete().queue());
+            SlashCommands.getCurrentCommands().forEach(c -> jda.upsertCommand(c).queue());
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -122,15 +124,19 @@ public class BeatSaberBot extends ListenerAdapter {
                 .replaceAll("playlist_embed", "rplaylist");
     }
 
-    private static void setupCommands(Guild guild) {
-        DiscordLogger.sendLogInChannel("Removing slash commands for Guild: " + guild.getName(), DiscordLogger.INFO);
+    private static void deleteCommands(Guild guild) {
+        try {
+            DiscordLogger.sendLogInChannel("Removing slash commands for Guild: " + guild.getName(), DiscordLogger.INFO);
 
-        List<Command> commands = guild.retrieveCommands().complete();
-        for (Command command : commands) {
-            if (command.getApplicationIdLong() == guild.getJDA().getSelfUser().getIdLong()) {
-                System.out.println("Deleting command " + command.getName() +" on guild " + guild.getName());
-                guild.deleteCommandById(command.getId()).complete();
+            List<Command> commands = guild.retrieveCommands().complete();
+            for (Command command : commands) {
+                if (command.getApplicationIdLong() == guild.getJDA().getSelfUser().getIdLong()) {
+                    System.out.println("Deleting command " + command.getName() + " on guild " + guild.getName());
+                    guild.deleteCommandById(command.getId()).complete();
+                }
             }
+        } catch (Exception ignore) {
+
         }
     }
 

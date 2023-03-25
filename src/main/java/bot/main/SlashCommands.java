@@ -46,7 +46,7 @@ public class SlashCommands {
                 .addOption(OptionType.STRING, "max_stars", "Maximum star amount", true);
 
         final CommandData registerCommand = new CommandData("register", "Registers a player that will be tracked and updated by the bot.")
-                .addOption(OptionType.STRING, "scoresaber_url", "Your ScoreSaber URL", true);
+                .addOption(OptionType.STRING, "id", "Your ScoreSaber/BeatLeader ID", true);
 
         final CommandData unregisterCommand = new CommandData("unregister", "Removes a player from the database so that the account is not being updated anymore.");
 
@@ -57,16 +57,10 @@ public class SlashCommands {
         final CommandData recentSongsCommand = new CommandData("recentsongs", "Displays the recently set scores of a player.")
                 .addOption(OptionType.INTEGER, "page_id", "The x-th recent page.", false)
                 .addOption(OptionType.USER, "other_user", "An other user than yourself.", false);
-        final CommandData recentSongsCommandBL = new CommandData("recentsongsBL", "Displays the recently set scores of a player.")
-                .addOption(OptionType.INTEGER, "page_id", "The x-th recent page.", false)
-                .addOption(OptionType.USER, "other_user", "An other user than yourself.", false);
 
         final CommandData topSongsCommand = new CommandData("topsongs", "Displays the best scores of a player.")
                 .addOption(OptionType.INTEGER, "page_id", "The x-th recent page.", false)
                 .addOption(OptionType.USER, "member", "An other user than yourself.", false);
-        final CommandData topSongsCommandBL = new CommandData("topsongsBL", "Displays the recently set scores of a player.")
-                .addOption(OptionType.INTEGER, "page_id", "The x-th recent page.", false)
-                .addOption(OptionType.USER, "other_user", "An other user than yourself.", false);
 
 
         final CommandData globalRankCommand = new CommandData("globalrank", "Shows your global rank in comparison to the two players above and below you on ScoreSaber.")
@@ -100,8 +94,6 @@ public class SlashCommands {
                recentSongCommand,
                recentSongsCommand,
                topSongsCommand,
-               recentSongsCommandBL,
-               topSongsCommandBL,
                setGridImageCommand,
                standCommand,
                setSkillCommand,

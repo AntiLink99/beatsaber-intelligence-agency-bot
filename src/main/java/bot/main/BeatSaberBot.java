@@ -298,10 +298,9 @@ public class BeatSaberBot extends ListenerAdapter {
                     new Rank(commandPlayer).sendGlobalRank(event);
                     break;
                 }
-                case "dachrank": {
+                case "dachrank":
                     new Rank(commandPlayer).sendDACHRank(event);
                     break;
-                }
                 case "setgridimage": {
                     if (msgParts.size() < 3) {
                         new AccGridImage(db).resetImage(event);

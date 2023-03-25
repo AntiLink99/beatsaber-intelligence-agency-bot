@@ -3,7 +3,7 @@ name: Deploy to Server
 on:
   push:
     branches:
-      - main # Replace 'main' with the name of your default branch if different
+      - master
 
 jobs:
   build-and-deploy:

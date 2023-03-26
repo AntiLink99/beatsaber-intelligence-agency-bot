@@ -32,3 +32,4 @@ jobs:
           sudo apt-get install -y sshpass
           sshpass -p "$PASSWORD" scp -v -o StrictHostKeyChecking=no -r target/*.jar $USER@$HOST:$TARGET_DIR || exit 1
           sshpass -p "$PASSWORD" ssh -v -o StrictHostKeyChecking=no $USER@$HOST "pkill -f 'java -jar' || true; cd $TARGET_DIR && ./execute.sh &" || exit 1
+          exit 0

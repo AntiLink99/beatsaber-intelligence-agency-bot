@@ -1,5 +1,6 @@
 package bot.main;
 
+import bot.api.BeatLeader;
 import bot.api.BeatSaver;
 import bot.api.ScoreSaber;
 import bot.commands.*;
@@ -11,6 +12,7 @@ import bot.commands.scoresaber.Ranked;
 import bot.commands.scoresaber.RecentSong;
 import bot.db.DatabaseManager;
 import bot.dto.MessageEventDTO;
+import bot.dto.beatleader.player.BeatLeaderPlayer;
 import bot.dto.player.DataBasePlayer;
 import bot.dto.player.PlayerSkills;
 import bot.dto.rankedmaps.RankedMaps;
@@ -49,6 +51,7 @@ import java.util.stream.Collectors;
 public class BeatSaberBot extends ListenerAdapter {
 
     final ScoreSaber ss = new ScoreSaber();
+    final BeatLeader bl = new BeatLeader();
     final BeatSaver bs = new BeatSaver();
     final DatabaseManager db = new DatabaseManager();
     RankedMaps ranked = new RankedMaps();
@@ -171,7 +174,7 @@ public class BeatSaberBot extends ListenerAdapter {
             db.connectToDatabase();
             fetchRankedMapsIfNonExistent(channel);
             String msg = StringUtils.join(msgParts, " ");
-            DataBasePlayer commandPlayer = getCommandPlayer(msgParts, channel, author.getUser());
+            DataBasePlayer commandPlayer = getCommandPlayer(msgParts, author.getUser());
 
             DiscordLogger.sendLogInChannel(Format.code("Command: " + msg + "\nRequester: " + author.getEffectiveName() + "\nGuild: " + guild.getName()), "info");
             String command = msgParts.get(1).toLowerCase();
@@ -427,30 +430,42 @@ public class BeatSaberBot extends ListenerAdapter {
         DiscordLogger.sendLogInChannel(Format.code("Left guild \"" + event.getGuild().getName() + "\""), DiscordLogger.GUILDS);
     }
 
-    private DataBasePlayer getCommandPlayer(List<String> msgParts, TextChannel channel, User author) {
+    private DataBasePlayer getCommandPlayer(List<String> msgParts, User author) {
+        //TODO Very not clean code!
+
         DataBasePlayer player = null;
         String lastArgument = msgParts.get(msgParts.size() - 1);
 
         if (Format.isUrl(lastArgument)) {
+            //ru register <URL>
             try {
-                player = getScoreSaberPlayerFromUrl(lastArgument);
+                player = getPlayerFromUrl(lastArgument);
                 if (player != null) {
                     player.setDiscordUserId(author.getIdLong());
                 }
-            } catch (FileNotFoundException e) {
-                Messages.sendMessage(e.getMessage(), channel);
+            } catch (FileNotFoundException ignored) {
+
             }
         } else {
+            //Find Member By Discord ID
             long memberId = 0;
-            if (lastArgument.contains("@")) {
+            if (lastArgument.contains("@")) { //Player mention
                 String mentionedMemberId = lastArgument.replaceAll("[^0-9]", "");
                 if (NumberUtils.isCreatable(mentionedMemberId)) {
-                    memberId = Long.parseLong(mentionedMemberId); //Mention
+                    memberId = Long.parseLong(mentionedMemberId);
                 }
             } else {
-                memberId = author.getIdLong(); //None
+                //Player is registered
+                memberId = author.getIdLong();
             }
             player = db.getPlayerByDiscordId(memberId);
+            if (player == null) {
+                //If not stored, try to fetch Player from BeatLeader
+                BeatLeaderPlayer blPlayer = bl.getPlayerByDiscordID(memberId);
+                if (blPlayer != null) {
+                    player = blPlayer.getAsDatabasePlayer();
+                }
+            }
         }
         return player;
     }
@@ -460,17 +475,13 @@ public class BeatSaberBot extends ListenerAdapter {
         System.out.println("READY!");
     }
 
-    private DataBasePlayer getScoreSaberPlayerFromUrl(String profileUrl) throws FileNotFoundException {
+    private DataBasePlayer getPlayerFromUrl(String profileUrl) throws FileNotFoundException {
         String id = profileUrl
                 .replace("https://scoresaber.com/u/", "")
                 .replace("https://www.beatleader.xyz/u/", "");
         if (id.isEmpty()) {
-            throw new FileNotFoundException("Player could not be found!");
+            throw new FileNotFoundException("Player ID is empty!");
         }
-        DataBasePlayer player = ss.getPlayerById(id);
-        if (player == null) {
-            throw new FileNotFoundException("Player could not be found!");
-        }
-        return player;
+        return ss.getPlayerById(id);
     }
 }

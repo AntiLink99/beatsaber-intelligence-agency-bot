@@ -55,12 +55,11 @@ public class BeatLeader {
         return new ArrayList<>();
     }
 
-    private BeatLeaderPlayer getPlayerByDiscordID(long discordId) {
-        String url = ApiConstants.getBeatLeaderPlayerByDiscordURL(discordId);
-        JsonArray response = http.fetchJsonArray(url);
+    public BeatLeaderPlayer getPlayerByDiscordID(long discordId) {
+        String url = ApiConstants.getBeatLeaderPlayerByDiscordId(discordId);
+        JsonObject response = http.fetchJsonObject(url);
         if (response != null) {
-            Type listType = new TypeToken<BeatLeaderPlayer>() {}.getType();
-            return gson.fromJson(response.toString(), listType);
+            return gson.fromJson(response.toString(), BeatLeaderPlayer.class);
         }
         return null;
     }

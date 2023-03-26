@@ -1,7 +1,9 @@
 package bot.dto.beatleader.player;
 
-import java.util.List;
+import bot.dto.player.DataBasePlayer;
 import com.google.gson.annotations.SerializedName;
+
+import java.util.List;
 
 public class BeatLeaderPlayer{
 
@@ -199,5 +201,16 @@ public class BeatLeaderPlayer{
 
 	public String getExternalProfileUrl(){
 		return externalProfileUrl;
+	}
+
+	public DataBasePlayer getAsDatabasePlayer() {
+		DataBasePlayer dbPlayer = new DataBasePlayer();
+		dbPlayer.setId(id);
+		dbPlayer.setName(name);
+		dbPlayer.setProfilePicture(avatar);
+		dbPlayer.setRank(rank);
+		dbPlayer.setCountryRank(countryRank);
+		dbPlayer.setCountry(country);
+		return dbPlayer;
 	}
 }

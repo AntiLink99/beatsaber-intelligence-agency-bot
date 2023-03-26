@@ -49,7 +49,7 @@ public class ApiConstants {
     public static String getBeatLeaderPlayerHistoryURL(String playerId) {
         return String.format(BL_PRE_URL + BL_USER_HISTORY_URL, playerId);
     }
-    public static String getBeatLeaderPlayerByDiscordURL(long discordId) {
+    public static String getBeatLeaderPlayerByDiscordId(long discordId) {
         return String.format(BL_PRE_URL + BL_USER_PLAYER_BY_DISCORD_URL, discordId);
     }
     public static final String BL_USER_PRE_URL = "https://www.beatleader.xyz/u/";

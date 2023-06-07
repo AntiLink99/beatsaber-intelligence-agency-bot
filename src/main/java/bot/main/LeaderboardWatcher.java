@@ -151,6 +151,12 @@ public class LeaderboardWatcher {
             }
             //Snipe Channel
             boolean playerImproved = updatedPlayer.getCountryRank() < oldPlayer.getCountryRank() && updatedPlayer.getPp() != oldPlayer.getPp();
+            boolean playerHasJustWentInactive = isInactive && oldPlayer.getCountryRank() != 0;
+            if (playerHasJustWentInactive) {
+                String inactiveMessage = Format.underline(Format.bold(updatedPlayer.getName())) + " just went inactive! (Previously " + Format.bold("#" + oldPlayer.getCountryRank() + " DE)");
+                Messages.sendBsgRankMessage(inactiveMessage, "F", updatedPlayer.getProfileURL(), Color.orange, updatedPlayer.getProfilePicture(), bsgOutput);
+                return;
+            }
             if (playerImproved && !isInactive) {
                 //Send message (only improvement)
                 System.out.println("Player " + updatedPlayer.getName() + " improved!");

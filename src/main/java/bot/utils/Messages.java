@@ -82,6 +82,16 @@ public class Messages {
         return channel.sendMessageEmbeds(builder.build()).complete();
     }
 
+    public static Message sendMemeEmbed(String imagePath, String title, String url, int upVotes, String subreddit, MessageChannel channel) {
+        EmbedBuilder builder = new EmbedBuilder();
+        builder.setTitle(Format.bold(Format.underline(title)), url);
+        builder.setColor(embedColor);
+        builder.setImage(imagePath);
+        builder.setFooter(upVotes + " Upvotes");
+        builder.setAuthor(subreddit, "https://reddit.com/r/" + subreddit);
+        return channel.sendMessageEmbeds(builder.build()).complete();
+    }
+
     public static void sendImage(String imagePath, String title, TextChannel channel) {
         File imageFile = new File(title);
         try {

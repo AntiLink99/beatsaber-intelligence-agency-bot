@@ -211,6 +211,7 @@ public class BeatLeaderPlayer{
 		dbPlayer.setRank(rank);
 		dbPlayer.setCountryRank(countryRank);
 		dbPlayer.setCountry(country);
+		dbPlayer.setHistoryValues(List.of(0));
 		return dbPlayer;
 	}
 }

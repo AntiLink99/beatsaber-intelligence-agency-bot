@@ -436,7 +436,8 @@ public class BeatSaberBot extends ListenerAdapter {
         DataBasePlayer player = null;
         String lastArgument = msgParts.get(msgParts.size() - 1);
 
-        if (Format.isUrl(lastArgument)) {
+        boolean isPlayerId = NumberUtils.isCreatable(lastArgument) && lastArgument.length() > 8;
+        if (Format.isUrl(lastArgument) || isPlayerId) {
             //ru register <URL>
             try {
                 player = getPlayerFromUrl(lastArgument);

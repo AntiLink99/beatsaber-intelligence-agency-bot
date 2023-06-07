@@ -1,5 +1,7 @@
 package bot.api;
 
+import java.util.List;
+
 public class ApiConstants {
 
     public static final String TWITCH_ID_REGEX = "twitch\\.tv\\/videos\\/(\\d+)";
@@ -74,5 +76,18 @@ public class ApiConstants {
         return String.format(ACC_API_PRE_URL + ACC_API_USER_HISTORY, playerId);
     }
     // Meme API
-    public static final String MEME_URL = "https://meme-api.com/gimme";
+    public static final List<String> MEME_SUBREDDITS = List.of(
+        "dankmemes",
+        "shitposting",
+        "suspiciouslyspecific",
+        "animememes",
+        "Discordmemes",
+        "okbuddyretard",
+        "OkBrudiMongo",
+        "deutschememes",
+        "technicallythetruth",
+        "schkreckl",
+        "SchnitzelVerbrechen"
+    );
+    public static final String MEME_URL = "https://meme-api.com/gimme/";
 }

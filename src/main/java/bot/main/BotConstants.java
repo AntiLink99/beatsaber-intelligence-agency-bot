@@ -16,30 +16,21 @@ public class BotConstants {
     public static final String featureRequestUrl = "https://github.com/AntiLink99/beatsaber-intelligence-agency-bot/issues";
     public static final String bsiaServerInviteUrl = "https://discord.gg/HXbmf8Xefs";
 
-    public static final long foaaServerId = Long.parseLong(System.getenv("foaa_server_id"));
     public static final long logServerId = Long.parseLong(System.getenv("log_server_id"));
     public static final long bsgServerId = Long.parseLong(System.getenv("bsg_server_id"));
 
-    public static final long foaaOutputChannelId = Long.parseLong(System.getenv("foaa_channel_id"));
     public static final long bsgOutputChannelId = Long.parseLong(System.getenv("bsg_channel_id"));
 
     public static final String bsgImage = "https://i.imgur.com/PlKkLyM.png";
 
     // Role milestones
-    public static final Integer[] foaaRankMilestones = {10, 50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000, 2000, 3000, 4000, 5000};
     public static final Integer[] bsgCountryRankMilestones = {1, 5, 10, 25, 50, 75, 100, 200};
     public static final String topRolePrefix = "Top ";
-
-    public static final Integer[] foaaPpRoleMilestones = {300, 350, 400, 450, 500};
-    public static final String[] foaaPpRoles = {"smol pp", "average pp", "big pp", "huge pp", "jumbo pp"};
     public static final String ppRoleSuffix = " PP";
-
-    public static final int milestoneEmoteCount = 10;
-    public static final String defaultEmote = ":boom:";
 
     public static final String[] playlistDifficultyEmotes = {"🟩", "🟦", "🟧", "🟥", "🟪"};
     public static final int improvementReactionMinTimeDiff = 400000000;
-    public static final String playlistImageFOAA = getImageBase64("playlistCover.png");
+    public static final String playlistImage = getImageBase64("playlistCover.png");
     public static final String playlistImageQualified = getImageBase64("qualified.png");
     public static final String playlistImageRanked = getImageBase64("ranked.png");
     public static final String playlistAuthor = "AntiLink#1337";
@@ -53,7 +44,6 @@ public class BotConstants {
     public static final List<String> validSkills = Arrays.asList("accuracy", "speed", "stamina", "reading");
 
     // Recent Songs
-    public static final String foaaMemberMessage = ":crossed_swords: " + Format.bold("Welcome to the FOAA server! Be sure to check out the channels #rules and #bot.roles for more information.") + " :crossed_swords:";
     public static final String bsgMemberMessage = ":crossed_swords: " + Format.bold("Welcome to the Beat Saber Germany server! Be sure to check out the channels #rules and #roles for more information.") + " :crossed_swords:";
 
     public static final String imageUrlDiffEasy = "https://i.imgur.com/dIHIsOH.png";

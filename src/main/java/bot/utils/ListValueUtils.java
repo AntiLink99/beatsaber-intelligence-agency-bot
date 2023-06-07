@@ -16,10 +16,6 @@ public class ListValueUtils {
         return -1;
     }
 
-    public static int findFoaaMilestoneForRank(int rank) {
-        return ListValueUtils.findLowestSurpassedValue(rank, BotConstants.foaaRankMilestones);
-    }
-
     public static int findBsgMilestoneForRank(int rank) {
         return ListValueUtils.findLowestSurpassedValue(rank, BotConstants.bsgCountryRankMilestones);
     }

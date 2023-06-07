@@ -181,7 +181,7 @@ public class BeatSaberBot extends ListenerAdapter {
             switch (command) {
                 case "register":
                     boolean success = new HandlePlayerRegisteration(db).registerPlayer(commandPlayer, channel);
-                    if (!success || guild.getIdLong() != BotConstants.foaaServerId) {
+                    if (!success) {
                         break;
                     }
                 case "update":
@@ -225,7 +225,7 @@ public class BeatSaberBot extends ListenerAdapter {
                     String playlistTitle = msgParts.get(2);
                     List<String> values = msgParts.subList(3, msgParts.size());
 
-                    bs.sendPlaylistInChannelByKeys(values, playlistTitle, BotConstants.playlistImageFOAA, channel);
+                    bs.sendPlaylistInChannelByKeys(values, playlistTitle, BotConstants.playlistImage, channel);
                     break;
                 }
                 case "rplaylist":
@@ -236,7 +236,7 @@ public class BeatSaberBot extends ListenerAdapter {
                     String playlistTitle = msgParts.get(2);
                     List<String> values = msgParts.subList(3, msgParts.size());
 
-                    bs.sendRecruitingPlaylistInChannel(values, playlistTitle, BotConstants.playlistImageFOAA, event);
+                    bs.sendRecruitingPlaylistInChannel(values, playlistTitle, BotConstants.playlistImage, event);
                     break;
                 case "qualified":
                     new Qualified().sendQualifiedPlaylist(event);
@@ -408,11 +408,7 @@ public class BeatSaberBot extends ListenerAdapter {
 
     @Override
     public void onGuildMemberJoin(GuildMemberJoinEvent event) {
-        if (event.getGuild().getIdLong() == BotConstants.foaaServerId) {
-            Messages.sendPrivateMessage(BotConstants.foaaMemberMessage, event.getMember());
-            TextChannel botChannel = event.getJDA().getTextChannelById(Long.parseLong(System.getenv("foaa_channel_id")));
-            Messages.sendPlainMessage(Format.bold(event.getMember().getAsMention() + ", welcome!") + " Be sure to register yourself here with " + Format.underline("\"ru register <ScoreSaber URL>\"") + " to obtain your bot.roles.", botChannel);
-        } else if (event.getGuild().getIdLong() == BotConstants.bsgServerId) {
+        if (event.getGuild().getIdLong() == BotConstants.bsgServerId) {
             Messages.sendPrivateMessage(BotConstants.bsgMemberMessage, event.getMember());
             TextChannel welcomeChannel = event.getJDA().getTextChannelById(Long.parseLong(System.getenv("bsg_welcome_channel_id")));
             Messages.sendPlainMessage(Format.bold(event.getMember().getEffectiveName() + ", welcome! 👏👏👏 Member Count: " + event.getGuild().getMemberCount()), welcomeChannel);

@@ -61,10 +61,6 @@ public class Format {
         return "```autohotkey\n" + msg + "\n```";
     }
 
-    public static String foaaRole(String role) {
-        return "[ " + role + " ]";
-    }
-
     public static boolean isUrl(String str) {
         try {
             new URI(str);
@@ -75,7 +71,7 @@ public class Format {
     }
 
     public static int roundDouble(double d) {
-        return (int) d;
+        return (int) Math.round(d);
     }
 
     public static String getSuffix(final int n) {

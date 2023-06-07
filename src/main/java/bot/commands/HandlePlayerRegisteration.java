@@ -3,10 +3,7 @@ package bot.commands;
 import bot.db.DatabaseManager;
 import bot.dto.MessageEventDTO;
 import bot.dto.player.DataBasePlayer;
-import bot.main.BotConstants;
-import bot.roles.RoleManager;
 import bot.utils.Messages;
-import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.TextChannel;
 
 public class HandlePlayerRegisteration {
@@ -33,16 +30,6 @@ public class HandlePlayerRegisteration {
 
     public void unregisterPlayer(MessageEventDTO event) {
         long discordUserId = event.getAuthor().getIdLong();
-        if (event.getGuild().getIdLong() == BotConstants.foaaServerId) {
-            Member member = event.getGuild().getMemberById(discordUserId);
-            if (member == null) {
-                Messages.sendMessage("Member could not be found.", event.getChannel());
-                return;
-            }
-            RoleManager.removeMemberRolesByName(member, BotConstants.topRolePrefix);
-            RoleManager.removeMemberRolesByName(member, BotConstants.ppRoleSuffix);
-        }
-
         boolean successDelete = db.deletePlayerByDiscordUserId(discordUserId);
         if (!successDelete) {
             Messages.sendMessage("You are already not registered.", event.getChannel());

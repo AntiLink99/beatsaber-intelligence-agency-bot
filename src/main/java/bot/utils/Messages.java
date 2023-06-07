@@ -5,7 +5,6 @@ import bot.dto.LeaderboardService;
 import bot.dto.MessageEventDTO;
 import bot.dto.MessageEventType;
 import bot.dto.RecentSongData;
-import bot.dto.player.DataBasePlayer;
 import bot.listeners.EmbedButtonListener;
 import bot.main.BotConstants;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -113,25 +112,6 @@ public class Messages {
             channel.sendMessage(message).queue();
         } catch (Exception e) {
             System.out.println("Could not send message because of lacking permissions.");
-        }
-    }
-
-    public static void sendMilestoneMessage(DataBasePlayer player, TextChannel channel) {
-        try {
-            String roleName = BotConstants.topRolePrefix + ListValueUtils.findFoaaMilestoneForRank(player.getRank());
-            List<Role> roles = channel.getGuild().getRolesByName(roleName, true);
-            if (roles.size() <= 0) {
-                System.out.println("Could not find role \"" + roleName + "\".");
-                return;
-            }
-
-            String emoteLine = Emotes.getMessageWithMultipleEmotes();
-            sendPlainMessage(emoteLine, channel);
-            sendMessage(Format.bold(player.getName() + "'s milestone role was updated! " + roles.get(0).getAsMention()), channel);
-            sendPlainMessage(emoteLine, channel);
-            sendPlainMessage(Format.ping(String.valueOf(player.getDiscordUserId())), channel);
-        } catch (Exception ignored) {
-
         }
     }
 

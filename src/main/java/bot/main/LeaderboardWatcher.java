@@ -5,8 +5,10 @@ import bot.db.DatabaseManager;
 import bot.dto.player.DataBasePlayer;
 import bot.roles.RoleManager;
 import bot.roles.RoleManagerBSG;
-import bot.roles.RoleManagerFOAA;
-import bot.utils.*;
+import bot.utils.DiscordLogger;
+import bot.utils.Format;
+import bot.utils.ListValueUtils;
+import bot.utils.Messages;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.TextChannel;
@@ -34,10 +36,9 @@ public class LeaderboardWatcher {
     }
 
     public void createNewLeaderboardWatcher() {
-        TextChannel foaaOutput = jda.getTextChannelById(BotConstants.foaaOutputChannelId);
         TextChannel bsgOutput = jda.getTextChannelById(BotConstants.bsgOutputChannelId);
 
-        if (foaaOutput == null || bsgOutput == null) {
+        if (bsgOutput == null) {
             throw new NullPointerException("An output channel variable was not set correctly.");
         }
         this.watcherRunnable = () -> {
@@ -66,7 +67,6 @@ public class LeaderboardWatcher {
                     boolean shouldUpdate = (rankIsDifferent || ppIsDifferent) && !isInactive;
                     if (shouldUpdate) {
                         db.updatePlayer(updatedPlayer);
-                        handleFOAAPlayerUpdate(foaaOutput, updatedPlayer, storedPlayer);
                     }
 
                     try {
@@ -89,24 +89,6 @@ public class LeaderboardWatcher {
             }
             DiscordLogger.sendLogInChannel("Finished!", DiscordLogger.WATCHER_REFRESH);
         };
-    }
-
-    private void handleFOAAPlayerUpdate(TextChannel foaaOutput, DataBasePlayer updatedPlayer, DataBasePlayer storedPlayer) {
-            Member member = DiscordUtils.getMemberByChannelAndId(foaaOutput, updatedPlayer.getDiscordUserId());
-            if (member != null && RoleManagerFOAA.isNewMilestone(updatedPlayer.getRank(), member)) {
-                //Log
-                String newRoleMessage = "Changed FOAA role: " + updatedPlayer.getName() + " New Rank: " + updatedPlayer.getRank() + " - Old Rank: " + storedPlayer.getRank() + "   " + "(Top " + ListValueUtils.findFoaaMilestoneForRank(updatedPlayer.getRank()) + ")";
-                DiscordLogger.sendLogInChannel(newRoleMessage, DiscordLogger.WATCHER_REFRESH);
-
-                //Remove role
-                RoleManager.removeMemberRolesByName(member, BotConstants.topRolePrefix);
-
-                //Add role
-                RoleManagerFOAA.assignMilestoneRole(updatedPlayer.getRank(), member);
-
-                //Send message
-                Messages.sendMilestoneMessage(updatedPlayer, foaaOutput);
-            }
     }
 
     private void handleBSGPlayerUpdate(TextChannel bsgOutput, List<DataBasePlayer> updatedPlayers, List<DataBasePlayer> oldPlayers) {

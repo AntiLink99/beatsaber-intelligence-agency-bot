@@ -276,6 +276,10 @@ public class BeatSaberBot extends ListenerAdapter {
                     break;
                 case "recentsong": {
                     int index = getIndexFromMsgParts(msgParts);
+                    if (commandPlayer == null) {
+                        Messages.sendMessage("Player was not found.", event.getChannel());
+                        return;
+                    }
                     DiscordLogger.sendLogInChannel(event.getAuthor() + " is requesting RecentSong for: " + commandPlayer.getName(), DiscordLogger.INFO);
                     new RecentSong(db).sendRecentSong(commandPlayer, ranked, index, event);
                     return;
@@ -427,41 +431,38 @@ public class BeatSaberBot extends ListenerAdapter {
     }
 
     private DataBasePlayer getCommandPlayer(List<String> msgParts, User author) {
-        //TODO Very not clean code!
+        String lastArg = msgParts.get(msgParts.size() - 1);
+        long memberId;
 
+        if (Format.isUrl(lastArg) || (NumberUtils.isCreatable(lastArg) && lastArg.length() > 8)) {
+            return getPlayerFromUrlOrDiscordId(lastArg, author.getIdLong());
+        }
+
+        memberId = lastArg.contains("@") && NumberUtils.isCreatable(lastArg.replaceAll("[^0-9]", ""))
+                ? Long.parseLong(lastArg.replaceAll("[^0-9]", ""))
+                : author.getIdLong();
+
+        return getPlayerByDiscordId(memberId);
+    }
+
+    private DataBasePlayer getPlayerFromUrlOrDiscordId(String url, long discordUserId) {
         DataBasePlayer player = null;
-        String lastArgument = msgParts.get(msgParts.size() - 1);
-
-        boolean isPlayerId = NumberUtils.isCreatable(lastArgument) && lastArgument.length() > 8;
-        if (Format.isUrl(lastArgument) || isPlayerId) {
-            //ru register <URL>
-            try {
-                player = getPlayerFromUrl(lastArgument);
-                if (player != null) {
-                    player.setDiscordUserId(author.getIdLong());
-                }
-            } catch (FileNotFoundException ignored) {
-
+        try {
+            player = getPlayerFromUrl(url);
+            if (player != null) {
+                player.setDiscordUserId(discordUserId);
             }
-        } else {
-            //Find Member By Discord ID
-            long memberId = 0;
-            if (lastArgument.contains("@")) { //Player mention
-                String mentionedMemberId = lastArgument.replaceAll("[^0-9]", "");
-                if (NumberUtils.isCreatable(mentionedMemberId)) {
-                    memberId = Long.parseLong(mentionedMemberId);
-                }
-            } else {
-                //Player is registered
-                memberId = author.getIdLong();
-            }
-            player = db.getPlayerByDiscordId(memberId);
-            if (player == null) {
-                //If not stored, try to fetch Player from BeatLeader
-                BeatLeaderPlayer blPlayer = bl.getPlayerByDiscordID(memberId);
-                if (blPlayer != null) {
-                    player = blPlayer.getAsDatabasePlayer();
-                }
+        } catch (FileNotFoundException ignored) {
+        }
+        return player;
+    }
+
+    private DataBasePlayer getPlayerByDiscordId(long memberId) {
+        DataBasePlayer player = db.getPlayerByDiscordId(memberId);
+        if (player == null) {
+            BeatLeaderPlayer blPlayer = bl.getPlayerByDiscordID(memberId);
+            if (blPlayer != null) {
+                player = blPlayer.getAsDatabasePlayer();
             }
         }
         return player;

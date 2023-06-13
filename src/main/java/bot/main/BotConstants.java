@@ -10,14 +10,18 @@ import java.util.*;
 
 public class BotConstants {
 
-    public static final String PLAYING = "Please use slash commands now!";
+    public static final String PLAYING = "-> bs help <-";
     public static final String RESOURCES_PATH = "src/main/resources/".replace("/", File.separator);
-    public static final String donateUrl = "https://www.patreon.com/antilink";
+    public static final String donateUrl = "https://ko-fi.com/antilink";
     public static final String featureRequestUrl = "https://github.com/AntiLink99/beatsaber-intelligence-agency-bot/issues";
     public static final String bsiaServerInviteUrl = "https://discord.gg/HXbmf8Xefs";
 
     public static final long logServerId = Long.parseLong(System.getenv("log_server_id"));
     public static final long bsgServerId = Long.parseLong(System.getenv("bsg_server_id"));
+
+    public static final long supporterServerId = Long.parseLong(System.getenv("supporter_server_id"));
+    public static final long twitchSupporterRoleId = Long.parseLong(System.getenv("twitch_sub_role_id"));
+    public static final long kofiSupporterRoleId = Long.parseLong(System.getenv("kofi_sub_role_id"));
 
     public static final long bsgOutputChannelId = Long.parseLong(System.getenv("bsg_channel_id"));
 
@@ -26,7 +30,6 @@ public class BotConstants {
     // Role milestones
     public static final Integer[] bsgCountryRankMilestones = {1, 5, 10, 25, 50, 75, 100, 200};
     public static final String topRolePrefix = "Top ";
-    public static final String ppRoleSuffix = " PP";
 
     public static final String[] playlistDifficultyEmotes = {"🟩", "🟦", "🟧", "🟥", "🟪"};
     public static final int improvementReactionMinTimeDiff = 400000000;

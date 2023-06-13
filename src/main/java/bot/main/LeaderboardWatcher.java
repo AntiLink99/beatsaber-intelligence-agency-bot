@@ -64,7 +64,7 @@ public class LeaderboardWatcher {
                     boolean rankIsDifferent = updatedPlayer.getRank() != storedPlayer.getRank();
                     boolean ppIsDifferent = updatedPlayer.getPp() != storedPlayer.getPp();
                     boolean isInactive = updatedPlayer.getRank() == 0;
-                    boolean shouldUpdate = (rankIsDifferent || ppIsDifferent) && !isInactive;
+                    boolean shouldUpdate = (rankIsDifferent || ppIsDifferent) && (!isInactive || storedPlayer.getCountryRank() != 0);
                     if (shouldUpdate) {
                         db.updatePlayer(updatedPlayer);
                     }

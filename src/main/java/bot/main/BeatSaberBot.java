@@ -178,9 +178,6 @@ public class BeatSaberBot extends ListenerAdapter {
                 case "unregister":
                     new HandlePlayerRegisteration(db).unregisterPlayer(event);
                     break;
-                case "registerall":
-                    new RegisterAll(db).registerAllMembers(event);
-                    break;
                 case "improvement":
                     new Improvement(db).sendImprovementMessage(channel);
                     break;

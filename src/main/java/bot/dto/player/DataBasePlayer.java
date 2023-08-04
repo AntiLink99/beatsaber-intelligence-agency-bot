@@ -3,6 +3,7 @@ package bot.dto.player;
 import bot.api.ApiConstants;
 import bot.dto.LeaderboardService;
 import bot.dto.LeaderboardServicePlayer;
+import org.bson.Document;
 
 import java.io.Serializable;
 import java.util.List;
@@ -139,6 +140,41 @@ public class DataBasePlayer implements Serializable, LeaderboardServicePlayer {
 
     public void setService(LeaderboardService service) {
         this.service = service;
+    }
+
+    public Document toDocument() {
+        return new Document()
+                .append("player_id", Long.parseLong(id))
+                .append("player_name", name)
+                .append("player_avatar", profilePicture)
+                .append("player_bio", bio)
+                .append("player_rank", rank)
+                .append("player_country_rank", countryRank)
+                .append("player_pp", pp)
+                .append("player_country", country)
+                .append("player_discord_user_id", discordUserId)
+                .append("player_historyValues", historyValues)
+                .append("player_histories", histories)
+                .append("user_customAccGridImage", customAccGridImage);
+    }
+
+    public static DataBasePlayer fromDocument(Document document) {
+        if (document == null) return null;
+
+        DataBasePlayer player = new DataBasePlayer();
+        player.setId(String.valueOf(document.get("player_id")));
+        player.setName(document.getString("player_name"));
+        player.setProfilePicture(document.getString("player_avatar"));
+        player.setBio(document.getString("player_bio"));
+        player.setRank(document.getInteger("player_rank"));
+        player.setCountryRank(document.getInteger("player_country_rank"));
+        player.setPp(document.getDouble("player_pp").floatValue());
+        player.setCountry(document.getString("player_country"));
+        player.setDiscordUserId(document.getLong("player_discord_user_id"));
+        player.setHistoryValues(document.getList("player_historyValues", Integer.class));
+        player.setHistories(document.getString("player_histories"));
+        player.setCustomAccGridImage(document.getString("user_customAccGridImage"));
+        return player;
     }
 
 }

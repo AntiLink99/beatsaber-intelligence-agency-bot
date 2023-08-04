@@ -89,7 +89,6 @@ public class RecentSong {
             // Saviour
             //TODO
             BeatSaviorPlayerScores saviorPlayerScores = bsavior.fetchPlayerMaps(Long.valueOf(playerId));
-            System.out.println(saviorPlayerScores);
             List<BeatSaviorPlayerScore> saviourScores = saviorPlayerScores != null ? saviorPlayerScores.getPlayerMaps() : null;
 
             BeatSaviorPlayerScore saviourScore = null;

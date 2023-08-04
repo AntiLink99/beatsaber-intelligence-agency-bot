@@ -1,5 +1,7 @@
 package bot.dto.player;
 
+import org.bson.Document;
+
 public class PlayerSkills {
 
     private String playerName;
@@ -46,5 +48,29 @@ public class PlayerSkills {
 
     public void setPlayerName(String playerName) {
         this.playerName = playerName;
+    }
+
+    public static PlayerSkills fromDocument(Document document) {
+        PlayerSkills skills = new PlayerSkills();
+        skills.setPlayerName(document.getString("player_name"));
+        Document skillDoc = (Document) document.get("skills");
+        if (skillDoc != null) {
+            skills.setAccuracy(skillDoc.getInteger("accuracy", 0));
+            skills.setSpeed(skillDoc.getInteger("speed", 0));
+            skills.setStamina(skillDoc.getInteger("stamina", 0));
+            skills.setReading(skillDoc.getInteger("reading", 0));
+        }
+        return skills;
+    }
+
+    public Document toDocument() {
+        Document skillDoc = new Document()
+                .append("accuracy", accuracy)
+                .append("speed", speed)
+                .append("stamina", stamina)
+                .append("reading", reading);
+        return new Document()
+                .append("player_name", playerName)
+                .append("skills", skillDoc);
     }
 }

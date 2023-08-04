@@ -1,6 +1,5 @@
 package bot.utils;
 
-import bot.api.ApiConstants;
 import bot.dto.LeaderboardService;
 import bot.dto.MessageEventDTO;
 import bot.dto.MessageEventType;
@@ -185,24 +184,6 @@ public class Messages {
         builder.setAuthor(data.getSongName(), data.getSongUrl(), data.getDiffImageUrl());
         builder.setImage(data.getCoverUrl());
         builder.setFooter(data.getFooterText());
-
-        if (data.isRanked()) {
-            String strBuilder = ApiConstants.REPLAY_PRE_URL + "?id=" +
-                    data.getMapKey() +
-                    "&difficulty=" +
-                    data.getDiffName().replace("+", "Plus") +
-                    "&playerID=" +
-                    data.getPlayerId();
-
-            List<Button> initialButtons = new ArrayList<>();
-            initialButtons.add(Button.link(strBuilder, "🎬 Watch Replay 🎬"));
-
-            channel.sendMessageEmbeds(builder.build())
-                    .setActionRows(ActionRow.of(initialButtons))
-                    .queue();
-            return;
-        }
-        channel.sendMessageEmbeds(builder.build()).queue();
     }
 
     public static void sendBsgRankMessage(String title, String desc, String titleUrl, Color color, String avatar, MessageChannel channel) {

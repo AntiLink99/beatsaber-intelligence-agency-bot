@@ -217,11 +217,9 @@ public class RecentSong {
             recentSongData.setFooterText(footerText);
             recentSongData.setRanked(isRanked);
 
-            if (isRanked) {
-                recentSongData.setMapKey(bsMap != null ? bsMap.getId() : null);
-                recentSongData.setPlayerId(playerId);
-                recentSongData.setDiffName(recentLeaderboard.getDifficulty().getDifficultyName());
-            }
+            recentSongData.setMapKey(bsMap != null ? bsMap.getId() : null);
+            recentSongData.setPlayerId(playerId);
+            recentSongData.setDiffName(recentLeaderboard.getDifficulty().getDifficultyName());
 
             Messages.sendRecentSongMessage(recentSongData, event.getChannel());
             if (hasBeatSavior) {
@@ -244,7 +242,6 @@ public class RecentSong {
                 } else {
                     DiscordLogger.sendLogInChannel("Image wasnt generated. accGrid_" + playerId + "_" + event.getId() + ".png", DiscordLogger.ERRORS);
                 }
-
             } else {
                 Messages.sendPlainMessage(Format.italic("No BeatSavior data was found for this score.\nMaybe it was set too far in the past or you don't have the mod installed."), event.getChannel());
             }

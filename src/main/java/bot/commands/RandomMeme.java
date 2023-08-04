@@ -27,6 +27,5 @@ public class RandomMeme {
         Message memeEmbed = Messages.sendMemeEmbed(url, title, postUrl, upvotes, subreddit, channel);
         memeEmbed.addReaction("⬆").queue();
         memeEmbed.addReaction("⬇").queue();
-
     }
 }

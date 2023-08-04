@@ -48,8 +48,11 @@ public class SongsImage extends Application {
             processPlayerScore(i, root);
         }
         setupLeaderboardImage(root);
-        setupProfilePic(root);
-        setupQRCode(root);
+
+        if (player != null) {
+            setupProfilePic(root);
+            setupQRCode(root);
+        }
 
         root.autosize();
         final SnapshotParameters snapPara = new SnapshotParameters();

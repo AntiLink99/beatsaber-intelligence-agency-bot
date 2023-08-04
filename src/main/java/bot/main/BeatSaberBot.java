@@ -33,9 +33,9 @@ import net.dv8tion.jda.api.events.guild.member.GuildMemberRemoveEvent;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import net.dv8tion.jda.api.interactions.commands.Command;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.requests.GatewayIntent;
+import net.dv8tion.jda.api.utils.MemberCachePolicy;
 import net.dv8tion.jda.api.utils.cache.CacheFlag;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -67,7 +67,12 @@ public class BeatSaberBot extends ListenerAdapter {
         try {
             JDABuilder builder = JDABuilder.createDefault(System.getenv("bot_token"))
                     .addEventListeners(new BeatSaberBot())
-                    .enableIntents(GatewayIntent.DIRECT_MESSAGES, GatewayIntent.GUILD_MESSAGES, GatewayIntent.GUILD_MEMBERS)
+                    .enableIntents(
+                            GatewayIntent.DIRECT_MESSAGES,
+                            GatewayIntent.GUILD_MESSAGES,
+                            GatewayIntent.GUILD_MEMBERS,
+                            GatewayIntent.GUILD_PRESENCES)
+                    .setMemberCachePolicy(MemberCachePolicy.ALL)
                     .disableCache(CacheFlag.VOICE_STATE, CacheFlag.EMOTE)
                     .setActivity(Activity.playing(BotConstants.PLAYING));
 
@@ -91,7 +96,6 @@ public class BeatSaberBot extends ListenerAdapter {
             watcher.createNewLeaderboardWatcher();
             watcher.start();
 
-            jda.retrieveCommands().complete().forEach(c -> c.delete().queue());
             SlashCommands.getCurrentCommands().forEach(c -> jda.upsertCommand(c).queue());
         } catch (Exception e) {
             e.printStackTrace();
@@ -125,22 +129,6 @@ public class BeatSaberBot extends ListenerAdapter {
                 .replaceAll("ranked_by_latest", "ranked")
                 .replaceAll("ranked_by_stars", "ranked")
                 .replaceAll("playlist_embed", "rplaylist");
-    }
-
-    private static void deleteCommands(Guild guild) {
-        try {
-            DiscordLogger.sendLogInChannel("Removing slash commands for Guild: " + guild.getName(), DiscordLogger.INFO);
-
-            List<Command> commands = guild.retrieveCommands().complete();
-            for (Command command : commands) {
-                if (command.getApplicationIdLong() == guild.getJDA().getSelfUser().getIdLong()) {
-                    System.out.println("Deleting command " + command.getName() + " on guild " + guild.getName());
-                    guild.deleteCommandById(command.getId()).complete();
-                }
-            }
-        } catch (Exception ignore) {
-
-        }
     }
 
     @Override

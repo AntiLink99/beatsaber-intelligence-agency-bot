@@ -16,6 +16,7 @@ import bot.dto.beatleader.player.BeatLeaderPlayer;
 import bot.dto.player.DataBasePlayer;
 import bot.dto.player.PlayerSkills;
 import bot.dto.rankedmaps.RankedMaps;
+import bot.dto.supporters.SupporterInfo;
 import bot.graphics.AccGridImage;
 import bot.listeners.PlayerChartListener;
 import bot.listeners.SongsCommandsListener;
@@ -163,6 +164,13 @@ public class BeatSaberBot extends ListenerAdapter {
             fetchRankedMapsIfNonExistent(channel);
             String msg = StringUtils.join(msgParts, " ");
             DataBasePlayer commandPlayer = getCommandPlayer(msgParts, author.getUser());
+
+            // Check if user is a supporter
+            SupporterInfo supporterInfo = db.updateAndRetrieveSupporterInfoByDiscordId(authorUser);
+            boolean isSupporter = false; //TODO
+            if (supporterInfo != null) {
+                isSupporter = supporterInfo.getSupportTypes().size() > 0;
+            }
 
             DiscordLogger.sendLogInChannel(Format.code("Command: " + msg + "\nRequester: " + author.getEffectiveName() + "\nGuild: " + guild.getName()), "info");
             String command = msgParts.get(1).toLowerCase();

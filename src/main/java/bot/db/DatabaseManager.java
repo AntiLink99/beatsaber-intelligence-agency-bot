@@ -2,7 +2,10 @@ package bot.db;
 
 import bot.dto.player.DataBasePlayer;
 import bot.dto.player.PlayerSkills;
+import bot.dto.supporters.SupportType;
+import bot.dto.supporters.SupporterInfo;
 import bot.utils.DiscordLogger;
+import bot.utils.Supporters;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
 import com.mongodb.client.FindIterable;
@@ -10,7 +13,7 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.result.DeleteResult;
-import com.mongodb.client.result.UpdateResult;
+import net.dv8tion.jda.api.entities.User;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.bson.Document;
 import org.bson.conversions.Bson;
@@ -22,6 +25,7 @@ public class DatabaseManager {
     private MongoClient mongoClient;
     private MongoDatabase database;
     private MongoCollection<Document> playersCollection;
+    private MongoCollection<Document> supportersCollection;
 
     public void connectToDatabase() {
         try {
@@ -30,6 +34,7 @@ public class DatabaseManager {
                 mongoClient = new MongoClient(new MongoClientURI(connectionUrl));
                 database = mongoClient.getDatabase(DBConstants.DB_DATABASE);
                 playersCollection = database.getCollection("players");
+                supportersCollection = database.getCollection("supporters");
                 System.out.println("*** Connected to database: MongoDB");
             }
         } catch (Exception e) {
@@ -72,9 +77,7 @@ public class DatabaseManager {
                 Filters.eq("player_id", newPlayer.getPlayerIdLong()),
                 Filters.eq("player_id", newPlayer.getId())
         );
-        UpdateResult result = playersCollection.updateOne(filter, new Document("$set", playerData));
-        System.out.println("Matching playerId " + newPlayer.getId());
-        System.out.println("Matched " + result.getMatchedCount() + " documents and modified " + result.getModifiedCount());
+        playersCollection.updateOne(filter, new Document("$set", playerData));
     }
 
     public List<DataBasePlayer> getAllStoredPlayers() {
@@ -130,5 +133,32 @@ public class DatabaseManager {
             database.getCollection("skills").insertOne(newSkill);
         }
         return 1;
+    }
+
+    public SupporterInfo updateAndRetrieveSupporterInfoByDiscordId(User user) {
+        if (database == null) {
+            return null;
+        }
+        MongoCollection<Document> supportersCollection = database.getCollection("supporters");
+        Document document = supportersCollection.find(Filters.eq("discord_user_id", user.getIdLong())).first();
+
+        List<SupportType> supportTypes = Supporters.getUserSupportTypes(user);
+        SupporterInfo supporterInfo;
+
+        if (document != null) {
+            supporterInfo = SupporterInfo.fromDocument(document);
+            supporterInfo.setSupportTypes(supportTypes);
+
+            Document updatedDocument = supporterInfo.toDocument();
+            supportersCollection.updateOne(Filters.eq("discord_user_id", user.getIdLong()), new Document("$set", updatedDocument));
+        } else {
+            supporterInfo = new SupporterInfo(user.getIdLong());
+            supporterInfo.setSupportTypes(supportTypes);
+
+            Document newDocument = supporterInfo.toDocument();
+            supportersCollection.insertOne(newDocument);
+        }
+
+        return supporterInfo;
     }
 }

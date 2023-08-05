@@ -21,7 +21,11 @@ public class BotConstants {
 
     public static final long supporterServerId = Long.parseLong(System.getenv("supporter_server_id"));
     public static final long twitchSupporterRoleId = Long.parseLong(System.getenv("twitch_sub_role_id"));
-    public static final long kofiSupporterRoleId = Long.parseLong(System.getenv("kofi_sub_role_id"));
+    public static final long kofiSupporterRoleId = Long.parseLong(System.getenv("kofi_role_id"));
+    public static final long patreonSupporterRoleId = Long.parseLong(System.getenv("patreon_role_id"));
+    public static final long patreonSmallSupporterRoleId = Long.parseLong(System.getenv("patreon_small_role_id"));
+    public static final long patreonMediumSupporterRoleId = Long.parseLong(System.getenv("patreon_medium_role_id"));
+    public static final long patreonChadSupporterRoleId = Long.parseLong(System.getenv("patreon_chad_role_id"));
 
     public static final long bsgOutputChannelId = Long.parseLong(System.getenv("bsg_channel_id"));
 

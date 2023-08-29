@@ -1,5 +1,5 @@
 package bot.dto.supporters;
 
-public enum SupportType {
-    KOFI, TWITCH, PATREON, PATREON_SMALL, PATREON_MEDIUM, PATREON_CHAD
+public interface SupportType {
+    String[] SUPPORT_TYPES = {"KOFI", "TWITCH", "PATREON BAT 🦇", "PATREON RAVEN 🦇", "PATREON OWL 🦉"};
 }

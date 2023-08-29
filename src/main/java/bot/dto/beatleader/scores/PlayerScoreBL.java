@@ -10,7 +10,6 @@ import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.time.Instant;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.Date;
 import java.util.Locale;
@@ -258,7 +257,7 @@ public class PlayerScoreBL implements PlayerScore {
 	}
 
 	public LocalDateTime getTimeSetLocalDateTime() {
-		return Instant.ofEpochMilli(Long.parseLong(timeset) * 1000).atZone(ZoneId.systemDefault()).toLocalDateTime();
+		return Instant.ofEpochMilli(Long.parseLong(timeset) * 1000).atZone(ZoneOffset.UTC).toLocalDateTime();
 	}
 
 	@Override

@@ -6,6 +6,7 @@ import bot.dto.LeaderboardService;
 import bot.dto.MessageEventDTO;
 import bot.dto.PlayerScore;
 import bot.dto.player.DataBasePlayer;
+import bot.dto.supporters.SupporterInfo;
 import bot.graphics.SongsImage;
 import bot.main.BotConstants;
 import bot.utils.JavaFXUtils;
@@ -25,7 +26,7 @@ public class SongsCommandsACC {
         this.db = db;
     }
 
-    public void sendRecentSongs(DataBasePlayer player, int index, MessageEventDTO event) {
+    public void sendRecentSongs(DataBasePlayer player, SupporterInfo supportInfo, int index, MessageEventDTO event) {
         if (player == null) {
             Messages.sendMessage("Player could not be found.", event.getChannel());
             return;
@@ -56,6 +57,7 @@ public class SongsCommandsACC {
         SongsImage.setFilePath(filePath);
         SongsImage.setScores(scores);
         SongsImage.setPlayer(player);
+        SongsImage.setSupporterInfo(supportInfo);
         JavaFXUtils.launch(SongsImage.class);
 
         int recentSongsWaitingCounter = 0;
@@ -79,7 +81,7 @@ public class SongsCommandsACC {
 
     }
 
-    public void sendTopSongs(DataBasePlayer player, int index, MessageEventDTO event) {
+    public void sendTopSongs(DataBasePlayer player, SupporterInfo supportInfo, int index, MessageEventDTO event) {
         if (player == null) {
             Messages.sendMessage("Player could not be found.", event.getChannel());
             return;
@@ -110,6 +112,7 @@ public class SongsCommandsACC {
         SongsImage.setFilePath(filePath);
         SongsImage.setScores(scores);
         SongsImage.setPlayer(player);
+        SongsImage.setSupporterInfo(supportInfo);
         JavaFXUtils.launch(SongsImage.class);
 
         int topSongsWaitingCounter = 0;

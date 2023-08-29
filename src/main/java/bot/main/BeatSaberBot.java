@@ -165,13 +165,6 @@ public class BeatSaberBot extends ListenerAdapter {
             String msg = StringUtils.join(msgParts, " ");
             DataBasePlayer commandPlayer = getCommandPlayer(msgParts, author.getUser());
 
-            // Check if user is a supporter
-            SupporterInfo supporterInfo = db.updateAndRetrieveSupporterInfoByDiscordId(authorUser);
-            boolean isSupporter = false; //TODO
-            if (supporterInfo != null) {
-                isSupporter = supporterInfo.getSupportTypes().size() > 0;
-            }
-
             DiscordLogger.sendLogInChannel(Format.code("Command: " + msg + "\nRequester: " + author.getEffectiveName() + "\nGuild: " + guild.getName()), "info");
             String command = msgParts.get(1).toLowerCase();
             switch (command) {
@@ -281,13 +274,15 @@ public class BeatSaberBot extends ListenerAdapter {
                     Messages.sendMessage("Try \"ru topsongs\" to see your top plays! ✨", channel);
                     break;
                 case "recentsongs": {
+                    SupporterInfo supportInfo = db.updateAndRetrieveSupporterInfoByDiscordId(authorUser);
                     int index = getIndexFromMsgParts(msgParts);
-                    event.getJDA().addEventListener(new SongsCommandsListener(SongsCommandsType.RECENT, commandPlayer, index, event, db, ranked));
+                    event.getJDA().addEventListener(new SongsCommandsListener(SongsCommandsType.RECENT, commandPlayer, supportInfo, index, event, db, ranked));
                     return;
                 }
                 case "topsongs": {
+                    SupporterInfo supportInfo = db.updateAndRetrieveSupporterInfoByDiscordId(authorUser);
                     int index = getIndexFromMsgParts(msgParts);
-                    event.getJDA().addEventListener(new SongsCommandsListener(SongsCommandsType.TOP, commandPlayer, index, event, db, ranked));
+                    event.getJDA().addEventListener(new SongsCommandsListener(SongsCommandsType.TOP, commandPlayer, supportInfo, index, event, db, ranked));
                     return;
                 }
                 case "localrank": {

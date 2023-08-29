@@ -2,7 +2,6 @@ package bot.db;
 
 import bot.dto.player.DataBasePlayer;
 import bot.dto.player.PlayerSkills;
-import bot.dto.supporters.SupportType;
 import bot.dto.supporters.SupporterInfo;
 import bot.utils.DiscordLogger;
 import bot.utils.Supporters;
@@ -139,10 +138,9 @@ public class DatabaseManager {
         if (database == null) {
             return null;
         }
-        MongoCollection<Document> supportersCollection = database.getCollection("supporters");
-        Document document = supportersCollection.find(Filters.eq("discord_user_id", user.getIdLong())).first();
+        Document document = supportersCollection.find(Filters.eq("discord_user_id", user.getId())).first();
 
-        List<SupportType> supportTypes = Supporters.getUserSupportTypes(user);
+        List<String> supportTypes = Supporters.getUserSupportTypes(user);
         SupporterInfo supporterInfo;
 
         if (document != null) {
@@ -150,9 +148,9 @@ public class DatabaseManager {
             supporterInfo.setSupportTypes(supportTypes);
 
             Document updatedDocument = supporterInfo.toDocument();
-            supportersCollection.updateOne(Filters.eq("discord_user_id", user.getIdLong()), new Document("$set", updatedDocument));
+            supportersCollection.updateOne(Filters.eq("discord_user_id", user.getId()), new Document("$set", updatedDocument));
         } else {
-            supporterInfo = new SupporterInfo(user.getIdLong());
+            supporterInfo = new SupporterInfo(user.getId());
             supporterInfo.setSupportTypes(supportTypes);
 
             Document newDocument = supporterInfo.toDocument();

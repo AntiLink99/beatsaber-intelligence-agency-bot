@@ -5,6 +5,7 @@ import bot.api.HttpMethods;
 import bot.dto.LeaderboardService;
 import bot.dto.LeaderboardServicePlayer;
 import bot.dto.PlayerScore;
+import bot.dto.supporters.SupporterInfo;
 import bot.utils.*;
 import javafx.application.Application;
 import javafx.embed.swing.SwingFXUtils;
@@ -33,8 +34,8 @@ public class SongsImage extends Application {
     private static boolean isFinished = false;
     private static List<PlayerScore> scores;
     private static LeaderboardServicePlayer player;
+    private static SupporterInfo supporterInfo;
     private static String filePath;
-    final ImageView baseImage = new ImageView("https://anti.link/img/scoresImage.png"); // Rectangle Image
     final Image starImage = new Image(Objects.requireNonNull(getClass().getClassLoader().getResourceAsStream("star.png")));
 
     @Override
@@ -42,7 +43,8 @@ public class SongsImage extends Application {
         setFinished(false);
 
         Pane root = new Pane();
-        root.getChildren().add(baseImage);
+        final ImageView baseImage = getBaseImage(); // Rectangle Image
+        //root.getChildren().add(baseImage);
 
         for (int i = 0; i < scores.size(); i++) {
             processPlayerScore(i, root);
@@ -289,6 +291,16 @@ public class SongsImage extends Application {
         root.getChildren().add(profilePicView);
     }
 
+    private ImageView getBaseImage() {
+        if (supporterInfo != null &&
+            supporterInfo.getCustomSongsImage() != null &&
+            !supporterInfo.getCustomSongsImage().isEmpty()) {
+            return new ImageView("https://anti.link" + supporterInfo.getCustomSongsImage());
+        }
+
+        return new ImageView("https://anti.link/img/scoresImage.png");
+    }
+
     public static boolean isFinished() {
         return isFinished;
     }
@@ -319,5 +331,13 @@ public class SongsImage extends Application {
 
     public static void setPlayer(LeaderboardServicePlayer player) {
         SongsImage.player = player;
+    }
+
+    public static SupporterInfo getSupporterInfo() {
+        return supporterInfo;
+    }
+
+    public static void setSupporterInfo(SupporterInfo supporterInfo) {
+        SongsImage.supporterInfo = supporterInfo;
     }
 }

@@ -7,11 +7,11 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class SupporterInfo {
-    private long discordUserId;
+    private String discordUserId;
     private String customSongsImage;
-    private List<SupportType> supportTypes;
+    private List<String> supportTypes;
 
-    public SupporterInfo(long discordUserId) {
+    public SupporterInfo(String discordUserId) {
         this.discordUserId = discordUserId;
         this.customSongsImage = "";
         this.supportTypes = new ArrayList<>();
@@ -21,25 +21,23 @@ public class SupporterInfo {
         Document document = new Document();
         document.append("discord_user_id", this.discordUserId)
                 .append("custom_songs_image", this.customSongsImage)
-                .append("support_types", supportTypes.stream().map(SupportType::name).collect(Collectors.toList()));
+                .append("support_types", supportTypes.stream().collect(Collectors.toList()));
         return document;
     }
 
     public static SupporterInfo fromDocument(Document document) {
-        List<String> supportTypesStr = document.getList("support_types", String.class);
-        List<SupportType> supportTypes = supportTypesStr.stream().map(SupportType::valueOf).collect(Collectors.toList());
-
-        SupporterInfo info = new SupporterInfo(document.getLong("discord_user_id"));
+        List<String> supportTypes = document.getList("support_types", String.class);
+        SupporterInfo info = new SupporterInfo(document.getString("discord_user_id"));
         info.setCustomSongsImage(document.getString("custom_songs_image"));
         info.setSupportTypes(supportTypes);
         return info;
     }
 
-    public long getDiscordUserId() {
+    public String getDiscordUserId() {
         return discordUserId;
     }
 
-    public void setDiscordUserId(long discordUserId) {
+    public void setDiscordUserId(String discordUserId) {
         this.discordUserId = discordUserId;
     }
 
@@ -51,11 +49,11 @@ public class SupporterInfo {
         this.customSongsImage = customSongsImage;
     }
 
-    public List<SupportType> getSupportTypes() {
+    public List<String> getSupportTypes() {
         return supportTypes;
     }
 
-    public void setSupportTypes(List<SupportType> supportTypes) {
+    public void setSupportTypes(List<String> supportTypes) {
         this.supportTypes = supportTypes;
     }
 }

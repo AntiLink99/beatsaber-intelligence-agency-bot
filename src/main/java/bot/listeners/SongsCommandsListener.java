@@ -9,6 +9,7 @@ import bot.dto.MessageEventDTO;
 import bot.dto.MessageEventType;
 import bot.dto.player.DataBasePlayer;
 import bot.dto.rankedmaps.RankedMaps;
+import bot.dto.supporters.SupporterInfo;
 import bot.utils.Messages;
 import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
 import net.dv8tion.jda.api.hooks.EventListener;
@@ -22,6 +23,7 @@ public class SongsCommandsListener extends ListenerAdapter implements EventListe
     private final MessageEventDTO userEvent;
     private long messageReferenceId;
     private final DataBasePlayer player;
+    private final SupporterInfo supportInfo;
     private final int index;
 
     DatabaseManager db;
@@ -29,10 +31,11 @@ public class SongsCommandsListener extends ListenerAdapter implements EventListe
 
     Timer timer;
 
-    public SongsCommandsListener(SongsCommandsType type, DataBasePlayer player, int index, MessageEventDTO userEvent, DatabaseManager db, RankedMaps ssRanked) {
+    public SongsCommandsListener(SongsCommandsType type, DataBasePlayer player, SupporterInfo supportInfo, int index, MessageEventDTO userEvent, DatabaseManager db, RankedMaps ssRanked) {
         this.type = type;
         this.userEvent = userEvent;
         this.player = player;
+        this.supportInfo = supportInfo;
         this.index = index;
 
         this.db = db;
@@ -69,21 +72,21 @@ public class SongsCommandsListener extends ListenerAdapter implements EventListe
         switch (selectedService) {
             case SCORESABER:
                 if (type == SongsCommandsType.RECENT)
-                    new SongsCommands(db, ssRanked).sendRecentSongs(player, index, userEvent);
+                    new SongsCommands(db, ssRanked).sendRecentSongs(player, supportInfo, index, userEvent);
                 else
-                    new SongsCommands(db, ssRanked).sendTopSongs(player, index, userEvent);
+                    new SongsCommands(db, ssRanked).sendTopSongs(player, supportInfo, index, userEvent);
                 break;
             case BEATLEADER:
                 if (type == SongsCommandsType.RECENT)
-                    new SongsCommandsBL(db).sendRecentSongs(player, index, userEvent);
+                    new SongsCommandsBL(db).sendRecentSongs(player, supportInfo, index, userEvent);
                 else
-                    new SongsCommandsBL(db).sendTopSongs(player, index, userEvent);
+                    new SongsCommandsBL(db).sendTopSongs(player, supportInfo, index, userEvent);
                 break;
             case ACCSABER:
                 if (type == SongsCommandsType.RECENT)
-                    new SongsCommandsACC(db).sendRecentSongs(player, index, userEvent);
+                    new SongsCommandsACC(db).sendRecentSongs(player, supportInfo, index, userEvent);
                 else
-                    new SongsCommandsACC(db).sendTopSongs(player, index, userEvent);
+                    new SongsCommandsACC(db).sendTopSongs(player, supportInfo, index, userEvent);
                 break;
         }
         if (userEvent.getType() == MessageEventType.TEXT) {

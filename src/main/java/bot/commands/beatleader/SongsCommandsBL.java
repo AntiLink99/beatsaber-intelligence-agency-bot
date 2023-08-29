@@ -7,6 +7,7 @@ import bot.dto.MessageEventDTO;
 import bot.dto.PlayerScore;
 import bot.dto.beatleader.scores.Player;
 import bot.dto.player.DataBasePlayer;
+import bot.dto.supporters.SupporterInfo;
 import bot.graphics.SongsImage;
 import bot.main.BotConstants;
 import bot.utils.JavaFXUtils;
@@ -23,7 +24,7 @@ public class SongsCommandsBL {
         this.db = db;
     }
 
-    private void sendSongs(DataBasePlayer player, int index, MessageEventDTO event, boolean isTopSongs) {
+    private void sendSongs(DataBasePlayer player, SupporterInfo supportInfo, int index, MessageEventDTO event, boolean isTopSongs) {
         String songType = isTopSongs ? "topSongs" : "recentSongs";
 
         if (player == null) {
@@ -49,7 +50,7 @@ public class SongsCommandsBL {
         }
         String filePath = BotConstants.RESOURCES_PATH+ songType + "_" + playerId + "_" + messageId + ".png";
 
-        generateImage(scores, filePath);
+        generateImage(scores, supportInfo, filePath);
 
         File songImage = new File(filePath);
         if (songImage.exists()) {
@@ -59,7 +60,7 @@ public class SongsCommandsBL {
 
     }
 
-    private void generateImage(List<PlayerScore> scores, String filePath) {
+    private void generateImage(List<PlayerScore> scores, SupporterInfo supportInfo, String filePath) {
         // Remove old image file if exists
         File songImage = new File(filePath);
         if (songImage.exists()) {
@@ -70,6 +71,7 @@ public class SongsCommandsBL {
         SongsImage.setScores(scores);
         LeaderboardServicePlayer imagePlayer = scores.get(0) != null ? scores.get(0).getLeaderboardPlayer() : new Player();
         SongsImage.setPlayer(imagePlayer);
+        SongsImage.setSupporterInfo(supportInfo);
         JavaFXUtils.launch(SongsImage.class);
 
         int songsWaitingCounter = 0;
@@ -88,11 +90,11 @@ public class SongsCommandsBL {
         }
     }
 
-    public void sendRecentSongs(DataBasePlayer player, int index, MessageEventDTO event) {
-        sendSongs(player, index, event, false);
+    public void sendRecentSongs(DataBasePlayer player, SupporterInfo supportInfo, int index, MessageEventDTO event) {
+        sendSongs(player, supportInfo, index, event, false);
     }
 
-    public void sendTopSongs(DataBasePlayer player, int index, MessageEventDTO event) {
-        sendSongs(player, index, event, true);
+    public void sendTopSongs(DataBasePlayer player, SupporterInfo supportInfo, int index, MessageEventDTO event) {
+        sendSongs(player, supportInfo, index, event, true);
     }
 }

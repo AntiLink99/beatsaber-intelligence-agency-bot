@@ -44,26 +44,36 @@ public class SongsImage extends Application {
 
         Pane root = new Pane();
         final ImageView baseImage = getBaseImage(); // Rectangle Image
-        //root.getChildren().add(baseImage);
+        root.getChildren().add(baseImage);
 
+        processAllPlayerScores(root);
+        setupLeaderboardImage(root);
+        setupAdditionalImages(root);
+
+        captureAndSaveScene(root);
+        setFinished(true);
+        primaryStage.close();
+    }
+
+    private void processAllPlayerScores(Pane root) throws Exception {
         for (int i = 0; i < scores.size(); i++) {
             processPlayerScore(i, root);
         }
-        setupLeaderboardImage(root);
+    }
 
+    private void setupAdditionalImages(Pane root) {
         if (player != null) {
             setupProfilePic(root);
             setupQRCode(root);
         }
+    }
 
+    private void captureAndSaveScene(Pane root) {
         root.autosize();
-        final SnapshotParameters snapPara = new SnapshotParameters();
+        SnapshotParameters snapPara = new SnapshotParameters();
         snapPara.setFill(Color.TRANSPARENT);
         WritableImage resultImage = root.snapshot(snapPara, null);
-
-        JavaFXUtils.saveFile(resultImage, new File(getFilePath()));
-        setFinished(true);
-        primaryStage.close();
+        JavaFXUtils.saveFile(resultImage, new File(getFilePath())); // Assuming JavaFXUtils and getFilePath() are defined elsewhere
     }
 
     private void processPlayerScore(int index, Pane root) throws IOException, ExecutionException, InterruptedException, TimeoutException {
@@ -292,13 +302,14 @@ public class SongsImage extends Application {
     }
 
     private ImageView getBaseImage() {
+        System.out.println(supporterInfo.getCustomSongsImage());
         if (supporterInfo != null &&
             supporterInfo.getCustomSongsImage() != null &&
             !supporterInfo.getCustomSongsImage().isEmpty()) {
-            return new ImageView("https://anti.link" + supporterInfo.getCustomSongsImage());
+            return new ImageView("https://anti.link/img/scoreImages/" + supporterInfo.getCustomSongsImage() + ".png");
         }
 
-        return new ImageView("https://anti.link/img/scoresImage.png");
+        return new ImageView("https://anti.link/img/scoreImages/Default.png");
     }
 
     public static boolean isFinished() {

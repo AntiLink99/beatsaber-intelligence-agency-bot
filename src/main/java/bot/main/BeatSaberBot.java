@@ -51,56 +51,77 @@ import java.util.stream.Collectors;
 
 public class BeatSaberBot extends ListenerAdapter {
 
-    final ScoreSaber ss = new ScoreSaber();
-    final BeatLeader bl = new BeatLeader();
-    final BeatSaver bs = new BeatSaver();
-    final DatabaseManager db = new DatabaseManager();
-    RankedMaps ranked = new RankedMaps();
+    JDA jda;
+    private final ScoreSaber ss;
+    private final BeatLeader bl;
+    private final BeatSaver bs;
+    private final DatabaseManager db;
+    private RankedMaps ranked;
+    private static boolean hasStarted = false;
 
-    static boolean hasStarted = false;
-    static long applicationId = -1;
+    public BeatSaberBot() {
+        ss = new ScoreSaber();
+        bl = new BeatLeader();
+        bs = new BeatSaver();
+        db = new DatabaseManager();
+        ranked = new RankedMaps();
+    }
 
     public static void main(String[] args) {
-        DatabaseManager db = new DatabaseManager();
-        ScoreSaber ss = new ScoreSaber();
         Platform.setImplicitExit(false);
 
         try {
-            JDABuilder builder = JDABuilder.createDefault(System.getenv("bot_token"))
-                    .addEventListeners(new BeatSaberBot())
-                    .enableIntents(
-                            GatewayIntent.DIRECT_MESSAGES,
-                            GatewayIntent.GUILD_MESSAGES,
-                            GatewayIntent.GUILD_MEMBERS,
-                            GatewayIntent.GUILD_PRESENCES)
-                    .setMemberCachePolicy(MemberCachePolicy.ALL)
-                    .disableCache(CacheFlag.VOICE_STATE, CacheFlag.EMOTE)
-                    .setActivity(Activity.playing(BotConstants.PLAYING));
-
-            JDA jda = builder.build();
-
-            System.out.println("Awaiting JDA ready status...");
-            jda.awaitReady();
-
-            hasStarted = true;
-            applicationId = jda.retrieveApplicationInfo().complete().getIdLong();
-            System.out.println("*** AppID: " + applicationId);
-
-            Guild loggingGuild = jda.getGuildById(BotConstants.logServerId);
-            if (loggingGuild != null) {
-                DiscordLogger.setLogGuild(loggingGuild);
-            } else {
-                System.out.println("Continuing without logging guild.");
-            }
-
-            LeaderboardWatcher watcher = new LeaderboardWatcher(db, ss, jda);
-            watcher.createNewLeaderboardWatcher();
-            watcher.start();
-
-            SlashCommands.getCurrentCommands().forEach(c -> jda.upsertCommand(c).queue());
+            initializeBot();
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public static void initializeBot() {
+        try {
+            BeatSaberBot bot = new BeatSaberBot();
+            bot.setupJDA();
+            bot.setupLoggingAndLeaderboard();
+            bot.registerSlashCommands();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void setupJDA() throws Exception {
+        JDABuilder builder = JDABuilder.createDefault(System.getenv("bot_token"))
+                .addEventListeners(this)
+                .enableIntents(
+                        GatewayIntent.DIRECT_MESSAGES,
+                        GatewayIntent.GUILD_MESSAGES,
+                        GatewayIntent.GUILD_MEMBERS,
+                        GatewayIntent.GUILD_PRESENCES)
+                .setMemberCachePolicy(MemberCachePolicy.ALL)
+                .disableCache(CacheFlag.VOICE_STATE, CacheFlag.EMOTE)
+                .setActivity(Activity.playing(BotConstants.PLAYING));
+
+        this.jda = builder.build();
+        System.out.println("Awaiting JDA ready status...");
+        jda.awaitReady();
+
+        hasStarted = true;
+    }
+
+    private void setupLoggingAndLeaderboard() {
+        Guild loggingGuild = jda.getGuildById(BotConstants.logServerId);
+        if (loggingGuild != null) {
+            DiscordLogger.setLogGuild(loggingGuild);
+        } else {
+            System.out.println("Continuing without logging guild.");
+        }
+
+        LeaderboardWatcher watcher = new LeaderboardWatcher(db, ss, jda);
+        watcher.createNewLeaderboardWatcher();
+        watcher.start();
+    }
+
+    private void registerSlashCommands() {
+        SlashCommands.getCurrentCommands().forEach(c -> jda.upsertCommand(c).queue());
     }
 
     @Override

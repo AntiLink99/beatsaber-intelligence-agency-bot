@@ -10,17 +10,17 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class JavaFXUtils {
 
-    private static boolean javaFxLaunched = false;
+    private static final AtomicBoolean javaFxLaunched = new AtomicBoolean(false);
 
     public static void launch(Class<? extends Application> applicationClass) {
-        if (!isJavaFxLaunched()) { // First time
+        if (javaFxLaunched.compareAndSet(false, true)) {
             Platform.setImplicitExit(false);
             new Thread(() -> Application.launch(applicationClass)).start();
-            setJavaFxLaunched(true);
-        } else { // Next times
+        } else {
             Platform.runLater(() -> {
                 try {
                     Application application = applicationClass.getDeclaredConstructor().newInstance();
@@ -41,13 +41,4 @@ public class JavaFXUtils {
             ex.printStackTrace();
         }
     }
-
-    public static boolean isJavaFxLaunched() {
-        return javaFxLaunched;
-    }
-
-    public static void setJavaFxLaunched(boolean javaFxLaunched) {
-        JavaFXUtils.javaFxLaunched = javaFxLaunched;
-    }
-
 }

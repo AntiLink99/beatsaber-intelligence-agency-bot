@@ -57,7 +57,6 @@ public class SongsCommandsBL {
             Messages.sendImage(songImage, songType + "_" + playerId + "_" + messageId + ".png", event);
             songImage.delete();
         }
-
     }
 
     private void generateImage(List<PlayerScore> scores, SupporterInfo supportInfo, String filePath) {

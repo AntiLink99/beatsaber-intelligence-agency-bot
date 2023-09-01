@@ -234,7 +234,11 @@ public class PlayerScoreBL implements PlayerScore {
 
 	@Override
 	public String getDifficultyName() {
-		return leaderboard.getDifficulty().getDifficultyName();
+		String diffName = leaderboard.getDifficulty().getDifficultyName();
+		if (diffName != null) {
+			diffName = diffName.replace("Plus", "+").replace("plus", "+");
+		}
+		return diffName;
 	}
 
 	@Override

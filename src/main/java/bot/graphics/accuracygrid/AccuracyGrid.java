@@ -1,6 +1,7 @@
-package bot.graphics;
+package bot.graphics.accuracygrid;
 
 import bot.api.HttpMethods;
+import bot.graphics.GraphicsConstants;
 import bot.utils.Format;
 import bot.utils.JavaFXUtils;
 import javafx.application.Application;
@@ -20,73 +21,38 @@ import javafx.stage.Stage;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
 
 public class AccuracyGrid extends Application {
 
     public static List<Float> accuracyValues = new ArrayList<>();
     private static List<Integer> notesCounts = new ArrayList<>();
-    private static String playerId = "";
-    private static String messageId = "";
     private static String customImageUrl = "";
     private static String filePath = "";
     private static boolean isFinished = false;
 
     final ImageView grid = new ImageView("https://i.imgur.com/8Y3FNri.png"); // Grid Image
 
-    public static void setAccuracyValues(List<Float> accuracyValuesIn) {
-        accuracyValues = accuracyValuesIn;
+    public AccuracyGrid(AccuracyGridParams params) {
+        accuracyValues = params.getGridAcc();
+        notesCounts = params.getNotesCounts();
+        customImageUrl = params.getCustomImageUrl();
+        filePath = params.getFilePath();
     }
 
-    public static List<Integer> getNotesCounts() {
-        return notesCounts;
-    }
-
-    public static void setNotesCounts(List<Integer> notesCountsIn) {
-        notesCounts = notesCountsIn;
-    }
-
-    public static String getPlayerId() {
-        return playerId;
-    }
-
-    public static void setPlayerId(String playerIdIn) {
-        playerId = playerIdIn;
-    }
-
-    public static String getMessageId() {
-        return messageId;
-    }
-
-    public static void setMessageId(String messageId) {
-        AccuracyGrid.messageId = messageId;
-    }
-
-    public static String getCustomImageUrl() {
-        return customImageUrl;
-    }
-
-    public static void setCustomImageUrl(String customImageUrl) {
-        AccuracyGrid.customImageUrl = customImageUrl;
-    }
-
-    public static boolean isFinished() {
-        return isFinished;
-    }
-
-    public static void setFilePath(String filePath) { AccuracyGrid.filePath = filePath; }
-
-    public static String getFilePath() { return filePath; }
     @Override
-    public void start(Stage primaryStage) throws Exception {
+    public void start(Stage primaryStage) throws IOException, ExecutionException, InterruptedException, TimeoutException {
         isFinished = false;
 
         Pane root = new Pane();
         root.getChildren().add(grid);
 
-        boolean hasCustomImage = getCustomImageUrl() != null && !getCustomImageUrl().isEmpty();
+        boolean hasCustomImage = customImageUrl != null && !customImageUrl.isEmpty();
         if (hasCustomImage) {
             ImageView background = new ImageView(); // Custom Image
             BufferedImage image = HttpMethods.getBufferedImagefromUrl(customImageUrl);
@@ -148,7 +114,7 @@ public class AccuracyGrid extends Application {
         PixelReader reader = resultImage.getPixelReader();
         resultImage = new WritableImage(reader, 0, 0, GraphicsConstants.accGridWidth, GraphicsConstants.accGridHeight);
 
-        JavaFXUtils.saveFile(resultImage, new File(getFilePath()));
+        JavaFXUtils.saveFile(resultImage, new File(filePath));
         isFinished = true;
         primaryStage.close();
         accuracyValues.clear();
@@ -170,5 +136,9 @@ public class AccuracyGrid extends Application {
             return Color.rgb(199, 110, 32);
         }
         return Color.rgb(181, 5, 5);
+    }
+
+    public boolean isFinished() {
+        return isFinished;
     }
 }

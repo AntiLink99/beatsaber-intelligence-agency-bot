@@ -6,6 +6,7 @@ import bot.api.BeatSavior;
 import bot.api.ScoreSaber;
 import bot.commands.chart.AccuracyChart;
 import bot.db.DatabaseManager;
+import bot.dto.LeaderboardService;
 import bot.dto.MessageEventDTO;
 import bot.dto.RecentSongData;
 import bot.dto.Song;
@@ -17,17 +18,22 @@ import bot.dto.rankedmaps.RankedMaps;
 import bot.dto.scoresaber.Leaderboard;
 import bot.dto.scoresaber.PlayerScoreSS;
 import bot.dto.scoresaber.Score;
-import bot.graphics.AccuracyGrid;
+import bot.graphics.accuracygrid.AccuracyGrid;
+import bot.graphics.accuracygrid.AccuracyGridParams;
 import bot.main.BotConstants;
 import bot.utils.*;
+import javafx.application.Platform;
+import javafx.stage.Stage;
 
 import java.io.File;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 public class RecentSong {
 
     final DatabaseManager db;
+    private AccuracyGrid accGrid;
 
     public RecentSong(DatabaseManager db) {
         this.db = db;
@@ -57,7 +63,7 @@ public class RecentSong {
         return rankOnPlayerLeaderboard + suffix + " Best Play";
     }
 
-    public void sendRecentSong(DataBasePlayer player, RankedMaps ranked, int index, MessageEventDTO event) {
+    public void sendRecentSong(LeaderboardService service, DataBasePlayer player, RankedMaps ranked, int index, MessageEventDTO event) {
         ScoreSaber ss = new ScoreSaber();
         BeatSaver bs = new BeatSaver();
         BeatSavior bsavior = new BeatSavior();
@@ -78,7 +84,7 @@ public class RecentSong {
                 return;
             }
 
-            PlayerScoreSS recentData = ssScores.get(index); //TODO Nullpointer
+            PlayerScoreSS recentData = ssScores.get(index);
             Leaderboard recentLeaderboard = recentData.getLeaderboard();
             Score recentScore = recentData.getScore();
 
@@ -87,7 +93,6 @@ public class RecentSong {
             File gridImage = new File(accGridFilePath);
 
             // Saviour
-            //TODO
             BeatSaviorPlayerScores saviorPlayerScores = bsavior.fetchPlayerMaps(Long.valueOf(playerId));
             List<BeatSaviorPlayerScore> saviourScores = saviorPlayerScores != null ? saviorPlayerScores.getPlayerMaps() : null;
 
@@ -96,25 +101,43 @@ public class RecentSong {
             if (hasBeatSavior) {
                 saviourScore = saviourScores.stream()
                         .filter(score -> score.getSongID().equals(recentLeaderboard.getSongHash()) &&
-                        SongUtils.matchScoreSaberAndBeatSaviorDiffname(recentLeaderboard.getDifficulty().getDifficultyName(), score.getSongDifficulty()) &&
-                        score.getTrackers().getWinTracker().isWon()).sorted()
+                                SongUtils.matchScoreSaberAndBeatSaviorDiffname(recentLeaderboard.getDifficulty().getDifficultyName(), score.getSongDifficulty()) &&
+                                score.getTrackers().getWinTracker().isWon()).sorted()
                         .findFirst().orElse(null);
+
                 if (saviourScore != null) {
                     List<Float> gridAcc = saviourScore.getTrackers().getAccuracyTracker().getGridAcc();
                     List<Integer> notesCounts = saviourScore.getTrackers().getAccuracyTracker().getGridCut();
-                    AccuracyGrid.setAccuracyValues(gridAcc);
-                    AccuracyGrid.setNotesCounts(notesCounts);
-                    AccuracyGrid.setPlayerId(playerId);
-                    AccuracyGrid.setCustomImageUrl(player.getCustomAccGridImage());
-                    AccuracyGrid.setMessageId(String.valueOf(event.getId()));
-                    AccuracyGrid.setFilePath(accGridFilePath);
+
+
+                    // Construct params object
+                    AccuracyGridParams accParams = new AccuracyGridParams(gridAcc, notesCounts, player.getCustomAccGridImage(), accGridFilePath);
 
                     // Remove old acc grid file if exists
                     if (gridImage.exists()) {
                         gridImage.delete();
                     }
 
-                    JavaFXUtils.launch(AccuracyGrid.class);
+                    CountDownLatch latch = new CountDownLatch(1);
+                    Platform.runLater(() -> {
+                        try {
+                            accGrid = new AccuracyGrid(accParams);
+                            accGrid.start(new Stage());
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        } finally {
+                            latch.countDown();
+                        }
+                    });
+
+                    try {
+                        if (!latch.await(30, TimeUnit.SECONDS)) {
+                            System.out.println("Timeout!");
+                        }
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+
                 } else {
                     hasBeatSavior = false;
                 }
@@ -224,7 +247,7 @@ public class RecentSong {
             if (hasBeatSavior) {
                 AccuracyChart.sendChartImage(saviourScore, player.getName(), recentLeaderboard.getDifficulty().getDifficultyName(), event);
                 int gridWaitingCounter = 0;
-                while (!AccuracyGrid.isFinished()) {
+                while (!accGrid.isFinished()) {
                     if (gridWaitingCounter > 8) {
                         break;
                     }

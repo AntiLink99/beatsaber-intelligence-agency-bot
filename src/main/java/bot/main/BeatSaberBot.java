@@ -9,7 +9,6 @@ import bot.commands.chart.RadarStatsChart;
 import bot.commands.scoresaber.Qualified;
 import bot.commands.scoresaber.Rank;
 import bot.commands.scoresaber.Ranked;
-import bot.commands.scoresaber.RecentSong;
 import bot.db.DatabaseManager;
 import bot.dto.MessageEventDTO;
 import bot.dto.beatleader.player.BeatLeaderPlayer;
@@ -19,6 +18,7 @@ import bot.dto.rankedmaps.RankedMaps;
 import bot.dto.supporters.SupporterInfo;
 import bot.graphics.AccGridImage;
 import bot.listeners.PlayerChartListener;
+import bot.listeners.RecentSongListener;
 import bot.listeners.SongsCommandsListener;
 import bot.listeners.SongsCommandsType;
 import bot.utils.*;
@@ -292,7 +292,7 @@ public class BeatSaberBot extends ListenerAdapter {
                         return;
                     }
                     DiscordLogger.sendLogInChannel(event.getAuthor() + " is requesting RecentSong for: " + commandPlayer.getName(), DiscordLogger.INFO);
-                    new RecentSong(db).sendRecentSong(commandPlayer, ranked, index, event);
+                    event.getJDA().addEventListener(new RecentSongListener(commandPlayer, index, event, db, ranked));
                     return;
                 }
                 case "topsong":

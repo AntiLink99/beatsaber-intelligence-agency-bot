@@ -23,6 +23,7 @@ import bot.listeners.SongsCommandsListener;
 import bot.listeners.SongsCommandsType;
 import bot.utils.*;
 import javafx.application.Platform;
+import javafx.embed.swing.JFXPanel;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.*;
@@ -50,6 +51,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class BeatSaberBot extends ListenerAdapter {
+    static {
+        new JFXPanel();
+    }
 
     JDA jda;
     private final ScoreSaber ss;

@@ -27,6 +27,8 @@ public class PlayerScoreSS implements PlayerScore {
 
 	LeaderboardServicePlayer dbPlayer;
 
+	private float songStars; //manually set
+
 	public PlayerScoreSS() {
 		format = new DecimalFormat("##0.00");
 		format.setDecimalFormatSymbols(DecimalFormatSymbols.getInstance(Locale.ENGLISH));
@@ -41,11 +43,7 @@ public class PlayerScoreSS implements PlayerScore {
 	}
 
 	public String getCoverURL() {
-		return coverURL;
-	}
-
-	public void setCoverURL(String coverURL) {
-		this.coverURL = coverURL;
+		return leaderboard.getCoverImage();
 	}
 
 	public float getStars() {
@@ -55,10 +53,6 @@ public class PlayerScoreSS implements PlayerScore {
 	public void setSongStars(float songStars) {
 		this.songStars = songStars;
 	}
-
-	private String coverURL; //manually set
-
-	private float songStars; //manually set
 
 	public Score getScore(){
 		return score;

@@ -1,8 +1,6 @@
 package bot.listeners;
 
-import bot.commands.accsaber.SongsCommandsACC;
-import bot.commands.beatleader.SongsCommandsBL;
-import bot.commands.scoresaber.SongsCommands;
+import bot.commands.UnifiedSongsCommands;
 import bot.db.DatabaseManager;
 import bot.dto.LeaderboardService;
 import bot.dto.MessageEventDTO;
@@ -71,22 +69,16 @@ public class SongsCommandsListener extends ListenerAdapter implements EventListe
 
         switch (selectedService) {
             case SCORESABER:
-                if (type == SongsCommandsType.RECENT)
-                    new SongsCommands(db, ssRanked).sendRecentSongs(player, supportInfo, index, userEvent);
-                else
-                    new SongsCommands(db, ssRanked).sendTopSongs(player, supportInfo, index, userEvent);
+                UnifiedSongsCommands ssCommand = new UnifiedSongsCommands(db, ssRanked);
+                executeCommand(ssCommand, selectedService, type, player, supportInfo, index, userEvent);
                 break;
             case BEATLEADER:
-                if (type == SongsCommandsType.RECENT)
-                    new SongsCommandsBL(db).sendRecentSongs(player, supportInfo, index, userEvent);
-                else
-                    new SongsCommandsBL(db).sendTopSongs(player, supportInfo, index, userEvent);
+                UnifiedSongsCommands blCommand = new UnifiedSongsCommands(db);
+                executeCommand(blCommand, selectedService, type, player, supportInfo, index, userEvent);
                 break;
             case ACCSABER:
-                if (type == SongsCommandsType.RECENT)
-                    new SongsCommandsACC(db).sendRecentSongs(player, supportInfo, index, userEvent);
-                else
-                    new SongsCommandsACC(db).sendTopSongs(player, supportInfo, index, userEvent);
+                UnifiedSongsCommands accCommand = new UnifiedSongsCommands(db);
+                executeCommand(accCommand, selectedService, type, player, supportInfo, index, userEvent);
                 break;
         }
         if (userEvent.getType() == MessageEventType.TEXT) {
@@ -95,6 +87,14 @@ public class SongsCommandsListener extends ListenerAdapter implements EventListe
         }
         timer.cancel();
         userEvent.getJDA().removeEventListener(this);
+    }
+
+    public void executeCommand(UnifiedSongsCommands unifiedSongService, LeaderboardService service, SongsCommandsType type, DataBasePlayer player, SupporterInfo supportInfo, int index, MessageEventDTO userEvent) {
+        if (type == SongsCommandsType.RECENT) {
+            unifiedSongService.sendRecentSongs(service, player, supportInfo, index, userEvent);
+        } else {
+            unifiedSongService.sendTopSongs(service, player, supportInfo, index, userEvent);
+        }
     }
 
     public void sendAskForServiceEmbed(MessageEventDTO event) {

@@ -1,4 +1,4 @@
-package bot.graphics;
+package bot.graphics.songsImage;
 
 import bot.api.ApiConstants;
 import bot.api.HttpMethods;
@@ -31,15 +31,24 @@ import java.util.concurrent.TimeoutException;
 
 public class SongsImage extends Application {
 
-    private static boolean isFinished = false;
-    private static List<PlayerScore> scores;
-    private static LeaderboardServicePlayer player;
-    private static SupporterInfo supporterInfo;
-    private static String filePath;
-    final Image starImage = new Image(Objects.requireNonNull(getClass().getClassLoader().getResourceAsStream("star.png")));
+    private boolean isFinished;
+    private List<PlayerScore> scores;
+    private LeaderboardServicePlayer player;
+    private SupporterInfo supporterInfo;
+    private String filePath;
+    private final Image starImage;
+
+    public SongsImage(SongsImageParams params) {
+        this.scores = params.getScores();
+        this.player = params.getPlayer();
+        this.supporterInfo = params.getSupporterInfo();
+        this.filePath = params.getFilePath();
+        this.isFinished = false;
+        this.starImage = new Image(Objects.requireNonNull(getClass().getClassLoader().getResourceAsStream("star.png")));
+    }
 
     @Override
-    public void start(Stage primaryStage) throws Exception {
+    public void start(Stage primaryStage) {
         setFinished(false);
 
         Pane root = new Pane();
@@ -55,9 +64,13 @@ public class SongsImage extends Application {
         primaryStage.close();
     }
 
-    private void processAllPlayerScores(Pane root) throws Exception {
+    private void processAllPlayerScores(Pane root) {
         for (int i = 0; i < scores.size(); i++) {
-            processPlayerScore(i, root);
+            try {
+                processPlayerScore(i, root);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -302,7 +315,6 @@ public class SongsImage extends Application {
     }
 
     private ImageView getBaseImage() {
-        System.out.println(supporterInfo.getCustomSongsImage());
         if (supporterInfo != null &&
             supporterInfo.getCustomSongsImage() != null &&
             !supporterInfo.getCustomSongsImage().isEmpty()) {
@@ -312,43 +324,43 @@ public class SongsImage extends Application {
         return new ImageView("https://anti.link/img/scoreImages/Default.png");
     }
 
-    public static boolean isFinished() {
+    public boolean isFinished() {
         return isFinished;
     }
 
-    public static void setFinished(boolean isFinished) {
-        SongsImage.isFinished = isFinished;
+    public void setFinished(boolean isFinished) {
+        this.isFinished = isFinished;
     }
 
-    public static List<PlayerScore> getScores() {
+    public List<PlayerScore> getScores() {
         return scores;
     }
 
-    public static void setScores(List<PlayerScore> scores) {
-        SongsImage.scores = scores;
+    public void setScores(List<PlayerScore> scores) {
+        this.scores = scores;
     }
 
-    public static String getFilePath() {
+    public String getFilePath() {
         return filePath;
     }
 
-    public static void setFilePath(String filePath) {
-        SongsImage.filePath = filePath;
+    public void setFilePath(String filePath) {
+        this.filePath = filePath;
     }
 
-    public static LeaderboardServicePlayer getPlayer() {
+    public LeaderboardServicePlayer getPlayer() {
         return player;
     }
 
-    public static void setPlayer(LeaderboardServicePlayer player) {
-        SongsImage.player = player;
+    public void setPlayer(LeaderboardServicePlayer player) {
+        this.player = player;
     }
 
-    public static SupporterInfo getSupporterInfo() {
+    public SupporterInfo getSupporterInfo() {
         return supporterInfo;
     }
 
-    public static void setSupporterInfo(SupporterInfo supporterInfo) {
-        SongsImage.supporterInfo = supporterInfo;
+    public void setSupporterInfo(SupporterInfo supporterInfo) {
+        this.supporterInfo = supporterInfo;
     }
 }

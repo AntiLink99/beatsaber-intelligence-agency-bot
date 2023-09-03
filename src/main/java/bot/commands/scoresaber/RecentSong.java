@@ -1,23 +1,14 @@
 package bot.commands.scoresaber;
 
-import bot.api.ApiConstants;
-import bot.api.BeatSaver;
-import bot.api.BeatSavior;
-import bot.api.ScoreSaber;
+import bot.api.*;
 import bot.commands.chart.AccuracyChart;
 import bot.db.DatabaseManager;
-import bot.dto.LeaderboardService;
-import bot.dto.MessageEventDTO;
-import bot.dto.RecentSongData;
-import bot.dto.Song;
+import bot.dto.*;
 import bot.dto.beatsavior.BeatSaviorPlayerScore;
 import bot.dto.beatsavior.BeatSaviorPlayerScores;
 import bot.dto.player.DataBasePlayer;
 import bot.dto.rankedmaps.BeatSaverRankedMap;
 import bot.dto.rankedmaps.RankedMaps;
-import bot.dto.scoresaber.Leaderboard;
-import bot.dto.scoresaber.PlayerScoreSS;
-import bot.dto.scoresaber.Score;
 import bot.graphics.accuracygrid.AccuracyGrid;
 import bot.graphics.accuracygrid.AccuracyGridParams;
 import bot.main.BotConstants;
@@ -26,6 +17,7 @@ import javafx.application.Platform;
 import javafx.stage.Stage;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -65,6 +57,9 @@ public class RecentSong {
 
     public void sendRecentSong(LeaderboardService service, DataBasePlayer player, RankedMaps ranked, int index, MessageEventDTO event) {
         ScoreSaber ss = new ScoreSaber();
+        BeatLeader bl = new BeatLeader();
+        AccSaber as = new AccSaber();
+
         BeatSaver bs = new BeatSaver();
         BeatSavior bsavior = new BeatSavior();
 
@@ -78,18 +73,30 @@ public class RecentSong {
             // ScoreSaber
             int pageNr = getPageNrFromSongIndex(index);
             index = (index - 1) % 8;
-            List<PlayerScoreSS> ssScores = ss.getRecentScoresByPlayerIdAndPage(Long.parseLong(player.getId()), pageNr);
-            if (ssScores == null || ssScores.isEmpty()) {
-                Messages.sendMessage("ScoreSaber didn't respond. Please try again later.", event.getChannel());
+            List<PlayerScore> scores;
+
+            switch (service) {
+                case SCORESABER:
+                    scores = new ArrayList<>(ss.getRecentScoresByPlayerIdAndPage(player.getPlayerIdLong(), pageNr));
+                    break;
+                case BEATLEADER:
+                    scores = bl.getRecentScoresByPlayerIdAndPage(player.getPlayerIdLong(), pageNr);
+                    break;
+                case ACCSABER:
+                    scores = as.getRecentScoresByPlayerIdAndPage(player.getPlayerIdLong(), pageNr);
+                    break;
+                default:
+                    scores = new ArrayList<>();
+            }
+
+            if (scores.isEmpty()) {
+                Messages.sendMessage("The service didn't respond. Please try again later.", event.getChannel());
                 return;
             }
 
-            PlayerScoreSS recentData = ssScores.get(index);
-            Leaderboard recentLeaderboard = recentData.getLeaderboard();
-            Score recentScore = recentData.getScore();
+            PlayerScore recentScore = scores.get(index);
 
-
-            String accGridFilePath = BotConstants.RESOURCES_PATH+"accGrid_" + playerId + "_" + event.getId() + ".png";
+            String accGridFilePath = BotConstants.RESOURCES_PATH + "accGrid_" + playerId + "_" + event.getId() + ".png";
             File gridImage = new File(accGridFilePath);
 
             // Saviour
@@ -100,8 +107,8 @@ public class RecentSong {
             boolean hasBeatSavior = saviourScores != null && !saviourScores.isEmpty();
             if (hasBeatSavior) {
                 saviourScore = saviourScores.stream()
-                        .filter(score -> score.getSongID().equals(recentLeaderboard.getSongHash()) &&
-                                SongUtils.matchScoreSaberAndBeatSaviorDiffname(recentLeaderboard.getDifficulty().getDifficultyName(), score.getSongDifficulty()) &&
+                        .filter(score -> score.getSongID().equals(recentScore.getSongHash().toUpperCase()) &&
+                                SongUtils.matchScoreSaberAndBeatSaviorDiffname(recentScore.getDifficultyName(), score.getSongDifficulty()) &&
                                 score.getTrackers().getWinTracker().isWon()).sorted()
                         .findFirst().orElse(null);
 
@@ -143,15 +150,16 @@ public class RecentSong {
                 }
             }
             // Ranked
-            boolean isRanked = recentScore.getPp() > 0;
+            boolean isRanked = recentScore.getPP() > 0;
             float starRating = 0;
             String coverUrl = null;
             int rankOnPlayerLeaderboard = -1;
             if (isRanked) {
-                BeatSaverRankedMap rankedMap = RankedMapUtils.findRankedMapBySongHash(ranked, recentLeaderboard.getSongHash());
+                BeatSaverRankedMap rankedMap = RankedMapUtils.findRankedMapBySongHash(ranked, recentScore.getSongHash().toUpperCase());
                 rankOnPlayerLeaderboard = Format.roundDouble((Math.log10(recentScore.getWeight()) + Math.log10(0.965)) / Math.log10(0.965));
-                if (rankedMap != null) {
-                    starRating = SongUtils.getStarRatingForMapDiff(rankedMap, recentLeaderboard.getDifficultyValue());
+                starRating = recentScore.getStars();
+                if (rankedMap != null && service == LeaderboardService.SCORESABER) {
+                    starRating = SongUtils.getStarRatingForMapDiff(rankedMap, recentScore.getDifficultyValue());
                 }
             }
 
@@ -170,11 +178,11 @@ public class RecentSong {
             String songInfo = Format.codeAutohotkey(topInfo);
 
             //BeatSaver
-            Song bsMap = bs.fetchSongByHash(recentLeaderboard.getSongHash());
+            Song bsMap = bs.fetchSongByHash(recentScore.getSongHash());
             int noteCount = -1;
             if (bsMap != null) {
-                noteCount = SongUtils.getNoteCountForBeatSaverMapDiff(bsMap, recentData);
-                Song.Version version = bsMap.getVersionByHash(recentLeaderboard.getSongHash());
+                noteCount = SongUtils.getNoteCountForBeatSaverMapDiff(bsMap, recentScore);
+                Song.Version version = bsMap.getVersionByHash(recentScore.getSongHash());
                 if (version != null) {
                     coverUrl = version.getCoverURL();
                 } else {
@@ -183,17 +191,19 @@ public class RecentSong {
             }
 
             String accuracy = null;
-            if (noteCount >= 13) { // Acc can't be calculated if map has < 13 notes
+            if (service != LeaderboardService.SCORESABER) {
+                accuracy = Format.fixedLength("Accuracy: " + recentScore.getAccuracyString(), lineWidth);
+            } else if (noteCount >= 13) { // Acc can't be calculated if map has < 13 notes
                 if (isRanked) {
-                    accuracy = Format.fixedLength("Accuracy: " + recentData.getAccuracyString(), lineWidth);
+                    accuracy = Format.fixedLength("Accuracy: " + recentScore.getAccuracyString(), lineWidth);
                 } else {
                     int maxScore = noteCount * 920 - 7245;
-                    float accuracyValue = (float) recentScore.getModifiedScore() / (float) maxScore * 100f;
+                    float accuracyValue = (float) recentScore.getScoreValue() / (float) maxScore * 100f;
                     accuracy = Format.fixedLength("Accuracy: " + Format.decimal(accuracyValue) + "%", lineWidth);
                 }
-                if (!hasBeatSavior) {
-                    songInfo += Format.codeProlog("\n" + accuracy);
-                }
+            }
+            if (!hasBeatSavior) {
+                songInfo += Format.codeProlog("\n" + accuracy);
             }
             if (hasBeatSavior) {
                 String hitAccuracy = Format.fixedLength("Hit Accuracy: ", lineWidth) + Format.decimal(saviourScore.getTrackers().getAccuracyTracker().getAverageAcc());
@@ -220,32 +230,33 @@ public class RecentSong {
             }
 
             if (isRanked) {
-                String rawPP = Format.fixedLength("Raw PP: ", lineWidth) + Format.decimal(recentScore.getPp());
-                String weightPP = Format.fixedLength("Weighted PP: ", lineWidth) + Format.decimal(recentScore.getWeight() * recentScore.getPp());
+                String ppText = service == LeaderboardService.ACCSABER ? "AP": "PP";
+                String rawPP = Format.fixedLength("Raw " + ppText + ": ", lineWidth) + Format.decimal(recentScore.getPP());
+                String weightPP = Format.fixedLength("Weighted " + ppText + ": ", lineWidth) + Format.decimal(recentScore.getWeight() * recentScore.getPP());
                 String stars = Format.fixedLength("Stars: ", lineWidth) + (starRating > 0 ? Format.decimal(starRating) : "?") + "⭐";
                 songInfo += Format.codeProlog("\n" + rawPP + "\n" + weightPP + "\n" + stars);
             }
-            String diffImageUrl = SongUtils.getDiffImageUrl(recentLeaderboard.getDifficultyValue());
-            String songName = recentLeaderboard.getSongName() + " - " + getDurationStringFromMap(bsMap);
-            String songUrl = ApiConstants.SS_LEADERBOARD_PRE_URL + recentLeaderboard.getId();
-            String footerText = "Mapped by " + recentLeaderboard.getLevelAuthorName();
+            String diffImageUrl = SongUtils.getDiffImageUrl(recentScore.getDifficultyValue());
+            String songName = recentScore.getSongName() + " - " + getDurationStringFromMap(bsMap);
+            String leaderboardUrl = recentScore.getLeaderboardURL();
+            String footerText = "Mapped by " + recentScore.getAuthorName();
 
             RecentSongData recentSongData = new RecentSongData();
             recentSongData.setSongInfo(songInfo);
             recentSongData.setSongName(songName);
-            recentSongData.setSongUrl(songUrl);
+            recentSongData.setSongUrl(leaderboardUrl);
             recentSongData.setCoverUrl(coverUrl);
             recentSongData.setDiffImageUrl(diffImageUrl);
             recentSongData.setFooterText(footerText);
             recentSongData.setRanked(isRanked);
-
             recentSongData.setMapKey(bsMap != null ? bsMap.getId() : null);
             recentSongData.setPlayerId(playerId);
-            recentSongData.setDiffName(recentLeaderboard.getDifficulty().getDifficultyName());
+            recentSongData.setDiffName(recentScore.getDifficultyName());
+            recentSongData.setOptionalReplayUrl(recentScore.getReplayURL());
 
             Messages.sendRecentSongMessage(recentSongData, event.getChannel());
             if (hasBeatSavior) {
-                AccuracyChart.sendChartImage(saviourScore, player.getName(), recentLeaderboard.getDifficulty().getDifficultyName(), event);
+                AccuracyChart.sendChartImage(saviourScore, player.getName(), recentScore.getDifficultyName(), event);
                 int gridWaitingCounter = 0;
                 while (!accGrid.isFinished()) {
                     if (gridWaitingCounter > 8) {
@@ -264,8 +275,6 @@ public class RecentSong {
                 } else {
                     DiscordLogger.sendLogInChannel("Image wasnt generated. accGrid_" + playerId + "_" + event.getId() + ".png", DiscordLogger.ERRORS);
                 }
-            } else {
-                Messages.sendPlainMessage(Format.italic("No BeatSavior data was found for this score.\nMaybe it was set too far in the past or you don't have the mod installed."), event.getChannel());
             }
         }
     }

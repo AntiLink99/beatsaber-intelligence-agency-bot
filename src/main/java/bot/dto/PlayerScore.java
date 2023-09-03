@@ -1,10 +1,12 @@
 package bot.dto;
 
 public interface PlayerScore {
+     int getScoreValue();
      String getSongName();
      String getSongHash();
      String getAuthorName();
      int getRank();
+     double getPP();
      String getPPString();
      String getWeightedPPString();
      String getDifficultyName();
@@ -17,4 +19,6 @@ public interface PlayerScore {
      String getCoverURL();
      LeaderboardService getService();
      LeaderboardServicePlayer getLeaderboardPlayer();
+     String getLeaderboardURL();
+     String getReplayURL();
 }

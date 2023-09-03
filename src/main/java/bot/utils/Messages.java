@@ -184,6 +184,13 @@ public class Messages {
         builder.setAuthor(data.getSongName(), data.getSongUrl(), data.getDiffImageUrl());
         builder.setImage(data.getCoverUrl());
         builder.setFooter(data.getFooterText());
+
+        if (data.getOptionalReplayUrl() != null) {
+            List<Button> buttons = new ArrayList<>();
+            buttons.add(Button.of(ButtonStyle.LINK, data.getOptionalReplayUrl(), "🎬 Watch Replay"));
+            channel.sendMessageEmbeds(builder.build()).setActionRows(ActionRow.of(buttons)).queue();
+            return;
+        }
         channel.sendMessageEmbeds(builder.build()).queue();
     }
 

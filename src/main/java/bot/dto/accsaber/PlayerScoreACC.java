@@ -1,5 +1,6 @@
 package bot.dto.accsaber;
 
+import bot.api.ApiConstants;
 import bot.dto.LeaderboardService;
 import bot.dto.LeaderboardServicePlayer;
 import bot.dto.PlayerScore;
@@ -103,7 +104,7 @@ public class PlayerScoreACC implements PlayerScore {
 		return weightedAp;
 	}
 
-	public double getAp(){
+	public double getPP(){
 		return ap;
 	}
 
@@ -212,6 +213,16 @@ public class PlayerScoreACC implements PlayerScore {
 		return null;
 	}
 
+	@Override
+	public String getLeaderboardURL() {
+		return ApiConstants.ACC_LEADERBOARD_PRE_URL + leaderboardId;
+	}
+
+	@Override
+	public String getReplayURL() {
+		return null;
+	}
+
 	public String getTimeSet(){
 		return timeSet;
 	}
@@ -225,5 +236,8 @@ public class PlayerScoreACC implements PlayerScore {
 		return levelAuthorName;
 	}
 
-
+	@Override
+	public int getScoreValue() {
+		return -1;
+	}
 }

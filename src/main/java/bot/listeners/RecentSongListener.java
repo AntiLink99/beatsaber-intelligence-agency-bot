@@ -57,22 +57,19 @@ public class RecentSongListener extends ListenerAdapter implements EventListener
             return;
         LeaderboardService selectedService = LeaderboardService.valueOf(btnEvent.getButton().getId());
         InteractionHook replyMessage = btnEvent
-                .reply("Loading image... Service: " + selectedService.name())
+                .reply("Loading song... Service: " + selectedService.name())
                 .setEphemeral(true)
                 .complete();
-
+        RecentSong recentSong = new RecentSong(db);
         switch (selectedService) {
             case SCORESABER:
-                RecentSong ssCommand = new RecentSong(db);
-                ssCommand.sendRecentSong(LeaderboardService.SCORESABER, player, ssRanked, index, userEvent);
+                recentSong.sendRecentSong(LeaderboardService.SCORESABER, player, ssRanked, index, userEvent);
                 break;
             case BEATLEADER:
-                RecentSong blCommand = new RecentSong(db);
-                blCommand.sendRecentSong(LeaderboardService.BEATLEADER, player, ssRanked, index, userEvent);
+                recentSong.sendRecentSong(LeaderboardService.BEATLEADER, player, ssRanked, index, userEvent);
                 break;
             case ACCSABER:
-                RecentSong accCommand = new RecentSong(db);
-                accCommand.sendRecentSong(LeaderboardService.ACCSABER, player, ssRanked, index, userEvent);
+                recentSong.sendRecentSong(LeaderboardService.ACCSABER, player, ssRanked, index, userEvent);
                 break;
         }
         if (userEvent.getType() == MessageEventType.TEXT) {

@@ -1,17 +1,17 @@
 package bot.utils;
 
+import bot.dto.PlayerScore;
 import bot.dto.Song;
 import bot.dto.Song.Version;
 import bot.dto.rankedmaps.BeatSaverRankedMap;
 import bot.dto.rankedmaps.DiffsItem;
-import bot.dto.scoresaber.PlayerScoreSS;
 import bot.main.BotConstants;
 
 public class SongUtils {
 
-    public static int getNoteCountForBeatSaverMapDiff(Song map, PlayerScoreSS score) {
-        String playedVersionHash = score.getLeaderboard().getSongHash().toLowerCase();
-        int difficulty = score.getLeaderboard().getDifficultyValue();
+    public static int getNoteCountForBeatSaverMapDiff(Song map, PlayerScore score) {
+        String playedVersionHash = score.getSongHash().toLowerCase();
+        int difficulty = score.getDifficultyValue();
 
         if (map == null || map.getVersions() == null || map.getVersions().get(0) == null) {
             return -1;

@@ -8,6 +8,7 @@ public class RecentSongData {
     String coverUrl;
     String diffImageUrl;
     String footerText;
+    String optionalReplayUrl;
 
     String mapKey;
     String diffName;
@@ -97,4 +98,11 @@ public class RecentSongData {
     }
 
     //id=c32d&difficulty=ExpertPlus&playerID=2538637699496776
+    public String getOptionalReplayUrl() {
+        return optionalReplayUrl;
+    }
+
+    public void setOptionalReplayUrl(String optionalReplayUrl) {
+        this.optionalReplayUrl = optionalReplayUrl;
+    }
 }

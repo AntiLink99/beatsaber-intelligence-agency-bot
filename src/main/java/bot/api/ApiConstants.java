@@ -34,9 +34,6 @@ public class ApiConstants {
     public static final String BSAVIOR_PRE_URL = "https://beat-savior.herokuapp.com";
     public static final String BSAVIOR_LIVESCORES_URL = BSAVIOR_PRE_URL + "/api/livescores/player/";
 
-    //BeatLeader (Replays)
-    public static final String REPLAY_PRE_URL = "https://www.replay.beatleader.xyz/";
-
     //BeatLeader
     public static final String BL_PRE_URL = "https://api.beatleader.xyz";
     public static final String BL_SCORES_URL = "/player/%s/scores?page=%d&sortBy=%s&order=desc&search=&diff=&type=&stars_from=&stars_to=&eventId=";
@@ -55,7 +52,8 @@ public class ApiConstants {
         return String.format(BL_PRE_URL + BL_USER_PLAYER_BY_DISCORD_URL, discordId);
     }
     public static final String BL_USER_PRE_URL = "https://www.beatleader.xyz/u/";
-
+    public static final String BL_LEADERBOARD_PRE_URL = "https://www.beatleader.xyz/leaderboard/global/";
+    public static final String BL_REPLAY_PRE_URL = "https://replay.beatleader.xyz/?scoreId=";
 
     //Acc Saber
     public static final String ACC_PRE_URL = "https://accsaber.com";
@@ -75,6 +73,8 @@ public class ApiConstants {
     public static String getAccSaberUserHistoryURL(String playerId) {
         return String.format(ACC_API_PRE_URL + ACC_API_USER_HISTORY, playerId);
     }
+    public static final String ACC_LEADERBOARD_PRE_URL = "https://accsaber.com/maps/";
+
     // Meme API
     public static final List<String> MEME_SUBREDDITS = List.of(
         "dankmemes",

@@ -1,5 +1,6 @@
 package bot.dto.beatleader.scores;
 
+import bot.api.ApiConstants;
 import bot.dto.LeaderboardService;
 import bot.dto.LeaderboardServicePlayer;
 import bot.dto.PlayerScore;
@@ -215,13 +216,14 @@ public class PlayerScoreBL implements PlayerScore {
 
 	@Override
 	public String getAuthorName() {
-		return leaderboard.getSong().getAuthor();
+		return leaderboard.getSong().getMapper();
 	}
 
 	public int getRank(){
 		return rank;
 	}
 
+	public double getPP() { return pp; }
 	@Override
 	public String getPPString() {
 		return format.format(pp) + "PP";
@@ -329,6 +331,16 @@ public class PlayerScoreBL implements PlayerScore {
 		return player;
 	}
 
+	@Override
+	public String getLeaderboardURL() {
+		return ApiConstants.BL_LEADERBOARD_PRE_URL + leaderboard.getId();
+	}
+
+	@Override
+	public String getReplayURL() {
+		return ApiConstants.BL_REPLAY_PRE_URL + id;
+	}
+
 	public double getAccLeft(){
 		return accLeft;
 	}
@@ -383,6 +395,11 @@ public class PlayerScoreBL implements PlayerScore {
 
 	public int getBombCuts(){
 		return bombCuts;
+	}
+
+	@Override
+	public int getScoreValue() {
+		return -1;
 	}
 
 

@@ -1,5 +1,6 @@
 package bot.dto.scoresaber;
 
+import bot.api.ApiConstants;
 import bot.dto.LeaderboardService;
 import bot.dto.LeaderboardServicePlayer;
 import bot.dto.PlayerScore;
@@ -27,8 +28,6 @@ public class PlayerScoreSS implements PlayerScore {
 
 	LeaderboardServicePlayer dbPlayer;
 
-	private float songStars; //manually set
-
 	public PlayerScoreSS() {
 		format = new DecimalFormat("##0.00");
 		format.setDecimalFormatSymbols(DecimalFormatSymbols.getInstance(Locale.ENGLISH));
@@ -47,11 +46,7 @@ public class PlayerScoreSS implements PlayerScore {
 	}
 
 	public float getStars() {
-		return songStars;
-	}
-
-	public void setSongStars(float songStars) {
-		this.songStars = songStars;
+		return (float) leaderboard.getStars();
 	}
 
 	public Score getScore(){
@@ -84,6 +79,11 @@ public class PlayerScoreSS implements PlayerScore {
 		return "";
 	}
 
+	@Override
+	public int getScoreValue() {
+		return score.getModifiedScore();
+	}
+
 	public String getSongName() {
 		return leaderboard.getSongName();
 	}
@@ -98,6 +98,10 @@ public class PlayerScoreSS implements PlayerScore {
 
 	public int getRank() {
 		return score.getRank();
+	}
+
+	public double getPP() {
+		return score.getPp();
 	}
 
 	public String getPPString() {
@@ -136,6 +140,16 @@ public class PlayerScoreSS implements PlayerScore {
 	@Override
 	public LeaderboardServicePlayer getLeaderboardPlayer() {
 		return dbPlayer;
+	}
+
+	@Override
+	public String getLeaderboardURL() {
+		return ApiConstants.SS_LEADERBOARD_PRE_URL + leaderboard.getId();
+	}
+
+	@Override
+	public String getReplayURL() {
+		return null;
 	}
 
 	public void setLeaderboardPlayer(DataBasePlayer player) {

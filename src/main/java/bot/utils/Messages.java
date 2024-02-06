@@ -27,24 +27,36 @@ public class Messages {
 
     public static final Color embedColor = Color.CYAN;
 
-    public static void sendMessage(String msg, MessageChannel channel) {
+    public static void sendMessage(String msg, MessageEventDTO event) {
         try {
             EmbedBuilder builder = new EmbedBuilder();
             builder.setDescription(msg);
             builder.setColor(embedColor);
-            channel.sendMessageEmbeds(builder.build()).queue();
+
+            if (event.getType() == MessageEventType.SLASH) {
+                event.getSlashCommandIfExists().replyEmbeds(builder.build()).setEphemeral(true).queue();
+            } else {
+                event.getChannel().sendMessageEmbeds(builder.build()).queue();
+            }
+
         } catch (Exception e) {
             System.out.println("Could not send message because of lacking permissions: " + e.getMessage());
         }
     }
 
-    public static void sendMessageWithTitle(String msg, String title, String titleUrl, MessageChannel channel) {
+    public static void sendMessageWithTitle(String msg, String title, String titleUrl, MessageEventDTO event) {
         try {
             EmbedBuilder builder = new EmbedBuilder();
             builder.setDescription(msg);
             builder.setColor(embedColor);
             builder.setTitle(title, titleUrl);
-            channel.sendMessageEmbeds(builder.build()).queue();
+
+            if (event.getType() == MessageEventType.SLASH) {
+                event.getSlashCommandIfExists().replyEmbeds(builder.build()).setEphemeral(true).queue();
+            } else {
+                event.getChannel().sendMessageEmbeds(builder.build()).queue();
+            }
+
         } catch (Exception e) {
             System.out.println("Could not send message because of lacking permissions: " + e.getMessage());
         }
@@ -72,12 +84,16 @@ public class Messages {
         return channel.sendMessageEmbeds(builder.build()).complete();
     }
 
-    public static Message sendImageEmbed(String imagePath, String title, MessageChannel channel) {
+    public static void sendImageEmbed(String imagePath, String title, MessageEventDTO event) {
         EmbedBuilder builder = new EmbedBuilder();
         builder.setTitle(Format.bold(Format.underline(title)));
         builder.setColor(embedColor);
         builder.setImage(imagePath);
-        return channel.sendMessageEmbeds(builder.build()).complete();
+        if (event.getType() == MessageEventType.SLASH) {
+            event.getSlashCommandIfExists().replyEmbeds(builder.build()).setEphemeral(true).queue();
+        } else {
+            event.getChannel().sendMessageEmbeds(builder.build()).queue();
+        }
     }
 
     public static Message sendMemeEmbed(String imagePath, String title, String url, int upVotes, String subreddit, MessageChannel channel) {
@@ -97,12 +113,23 @@ public class Messages {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        channel.sendFile(imageFile, title + imagePath.substring(imagePath.length() - 4)).queue();
+        channel.sendFile(imageFile, title + imagePath.substring(imagePath.length() - 4)).complete();
         imageFile.delete();
     }
 
     public static void sendImage(File image, String title, MessageEventDTO event) {
-        event.getChannel().sendFile(image, title).queue();
+        if (event.getType() == MessageEventType.SLASH) {
+            event.getSlashCommandIfExists().reply("Image generated successfully! ヾ(⌐■_■)ノ♪").queue();
+        }
+        event.getChannel().sendFile(image, title).complete();
+        image.delete();
+    }
+
+    public static void sendSongsImage(File image, String title, MessageEventDTO event) {
+        List<Button> buttons = new ArrayList<>();
+        buttons.add(Button.of(ButtonStyle.LINK, "https://anti.link/features", "Set Background Image 🎨"));
+
+        event.getChannel().sendFile(image, title).setActionRows(ActionRow.of(buttons)).complete();
         image.delete();
     }
 
@@ -227,4 +254,22 @@ public class Messages {
                     .setActionRows(ActionRow.of(buttons))
                     .complete().getIdLong();
     }
+
+    public static void sendReminderMessage(MessageChannel channel) {
+        EmbedBuilder embed = new EmbedBuilder();
+
+        embed.setColor(new Color(255, 223, 186));
+        embed.setTitle("Fuel the Code & Caffeine Machine! ☕");
+        embed.setDescription("Like the bot? 🤖\nIt's actually powered by a blend of code and coffee. By supporting, you not only fuel my coffee addiction but also unlock exclusive features!\n\n" +
+                "Lend a hand on [Ko-fi](https://ko-fi.com/antilink) ☕ or [Patreon](https://www.patreon.com/antilink) 🎁.");
+        embed.setImage("https://anti.link/img/reminder/" + RandomUtils.getRandomItem(BotConstants.DONATE_REMINDERS));
+
+        List<Button> buttons = new ArrayList<>();
+        buttons.add(Button.of(ButtonStyle.LINK, "https://ko-fi.com/antilink", "Support on Ko-fi ☕"));
+        buttons.add(Button.of(ButtonStyle.LINK, "https://www.patreon.com/antilink", "Become a Patron 🎁"));
+
+        channel.sendMessageEmbeds(embed.build()).setActionRows(ActionRow.of(buttons)).queue();
+
+    }
+
 }

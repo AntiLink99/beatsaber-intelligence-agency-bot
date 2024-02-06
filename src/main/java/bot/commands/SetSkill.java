@@ -19,11 +19,11 @@ public class SetSkill {
             try {
                 newValue = Integer.parseInt(msgParts.get(3));
             } catch (NumberFormatException | IndexOutOfBoundsException e) {
-                Messages.sendMessage("The value provided has to be an integer from 1 to 10.", channel);
+                Messages.sendMessage("The value provided has to be an integer from 1 to 10.", event);
                 return;
             }
             if (newValue < 0 || newValue > 10) {
-                Messages.sendMessage("The value for a skill has to be between 0 and 10.", channel);
+                Messages.sendMessage("The value for a skill has to be between 0 and 10.", event);
                 return;
             }
 
@@ -36,10 +36,10 @@ public class SetSkill {
                     Messages.sendTempMessage("Skill \"" + skill + "\" updated for " + event.getAuthor().getUser().getName() + ": " + newValue, 6, channel);
                 }
             } else {
-                Messages.sendMessage("Sorry, i do not know that skill.", channel);
+                Messages.sendMessage("Sorry, i do not know that skill.", event);
             }
         } else {
-            Messages.sendMessage("Your syntax is incorrect.", channel);
+            Messages.sendMessage("Your syntax is incorrect.", event);
         }
     }
 }

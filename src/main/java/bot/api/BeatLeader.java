@@ -55,7 +55,17 @@ public class BeatLeader {
         return new ArrayList<>();
     }
 
+    public BeatLeaderPlayer getPlayerById(long playerId) {
+        String url = ApiConstants.getBeatLeaderPlayerByIdURL(playerId);
+        JsonObject response = http.fetchJsonObject(url);
+        if (response != null) {
+            return gson.fromJson(response.toString(), BeatLeaderPlayer.class);
+        }
+        return null;
+    }
+
     public BeatLeaderPlayer getPlayerByDiscordID(long discordId) {
+        //TODO BROKEN?
         String url = ApiConstants.getBeatLeaderPlayerByDiscordId(discordId);
         JsonObject response = http.fetchJsonObject(url);
         if (response != null) {

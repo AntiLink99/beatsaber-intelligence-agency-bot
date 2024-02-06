@@ -139,7 +139,9 @@ public class BeatSaberBot extends ListenerAdapter {
         try {
             handleCommand(msgParts, new MessageEventDTO(event));
         } catch (IOException e) {
+            DiscordLogger.sendLogInChannel(ExceptionUtils.getStackTrace(e), DiscordLogger.ERRORS);
             e.printStackTrace();
+            event.getHook().sendMessage("An error occurred.").queue();
         }
     }
 
@@ -170,8 +172,6 @@ public class BeatSaberBot extends ListenerAdapter {
             if (!msg.toLowerCase().startsWith("ru ") && !msg.toLowerCase().startsWith("bs ")) {
                 return;
             }
-
-            event.getChannel().sendTyping().queue();
             handleCommand(msgParts, new MessageEventDTO(event));
         } catch (Exception e) {
             DiscordLogger.sendLogInChannel(ExceptionUtils.getStackTrace(e), DiscordLogger.ERRORS);
@@ -187,19 +187,27 @@ public class BeatSaberBot extends ListenerAdapter {
 
             db.connectToDatabase();
             fetchRankedMapsIfNonExistent(channel);
+
+            UserInteractionCounter.increment(event.getAuthor().getId());
+
+            if (UserInteractionCounter.shouldSendReminder(event.getAuthor().getId())) {
+                Messages.sendReminderMessage(event.getChannel());
+            }
+
             String msg = StringUtils.join(msgParts, " ");
             DataBasePlayer commandPlayer = getCommandPlayer(msgParts, author.getUser());
 
+            event.getChannel().sendTyping().queue();
             DiscordLogger.sendLogInChannel(Format.code("Command: " + msg + "\nRequester: " + author.getEffectiveName() + "\nGuild: " + guild.getName()), "info");
             String command = msgParts.get(1).toLowerCase();
             switch (command) {
                 case "register":
-                    boolean success = new HandlePlayerRegisteration(db).registerPlayer(commandPlayer, channel);
+                    boolean success = new HandlePlayerRegisteration(db).registerPlayer(commandPlayer, event);
                     if (!success) {
                         break;
                     }
                 case "update":
-                    new UpdatePlayer(db).updatePlayer(commandPlayer, channel);
+                    new UpdatePlayer(db).updatePlayer(commandPlayer, event);
                     break;
                 case "unregister":
                     new HandlePlayerRegisteration(db).unregisterPlayer(event);
@@ -219,7 +227,7 @@ public class BeatSaberBot extends ListenerAdapter {
                 case "stand": {
                     PlayerSkills skills = db.getPlayerSkillsByDiscordId(commandPlayer.getDiscordUserId());
                     if (skills == null) {
-                        Messages.sendMessage("No skill has been set yet. Try \"ru help\".", channel);
+                        Messages.sendMessage("No skill has been set yet. Try \"ru help\".", event);
                         return;
                     }
                     new RadarStatsChart().sendChartImage(skills, event);
@@ -230,7 +238,7 @@ public class BeatSaberBot extends ListenerAdapter {
                     break;
                 case "playlist": {
                     if (msgParts.size() < 3) {
-                        Messages.sendMessage("Please provide at least one key.", channel);
+                        Messages.sendMessage("Please provide at least one key.", event);
                         break;
                     }
                     String playlistTitle = msgParts.get(2);
@@ -241,7 +249,7 @@ public class BeatSaberBot extends ListenerAdapter {
                 }
                 case "rplaylist":
                     if (msgParts.size() < 3) {
-                        Messages.sendMessage("Please provide at least one key.", channel);
+                        Messages.sendMessage("Please provide at least one key.", event);
                         break;
                     }
                     String playlistTitle = msgParts.get(2);
@@ -254,13 +262,13 @@ public class BeatSaberBot extends ListenerAdapter {
                     break;
                 case "ranked":
                     if (msgParts.size() < 3) {
-                        Messages.sendMessage("Please provide at least one parameter.", channel);
+                        Messages.sendMessage("Please provide at least one parameter.", event);
                         break;
                     }
                     List<String> inputValues = msgParts.subList(2, msgParts.size());
                     if (inputValues.size() == 1) {
                         if (!NumberValidation.isInteger(inputValues.get(0))) {
-                            Messages.sendMessage("The entered value has to be an integer.", channel);
+                            Messages.sendMessage("The entered value has to be an integer.", event);
                             return;
                         }
                         new Ranked(ranked).sendRecentRankedPlaylist(Integer.parseInt(inputValues.get(0)), event);
@@ -268,18 +276,18 @@ public class BeatSaberBot extends ListenerAdapter {
                         String minString = inputValues.get(0).replaceAll(",", ".");
                         String maxString = inputValues.get(1).replaceAll(",", ".");
                         if (!NumberUtils.isCreatable(minString) || !NumberUtils.isCreatable(maxString)) {
-                            Messages.sendMessage("At least one of the entered values is not a number.", channel);
+                            Messages.sendMessage("At least one of the entered values is not a number.", event);
                             return;
                         }
                         float min = Float.parseFloat(minString);
                         float max = Float.parseFloat(maxString);
                         if (max < min) {
-                            Messages.sendMessage("The min value has to be smaller than the max value.", channel);
+                            Messages.sendMessage("The min value has to be smaller than the max value.", event);
                             return;
                         }
                         new Ranked(ranked).sendStarRangeRankedPlaylist(min, max, event);
                     } else {
-                        Messages.sendMessage("Invalid number of parameters.", channel);
+                        Messages.sendMessage("Invalid number of parameters.", event);
                     }
                     break;
                 case "randommeme":
@@ -288,7 +296,7 @@ public class BeatSaberBot extends ListenerAdapter {
                 case "recentsong": {
                     int index = getIndexFromMsgParts(msgParts);
                     if (commandPlayer == null) {
-                        Messages.sendMessage("Player was not found.", event.getChannel());
+                        Messages.sendMessage("Player was not found.", event);
                         return;
                     }
                     DiscordLogger.sendLogInChannel(event.getAuthor() + " is requesting RecentSong for: " + commandPlayer.getName(), DiscordLogger.INFO);
@@ -296,7 +304,7 @@ public class BeatSaberBot extends ListenerAdapter {
                     return;
                 }
                 case "topsong":
-                    Messages.sendMessage("Try \"ru topsongs\" to see your top plays! ✨", channel);
+                    Messages.sendMessage("Try \"ru topsongs\" to see your top plays! ✨", event);
                     break;
                 case "recentsongs": {
                     SupporterInfo supportInfo = db.updateAndRetrieveSupporterInfoByDiscordId(authorUser);
@@ -321,6 +329,38 @@ public class BeatSaberBot extends ListenerAdapter {
                 case "dachrank":
                     new Rank(commandPlayer).sendDACHRank(event);
                     break;
+                case "compare":
+                    if (msgParts.size() < 4) {
+                        Messages.sendMessage("Please mention two players to compare.", event);
+                        break;
+                    }
+                    String player1DiscordId = msgParts.get(2).replaceAll("<@!?|>", "").replace("@", "");
+                    String player2DiscordId = msgParts.get(3).replaceAll("<@!?|>", "").replace("@", "");
+
+                    if (!NumberUtils.isCreatable(player1DiscordId) || !NumberUtils.isCreatable(player2DiscordId)) {
+                        Messages.sendMessage("At least one ID is not a valid number.", event);
+                        return;
+                    }
+                    DataBasePlayer player1 = db.getPlayerByDiscordId(Long.parseLong(player1DiscordId));
+                    DataBasePlayer player2 = db.getPlayerByDiscordId(Long.parseLong(player2DiscordId));
+
+                    if (player1 == null) {
+                        player1 = ss.getPlayerById(player1DiscordId);
+                        if (player1 == null) {
+                            Messages.sendMessage("The first player was not found in the database or on the leaderboards.", event);
+                            break;
+                        }
+                    }
+                    if (player2 == null) {
+                        player2 = ss.getPlayerById(player2DiscordId);
+                        if (player2 == null) {
+                            Messages.sendMessage("The second player was not found in the database or on the leaderboards.", event);
+                            break;
+                        }
+                    }
+
+                    new Compare().generateAndSendCompareImage(player1, player2, event);
+                    break;
                 case "setgridimage": {
                     if (msgParts.size() < 3) {
                         new AccGridImage(db).resetImage(event);
@@ -329,7 +369,7 @@ public class BeatSaberBot extends ListenerAdapter {
                     String urlString = msgParts.get(2);
                     List<String> allowedFormats = Arrays.asList(".jpeg", ".jpg", ".png");
                     if (!Format.isUrl(urlString) || allowedFormats.stream().noneMatch(format -> urlString.toLowerCase().contains(format))) {
-                        Messages.sendMessage("The given parameter is not an image URL. (Has to contain .png, .jpg or .jpeg)", channel);
+                        Messages.sendMessage("The given parameter is not an image URL. (Has to contain .png, .jpg or .jpeg)", event);
                         return;
                     }
                     new AccGridImage(db).sendAccGridImage(urlString, event);
@@ -338,7 +378,7 @@ public class BeatSaberBot extends ListenerAdapter {
                 case "seal":
                     int randomSealIndex = RandomUtils.getRandomNum(83);
                     String sealFileName = (randomSealIndex < 10 ? "0" : "") + "00" + randomSealIndex + ".jpg";
-                    Messages.sendImageEmbed("https://focabot.github.io/random-seal/seals/" + sealFileName, ":seal: Ow, ow, ow! :seal:", channel);
+                    Messages.sendImageEmbed("https://focabot.github.io/random-seal/seals/" + sealFileName, ":seal: Ow, ow, ow! :seal:", event);
                     break;
                 case "say":
                     String phrase = msgParts.size() >= 3 ? msgParts.get(2) : "🤡";
@@ -369,7 +409,7 @@ public class BeatSaberBot extends ListenerAdapter {
                     }
                     break;
                 case "invite": {
-                    Messages.sendMessage(Format.bold("https://discord.com/api/oauth2/authorize?client_id=711323223891116043&permissions=0&scope=bot"), channel);
+                    Messages.sendMessage(Format.bold("https://discord.com/api/oauth2/authorize?client_id=711323223891116043&permissions=0&scope=bot"), event);
                     break;
                 }
                 case "leave":
@@ -379,9 +419,9 @@ public class BeatSaberBot extends ListenerAdapter {
                             Guild guildToLeave = event.getJDA().getGuildById(id);
                             if (guildToLeave != null) {
                                 guildToLeave.leave().queue();
-                                Messages.sendMessage("Left guild " + guildToLeave.getName() + " successfully.", channel);
+                                Messages.sendMessage("Left guild " + guildToLeave.getName() + " successfully.", event);
                             } else {
-                                Messages.sendMessage("Could not find guild.", channel);
+                                Messages.sendMessage("Could not find guild.", event);
                             }
                         }
                     }
@@ -390,7 +430,7 @@ public class BeatSaberBot extends ListenerAdapter {
                     Messages.sendMultiPageMessage(BotConstants.getCommands(), "🔨 Bot commands 🔨", channel);
                     break;
                 default:
-                    Messages.sendMessage("Sorry, i don't speak wrong. 🤡  Try \"ru help\".\nIf you want to suggest something to the dev do it " + Format.link("here", BotConstants.featureRequestUrl) + ".", channel);
+                    Messages.sendMessage("Sorry, i don't speak wrong. 🦜  Try \"ru help\".\nIf you want to suggest something to the dev do it " + Format.link("here", BotConstants.featureRequestUrl) + ".", event);
             }
     }
 

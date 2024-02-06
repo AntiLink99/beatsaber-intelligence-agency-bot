@@ -27,21 +27,21 @@ public class AccGridImage {
         try {
             image = HttpMethods.getBufferedImagefromUrl(urlString);
             if (image == null) {
-                Messages.sendMessage("Was not able to fetch image. Please check the URL and source.", event.getChannel());
+                Messages.sendMessage("Was not able to fetch image. Please check the URL and source.", event);
                 return;
             }
             if (image.getWidth() > 1000 || image.getHeight() > 1000) {
-                Messages.sendMessage("The image is too big. Max. size: 1000px x 1000px", event.getChannel());
+                Messages.sendMessage("The image is too big. Max. size: 1000px x 1000px", event);
                 return;
             }
         } catch (MalformedURLException e) {
-            Messages.sendMessage("Was not able to fetch image, because the URL is incorrect.", event.getChannel());
+            Messages.sendMessage("Was not able to fetch image, because the URL is incorrect.", event);
             return;
         } catch (IOException e) {
-            Messages.sendMessage("Was not able to fetch image. Please check the URL and source.", event.getChannel());
+            Messages.sendMessage("Was not able to fetch image. Please check the URL and source.", event);
             return;
         } catch (TimeoutException | InterruptedException | ExecutionException e) {
-            Messages.sendMessage("Image could not be loaded after 4 seconds.", event.getChannel());
+            Messages.sendMessage("Image could not be loaded after 4 seconds.", event);
             return;
         }
 
@@ -55,20 +55,20 @@ public class AccGridImage {
         int contentLength = tmp.size();
         long sizeKB = (long) contentLength / 1000L;
         if (sizeKB > 3000) {
-            Messages.sendMessage("The image is too large. (" + sizeKB + "KB) Max. is 3000KB", event.getChannel());
+            Messages.sendMessage("The image is too large. (" + sizeKB + "KB) Max. is 3000KB", event);
             return;
         }
 
         DataBasePlayer storedPlayer = db.getPlayerByDiscordId(event.getAuthor().getIdLong());
         storedPlayer.setCustomAccGridImage(urlString);
         db.updatePlayer(storedPlayer);
-        Messages.sendMessage("Image URL was updated successfully!", event.getChannel());
+        Messages.sendMessage("Image URL was updated successfully!", event);
     }
 
     public void resetImage(MessageEventDTO event) {
         DataBasePlayer storedPlayer = db.getPlayerByDiscordId(event.getAuthor().getIdLong());
         storedPlayer.setCustomAccGridImage(null);
         db.updatePlayer(storedPlayer);
-        Messages.sendMessage("Image URL was reset successfully!", event.getChannel());
+        Messages.sendMessage("Image URL was reset successfully!", event);
     }
 }

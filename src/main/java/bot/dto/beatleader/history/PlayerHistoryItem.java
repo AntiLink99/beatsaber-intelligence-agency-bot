@@ -101,7 +101,7 @@ public class PlayerHistoryItem{
 	private double averageWeightedRankedAccuracy;
 
 	@SerializedName("totalScore")
-	private int totalScore;
+	private long totalScore;
 
 	@SerializedName("averageRankedRank")
 	private double averageRankedRank;
@@ -125,7 +125,7 @@ public class PlayerHistoryItem{
 	private int totalPlayCount;
 
 	@SerializedName("totalUnrankedScore")
-	private int totalUnrankedScore;
+	private long totalUnrankedScore;
 
 	@SerializedName("medianAccuracy")
 	private double medianAccuracy;
@@ -156,7 +156,7 @@ public class PlayerHistoryItem{
 		return sspPlays;
 	}
 
-	public int getTotalRankedScore(){
+	public long getTotalRankedScore(){
 		return totalRankedScore;
 	}
 
@@ -264,7 +264,7 @@ public class PlayerHistoryItem{
 		return averageWeightedRankedAccuracy;
 	}
 
-	public int getTotalScore(){
+	public long getTotalScore(){
 		return totalScore;
 	}
 
@@ -296,7 +296,7 @@ public class PlayerHistoryItem{
 		return totalPlayCount;
 	}
 
-	public int getTotalUnrankedScore(){
+	public long getTotalUnrankedScore(){
 		return totalUnrankedScore;
 	}
 

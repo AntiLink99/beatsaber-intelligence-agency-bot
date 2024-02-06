@@ -77,6 +77,10 @@ public class PlayerChartListener extends ListenerAdapter implements EventListene
             case ACCSABER:
                 AccSaber as = new AccSaber();
                 Map<String, Integer> history = as.getPlayerHistoryValues(player.getId());
+                if (history.size() == 0) {
+                    Messages.sendMessage("Acc Saber profile not found.", userEvent);
+                    return;
+                }
                 List<Integer> historyValues = new ArrayList<>(history.values()).subList(history.size() - 49, history.size());
                 player.setHistoryValues(historyValues);
                 new PlayerChart().sendChartImage(player, new Color(4, 235, 32), selectedService, userEvent);

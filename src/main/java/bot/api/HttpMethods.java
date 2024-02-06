@@ -8,6 +8,7 @@ import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.cookie.CookiePolicy;
 import org.apache.commons.httpclient.methods.GetMethod;
+import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.httpclient.params.HttpClientParams;
 import org.apache.commons.io.IOUtils;
 
@@ -67,6 +68,7 @@ public class HttpMethods {
         try {
             response = get.getResponseBodyAsStream();
         } catch (IOException e) {
+            closeStream(response);
             DiscordLogger.sendLogInChannel(e.getMessage(), DiscordLogger.HTTP_ERRORS);
         }
         return response;
@@ -80,18 +82,12 @@ public class HttpMethods {
                 return null;
             }
             JsonObject response = JsonParser.parseString(IOUtils.toString(fetchedStream, StandardCharsets.UTF_8)).getAsJsonObject();
-            fetchedStream.close();
             return response;
         } catch (IOException e) {
-            if (fetchedStream != null) {
-                try {
-                    fetchedStream.close();
-                } catch (IOException ex) {
-                    ex.printStackTrace();
-                }
-            }
             DiscordLogger.sendLogInChannel(e.getMessage(), DiscordLogger.HTTP_ERRORS);
             return null;
+        } finally {
+            closeStream(fetchedStream);
         }
     }
 
@@ -116,11 +112,57 @@ public class HttpMethods {
         }
     }
 
+    public InputStream post(String url, String requestBody) throws IOException {
+        PostMethod post = new PostMethod(url);
+        setAgent(post);
+        post.setRequestEntity(new org.apache.commons.httpclient.methods.StringRequestEntity(requestBody, "application/json", "UTF-8"));
+        int statusCode = http.executeMethod(post);
+        if (statusCode != 200) {
+            DiscordLogger.sendLogInChannel("Data could not be posted. (" + url + ")\nStatuscode: " + statusCode, DiscordLogger.HTTP_ERRORS);
+            return null;
+        }
+
+        InputStream response = null;
+        try {
+            response = post.getResponseBodyAsStream();
+        } catch (IOException e) {
+            DiscordLogger.sendLogInChannel(e.getMessage(), DiscordLogger.HTTP_ERRORS);
+        }
+        return response;
+    }
+
+    public JsonObject fetchJsonObjectFromPost(String url, String requestBody) {
+        InputStream fetchedStream = null;
+        try {
+            fetchedStream = post(url, requestBody);
+            if (fetchedStream == null) {
+                return null;
+            }
+            JsonObject response = JsonParser.parseString(IOUtils.toString(fetchedStream, StandardCharsets.UTF_8)).getAsJsonObject();
+            return response;
+        } catch (IOException e) {
+            DiscordLogger.sendLogInChannel(e.getMessage(), DiscordLogger.HTTP_ERRORS);
+            return null;
+        } finally {
+            closeStream(fetchedStream);
+        }
+    }
+
     private void setAgent(HttpMethod method) {
         method.setRequestHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.95 Safari/537.11");
         method.setRequestHeader("Accept-Language", "de-DE,de;q=0.9,en-US;q=0.8,en;q=0.7");
         method.setRequestHeader("Cookie", "__cfduid=de1f9ce53366f28f39d9f3907233af7e41606754887");
         method.setRequestHeader("Server", "BeatSaber Intelligence Agency Discord Bot by AntiLink#1337");
         method.setRequestHeader("Accept", "*/*");
+    }
+
+    private void closeStream(InputStream stream) {
+        if (stream != null) {
+            try {
+                stream.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 }

@@ -1,6 +1,7 @@
 package bot.api;
 
 import bot.dto.PlayerScore;
+import bot.dto.accsaber.AccSaberPlayer;
 import bot.dto.accsaber.PlayerScoreACC;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
@@ -36,7 +37,7 @@ public class AccSaber {
         int page = 1; //TODO Change this when AccSaber allows Limit, 40 Scores
         String url = ApiConstants.getAccSaberRecentScoresURL(String.valueOf(playerId), page);
         List<PlayerScore> recentScores = getPlayerScores(url);
-        if (recentScores != null) {
+        if (recentScores != null && recentScores.size() > 0) {
             int offset = pageNr - 1;
             return recentScores.subList(8 * offset, 8 + 8 * offset);
         }
@@ -71,5 +72,14 @@ public class AccSaber {
             return gson.fromJson(response.toString(), listType);
         }
         return new HashMap<>();
+    }
+
+    public AccSaberPlayer getPlayerById(String playerId) {
+        String url = ApiConstants.getAccSaberProfileURL(String.valueOf(playerId));
+        JsonObject response = http.fetchJsonObject(url);
+        if (response != null) {
+            return gson.fromJson(response, AccSaberPlayer.class);
+        }
+        return null;
     }
 }

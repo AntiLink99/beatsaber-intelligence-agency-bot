@@ -20,8 +20,10 @@ import java.awt.*;
 import java.io.File;
 
 public class AccuracyChart {
-    public static void sendChartImage(BeatSaviorPlayerScore score, String playerName, String diffName, MessageEventDTO event) {
 
+    private static final Color DISCORD_COLOR = new Color(49, 51, 56);
+
+    public static void sendChartImage(BeatSaviorPlayerScore score, String playerName, String diffName, MessageEventDTO event) {
         XYChart chart = AccuracyChart.getAccuracyChart(score, playerName, diffName);
         String filename = BotConstants.RESOURCES_PATH + "accuracyChart_" + score.getPlayerID();
         ChartUtils.saveChart(chart, filename);
@@ -56,25 +58,27 @@ public class AccuracyChart {
         // Customize Chart
         XYStyler styler = chart.getStyler();
 
-        styler.setDefaultSeriesRenderStyle(XYSeriesRenderStyle.Line);
-        styler.setPlotGridLinesVisible(false);
-        styler.setMarkerSize(15);
-        styler.setPlotContentSize(.95);
+        styler.setDefaultSeriesRenderStyle(XYSeriesRenderStyle.Line)
+                .setPlotGridLinesVisible(false)
+                .setMarkerSize(15)
+                .setPlotContentSize(.95)
+                .setPlotBorderVisible(false)
+                .setBaseFont(font)
+                .setLegendFont(legendFont)
+                .setChartTitleFont(titleFont);
 
-        styler.setBaseFont(font);
-        styler.setLegendFont(legendFont);
-        styler.setChartTitleFont(titleFont);
         styler.setAxisTickLabelsFont(labelFont);
         styler.setAxisTitleFont(labelTitleFont);
 
-        styler.setLegendPosition(LegendPosition.OutsideS);
-        styler.setLegendLayout(LegendLayout.Horizontal);
-        styler.setLegendSeriesLineLength(20);
-        styler.setLegendBorderColor(Color.DARK_GRAY);
-        styler.setLegendBackgroundColor(Color.DARK_GRAY);
+        styler.setLegendPosition(LegendPosition.OutsideS)
+                .setLegendLayout(LegendLayout.Horizontal);
 
-        styler.setChartBackgroundColor(Color.DARK_GRAY);
-        styler.setChartFontColor(Color.WHITE);
+        styler.setLegendSeriesLineLength(20)
+                .setLegendBorderColor(DISCORD_COLOR)
+                .setLegendBackgroundColor(DISCORD_COLOR)
+                .setChartBackgroundColor(DISCORD_COLOR)
+                .setPlotBackgroundColor(DISCORD_COLOR)
+                .setChartFontColor(Color.WHITE);
 
         styler.setAxisTickLabelsColor(Color.WHITE);
 

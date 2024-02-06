@@ -61,6 +61,10 @@ public class SongsCommandsListener extends ListenerAdapter implements EventListe
             return;
         if (btnEvent.isAcknowledged())
             return;
+
+        if (userEvent.getType() == MessageEventType.TEXT) {
+            btnEvent.getMessage().delete().queue();
+        }
         LeaderboardService selectedService = LeaderboardService.valueOf(btnEvent.getButton().getId());
         InteractionHook replyMessage = btnEvent
                 .reply("Loading image... Service: " + selectedService.name())
@@ -82,7 +86,6 @@ public class SongsCommandsListener extends ListenerAdapter implements EventListe
                 break;
         }
         if (userEvent.getType() == MessageEventType.TEXT) {
-            btnEvent.getMessage().delete().queue();
             replyMessage.deleteOriginal().queue();
         }
         timer.cancel();

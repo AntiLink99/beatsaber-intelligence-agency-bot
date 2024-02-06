@@ -3,9 +3,9 @@ package bot.commands.scoresaber;
 import bot.api.ApiConstants;
 import bot.api.ScoreSaber;
 import bot.dto.MessageEventDTO;
-import bot.dto.leaderboards.LeaderboardPlayer;
-import bot.dto.leaderboards.LeaderboardType;
 import bot.dto.player.DataBasePlayer;
+import bot.dto.scoresaber.player.LeaderboardType;
+import bot.dto.scoresaber.player.ScoreSaberPlayer;
 import bot.utils.Format;
 import bot.utils.Messages;
 
@@ -37,7 +37,7 @@ public class Rank {
     public void sendDACHRank(MessageEventDTO event) {
         String[] dachCodes = {"de","at","ch"};
         if (!Arrays.asList(dachCodes).contains(player.getCountry().toLowerCase())) {
-            Messages.sendMessage("You are not from Germany, Austria or Switzerland.", event.getChannel());
+            Messages.sendMessage("You are not from Germany, Austria or Switzerland.", event);
             return;
         }
         sendRank(player, 1, 10000, "de,at,ch", LeaderboardType.DACH, event);
@@ -45,12 +45,12 @@ public class Rank {
 
     private void sendRank(DataBasePlayer player, int startPage, int sizeLimit, String countryCode, LeaderboardType leaderboardType, MessageEventDTO event) {
         ScoreSaber ss = new ScoreSaber();
-        List<LeaderboardPlayer> leaderboardEntries = ss.findLeaderboardEntriesAroundPlayer(player, countryCode, startPage, sizeLimit);
+        List<ScoreSaberPlayer> leaderboardEntries = ss.findLeaderboardEntriesAroundPlayer(player, countryCode, startPage, sizeLimit);
         if (leaderboardEntries == null) {
-            Messages.sendMessage("Could not extract ScoreSaber profiles. Maybe your rank is too low or there is another error.", event.getChannel());
+            Messages.sendMessage("Could not extract ScoreSaber profiles. Maybe your rank is too low or there is another error.", event);
             return;
         }
-        LeaderboardPlayer playerEntry = leaderboardEntries.stream()
+        ScoreSaberPlayer playerEntry = leaderboardEntries.stream()
                 .filter(entry -> entry.getIdLong() == player.getPlayerIdLong())
                 .findFirst()
                 .orElse(null);
@@ -94,10 +94,10 @@ public class Rank {
                 break;
         }
 
-        Messages.sendMessageWithTitle(resultMessage, Format.underline(title), titleUrl, event.getChannel());
+        Messages.sendMessageWithTitle(resultMessage, Format.underline(title), titleUrl, event);
     }
 
-    private String toEntryString(LeaderboardPlayer playerEntry, double ownPP, LeaderboardType type) {
+    private String toEntryString(ScoreSaberPlayer playerEntry, double ownPP, LeaderboardType type) {
         String entryString = "";
         if (playerEntry == null) {
             return entryString;

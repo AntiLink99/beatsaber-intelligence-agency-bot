@@ -1,9 +1,9 @@
 package bot.api;
 
 import bot.dto.ScoreSaberMapData;
-import bot.dto.leaderboards.LeaderboardPlayer;
 import bot.dto.player.DataBasePlayer;
 import bot.dto.scoresaber.PlayerScoreSS;
+import bot.dto.scoresaber.player.ScoreSaberPlayer;
 import bot.utils.DiscordLogger;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
@@ -83,8 +83,8 @@ public class ScoreSaber {
         return new ArrayList<>();
     }
 
-    public List<LeaderboardPlayer> findLeaderboardEntriesAroundPlayer(DataBasePlayer player, String countryCode, int startPage, int sizeLimit) {
-        List<LeaderboardPlayer> entries = new ArrayList<>();
+    public List<ScoreSaberPlayer> findLeaderboardEntriesAroundPlayer(DataBasePlayer player, String countryCode, int startPage, int sizeLimit) {
+        List<ScoreSaberPlayer> entries = new ArrayList<>();
         boolean searchingPlayerData = true;
         for (int i = startPage; searchingPlayerData; i++) {
             if (i > 50) {
@@ -93,19 +93,19 @@ public class ScoreSaber {
             String leaderboardUrl = getLeaderboardApiUrl(i, countryCode);
             JsonObject response = http.fetchJsonObject(leaderboardUrl);
             JsonArray responsePlayerList = response.getAsJsonArray("players");
-            Type listType = new TypeToken<List<LeaderboardPlayer>>() {}.getType();
+            Type listType = new TypeToken<List<ScoreSaberPlayer>>() {}.getType();
             entries.addAll(gson.fromJson(responsePlayerList, listType));
 
             if (entries.size() >= sizeLimit) {
                 entries = entries.subList(100, sizeLimit);
             }
 
-            LeaderboardPlayer playerEntry = entries.stream().filter(entry -> entry.getIdLong() == player.getPlayerIdLong()).findFirst().orElse(null);
+            ScoreSaberPlayer playerEntry = entries.stream().filter(entry -> entry.getIdLong() == player.getPlayerIdLong()).findFirst().orElse(null);
             boolean playerIsNotInList = playerEntry == null; //Following Player necessary for ru rank
             boolean playerIsAtEndOfList = entries.indexOf(playerEntry) >= entries.size() - 3;
             searchingPlayerData = playerIsNotInList || playerIsAtEndOfList;
         }
-        List<LeaderboardPlayer> finalEntries = entries;
+        List<ScoreSaberPlayer> finalEntries = entries;
         entries.forEach(entry -> entry.setCustomLeaderboardRank(finalEntries.indexOf(entry) + 1));
         return entries;
     }

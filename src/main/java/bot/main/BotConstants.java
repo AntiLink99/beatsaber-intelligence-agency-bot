@@ -12,6 +12,7 @@ public class BotConstants {
 
     public static final String PLAYING = "-> bs help <-";
     public static final String RESOURCES_PATH = "src/main/resources/".replace("/", File.separator);
+    public static final List<String> DONATE_REMINDERS = List.of("donateReminder1.png", "donateReminder2.png", "donateReminder3.gif", "donateReminder4.gif", "donateReminder5.png", "donateReminder6.jpg");
     public static final String donateUrl = "https://ko-fi.com/antilink";
     public static final String featureRequestUrl = "https://github.com/AntiLink99/beatsaber-intelligence-agency-bot/issues";
     public static final String bsiaServerInviteUrl = "https://discord.gg/HXbmf8Xefs";
@@ -73,6 +74,7 @@ public class BotConstants {
         commands.put("bs setgridimage <Image URL>", "Sets a background image for the acc grid in 'bs recentsong'. Leave the URL empty to reset the image.");
         commands.put("bs recentsongs (optional: <PageID>) (optional: <@member>)", "Displays the recently set scores of a player.");
         commands.put("bs topsongs (optional: <PageID>) (optional: <@member>)", "Displays the best scores of a player.");
+        commands.put("bs compare <@member> <@member>", "Compares two player on different leaderboards.");
         commands.put("bs globalrank (optional: <@member>)", "Shows your global rank in comparison to the two players above and below you on ScoreSaber.");
         commands.put("bs localrank (optional: <@member>)", "Shows your local rank in comparison to the two players above and below you on ScoreSaber.");
         commands.put("bs improvement", "Lists the rank difference between the last seven days for all players.");

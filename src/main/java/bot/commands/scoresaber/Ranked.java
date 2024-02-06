@@ -28,17 +28,17 @@ public class Ranked {
         rankedMaps.removeIf(map -> !isInStarRange(map, min, max));
         List<Song> rankedSongs = rankedMaps.stream().map(map -> new Song(map.getLatestVersion().getHash(), map.getName())).collect(Collectors.toList());
         if (rankedSongs.size() == 0) {
-            Messages.sendMessage("Could not find any maps in the given star range.", event.getChannel());
+            Messages.sendMessage("Could not find any maps in the given star range.", event);
             return;
         }
-        Messages.sendMessage("Found " + Format.bold(String.valueOf(rankedSongs.size())) + " maps.", event.getChannel());
+        Messages.sendMessage("Found " + Format.bold(String.valueOf(rankedSongs.size())) + " maps.", event);
         bs.sendPlaylistInChannelBySongs(rankedSongs, "Ranked Maps (" + Format.decimal(min) + " - " + Format.decimal(max) + "★)", BotConstants.playlistImageRanked, event.getChannel());
     }
 
     public void sendRecentRankedPlaylist(int recentAmount, MessageEventDTO event) {
         List<BeatSaverRankedMap> rankedMaps = ranked.getRankedMaps();
         if (recentAmount > rankedMaps.size()) {
-            Messages.sendMessage("The given value exceeds the maximum map count, new playlist size was set to: " + Format.bold(String.valueOf(rankedMaps.size())), event.getChannel());
+            Messages.sendMessage("The given value exceeds the maximum map count, new playlist size was set to: " + Format.bold(String.valueOf(rankedMaps.size())), event);
         } else {
             rankedMaps = rankedMaps.subList(0, recentAmount);
         }

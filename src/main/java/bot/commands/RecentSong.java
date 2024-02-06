@@ -1,4 +1,4 @@
-package bot.commands.scoresaber;
+package bot.commands;
 
 import bot.api.*;
 import bot.commands.chart.AccuracyChart;
@@ -64,7 +64,7 @@ public class RecentSong {
         BeatSavior bsavior = new BeatSavior();
 
         if (index > 40 || index < 1) {
-            Messages.sendMessage("The value provided has to be an integer between 1 and 40.", event.getChannel());
+            Messages.sendMessage("The value provided has to be an integer between 1 and 40.", event);
             return;
         }
         String playerId = player.getId();
@@ -90,7 +90,7 @@ public class RecentSong {
             }
 
             if (scores.isEmpty()) {
-                Messages.sendMessage("The service didn't respond. Please try again later.", event.getChannel());
+                Messages.sendMessage("The service didn't respond. Please try again later.", event);
                 return;
             }
 

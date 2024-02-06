@@ -33,11 +33,11 @@ public class PlayerChart {
 
     public void sendChartImage(DataBasePlayer player, Color lineColor, LeaderboardService service, MessageEventDTO event) {
         if (player == null) {
-            Messages.sendMessage("Could not find player. Please check if you are registered.", event.getChannel());
+            Messages.sendMessage("Could not find player. Please check if you are registered.", event);
             return;
         }
         if (player.getHistoryValues() == null) {
-            Messages.sendMessage("Could not find history values for user. Please update the user with \"ru update\".", event.getChannel());
+            Messages.sendMessage("Could not find history values for user. Please update the user with \"ru update\".", event);
             return;
         }
         this.lineColor = lineColor;
@@ -59,12 +59,12 @@ public class PlayerChart {
                 max = Double.parseDouble(values[0]);
                 min = Double.parseDouble(values[1]);
             } catch (NullPointerException | NumberFormatException e) {
-                Messages.sendMessage("Wrong syntax. Check out ru \"help\".", event.getChannel());
+                Messages.sendMessage("Wrong syntax. Check out ru \"help\".", event);
                 return;
             }
 
             if (min < max) {
-                Messages.sendMessage("The minimum rank cannot be bigger than the maximum rank.", event.getChannel());
+                Messages.sendMessage("The minimum rank cannot be bigger than the maximum rank.", event);
                 return;
             }
         }

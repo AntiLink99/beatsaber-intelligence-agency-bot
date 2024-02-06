@@ -17,7 +17,7 @@ public class ScoreStats{
 	private int sspPlays;
 
 	@SerializedName("totalRankedScore")
-	private int totalRankedScore;
+	private long totalRankedScore;
 
 	@SerializedName("spPlays")
 	private int spPlays;
@@ -92,7 +92,7 @@ public class ScoreStats{
 	private double averageWeightedRankedAccuracy;
 
 	@SerializedName("totalScore")
-	private int totalScore;
+	private long totalScore;
 
 	@SerializedName("unrankedMaxStreak")
 	private int unrankedMaxStreak;
@@ -119,7 +119,7 @@ public class ScoreStats{
 	private int totalPlayCount;
 
 	@SerializedName("totalUnrankedScore")
-	private int totalUnrankedScore;
+	private long totalUnrankedScore;
 
 	@SerializedName("medianAccuracy")
 	private double medianAccuracy;
@@ -146,7 +146,7 @@ public class ScoreStats{
 		return sspPlays;
 	}
 
-	public int getTotalRankedScore(){
+	public long getTotalRankedScore(){
 		return totalRankedScore;
 	}
 
@@ -246,7 +246,7 @@ public class ScoreStats{
 		return averageWeightedRankedAccuracy;
 	}
 
-	public int getTotalScore(){
+	public long getTotalScore(){
 		return totalScore;
 	}
 
@@ -282,7 +282,7 @@ public class ScoreStats{
 		return totalPlayCount;
 	}
 
-	public int getTotalUnrankedScore(){
+	public long getTotalUnrankedScore(){
 		return totalUnrankedScore;
 	}
 

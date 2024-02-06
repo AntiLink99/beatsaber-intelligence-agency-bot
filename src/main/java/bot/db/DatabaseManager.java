@@ -29,7 +29,8 @@ public class DatabaseManager {
     public void connectToDatabase() {
         try {
             if (mongoClient == null) {
-                String connectionUrl = "mongodb://" + DBConstants.DB_USERNAME + ":" + DBConstants.DB_PASSWORD + "@" + DBConstants.DB_HOST + ":" + DBConstants.DB_PORT + "/?authMechanism=SCRAM-SHA-1&authSource=admin";
+                String connectionUrl = "mongodb://" + DBConstants.DB_USERNAME + ":" + DBConstants.DB_PASSWORD + "@" + DBConstants.DB_HOST + ":" + DBConstants.DB_PORT + "/?authSource=admin";
+                System.out.println(connectionUrl);
                 mongoClient = new MongoClient(new MongoClientURI(connectionUrl));
                 database = mongoClient.getDatabase(DBConstants.DB_DATABASE);
                 playersCollection = database.getCollection("players");
@@ -44,6 +45,10 @@ public class DatabaseManager {
 
     public boolean savePlayer(DataBasePlayer player) {
         if (playersCollection == null) {
+            return false;
+        }
+        DataBasePlayer storedPlayer = getPlayerByDiscordId(player.getDiscordUserId());
+        if (storedPlayer != null) {
             return false;
         }
         try {

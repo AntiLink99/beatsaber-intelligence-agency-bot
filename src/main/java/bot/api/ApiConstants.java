@@ -4,7 +4,10 @@ import java.util.List;
 
 public class ApiConstants {
 
-    public static final String TWITCH_ID_REGEX = "twitch\\.tv\\/videos\\/(\\d+)";
+    //Backend
+    public static final String BACKEND_URL = "http://localhost:3001";
+    public static final String COMPARISON_URL = BACKEND_URL + "/comparisonImage";
+
     // ScoreSaber
     public static final String SS_PRE_URL = "https://scoresaber.com";
     public static final String USER_PRE_URL = SS_PRE_URL + "/u/";
@@ -48,6 +51,10 @@ public class ApiConstants {
     public static String getBeatLeaderPlayerHistoryURL(String playerId) {
         return String.format(BL_PRE_URL + BL_USER_HISTORY_URL, playerId);
     }
+    public static final String BL_USER_PLAYER_BY_ID_URL = "/player/%d";
+    public static String getBeatLeaderPlayerByIdURL(long discordId) {
+        return String.format(BL_PRE_URL + BL_USER_PLAYER_BY_ID_URL, discordId);
+    }
     public static String getBeatLeaderPlayerByDiscordId(long discordId) {
         return String.format(BL_PRE_URL + BL_USER_PLAYER_BY_DISCORD_URL, discordId);
     }
@@ -63,6 +70,7 @@ public class ApiConstants {
         return String.format(ACC_PRE_URL + ACC_SCORES_URL, playerId, pageNr, "ap");
     }
     public static String getAccSaberRecentScoresURL(String playerId, int pageNr) {
+        System.out.println(String.format(ACC_PRE_URL + ACC_SCORES_URL, playerId, pageNr, "timeSet"));
         return String.format(ACC_PRE_URL + ACC_SCORES_URL, playerId, pageNr, "timeSet");
     }
     public static final String ACC_USER_URL = "/profile/%s/overall/scores";
@@ -72,6 +80,10 @@ public class ApiConstants {
     public static final String ACC_API_USER_HISTORY = "/players/%s/recent-rank-history";
     public static String getAccSaberUserHistoryURL(String playerId) {
         return String.format(ACC_API_PRE_URL + ACC_API_USER_HISTORY, playerId);
+    }
+    public static final String ACC_API_PLAYER_URL = "/players/%s";
+    public static String getAccSaberProfileURL(String playerId) {
+        return String.format(ACC_API_PRE_URL + ACC_API_PLAYER_URL, playerId);
     }
     public static final String ACC_LEADERBOARD_PRE_URL = "https://accsaber.com/maps/";
 

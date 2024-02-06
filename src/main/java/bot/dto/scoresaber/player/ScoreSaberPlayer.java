@@ -1,8 +1,9 @@
-package bot.dto.leaderboards;
+package bot.dto.scoresaber.player;
 
+import bot.dto.player.ScoreStats;
 import com.google.gson.annotations.SerializedName;
 
-public class LeaderboardPlayer {
+public class ScoreSaberPlayer {
 
 	@SerializedName("pp")
 	private double pp;

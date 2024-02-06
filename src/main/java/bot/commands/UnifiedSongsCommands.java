@@ -56,14 +56,14 @@ public class UnifiedSongsCommands {
     private void sendSongs(LeaderboardService service, DataBasePlayer player, SupporterInfo supportInfo, int index, MessageEventDTO event, boolean isTopSongs) {
         String songType = isTopSongs ? "topSongs" : "recentSongs";
         if (player == null) {
-            Messages.sendMessage("Player could not be found.", event.getChannel());
+            Messages.sendMessage("Player could not be found.", event);
             return;
         }
         long playerId = Long.parseLong(player.getId());
         List<PlayerScore> scores = fetchScores(service, playerId, index, isTopSongs);
 
         if (scores == null || scores.isEmpty()) {
-            Messages.sendMessage("Scores could not be fetched. Please try again later.", event.getChannel());
+            Messages.sendMessage("Scores could not be fetched. Please try again later.", event);
             return;
         }
 
@@ -73,8 +73,7 @@ public class UnifiedSongsCommands {
 
         File songImage = new File(filePath);
         if (songImage.exists()) {
-            Messages.sendImage(songImage, songType + "_" + playerId + "_" + messageId + ".png", event);
-            songImage.delete();
+            Messages.sendSongsImage(songImage, songType + "_" + playerId + "_" + messageId + ".png", event);
         }
     }
 

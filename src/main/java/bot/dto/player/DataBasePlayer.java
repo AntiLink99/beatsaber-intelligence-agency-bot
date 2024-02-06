@@ -23,6 +23,7 @@ public class DataBasePlayer implements Serializable, LeaderboardServicePlayer {
     private long discordUserId;
     private List<Integer> historyValues;
     private String histories;
+    private ScoreStats scoreStats;
     private transient String customAccGridImage;
 
     private transient LeaderboardService service = LeaderboardService.SCORESABER;
@@ -142,6 +143,14 @@ public class DataBasePlayer implements Serializable, LeaderboardServicePlayer {
         this.service = service;
     }
 
+    public ScoreStats getScoreStats() {
+        return scoreStats;
+    }
+
+    public void setScoreStats(ScoreStats scoreStats) {
+        this.scoreStats = scoreStats;
+    }
+
     public Document toDocument() {
         return new Document()
                 .append("player_id", Long.parseLong(id))
@@ -155,6 +164,7 @@ public class DataBasePlayer implements Serializable, LeaderboardServicePlayer {
                 .append("player_discord_user_id", discordUserId)
                 .append("player_historyValues", historyValues)
                 .append("player_histories", histories)
+                .append("player_scoreStats", scoreStats.toDocument())
                 .append("user_customAccGridImage", customAccGridImage);
     }
 
@@ -173,6 +183,7 @@ public class DataBasePlayer implements Serializable, LeaderboardServicePlayer {
         player.setDiscordUserId(document.getLong("player_discord_user_id"));
         player.setHistoryValues(document.getList("player_historyValues", Integer.class));
         player.setHistories(document.getString("player_histories"));
+        player.setScoreStats(ScoreStats.fromDocument((Document) document.get("player_scoreStats")));
         player.setCustomAccGridImage(document.getString("user_customAccGridImage"));
         return player;
     }

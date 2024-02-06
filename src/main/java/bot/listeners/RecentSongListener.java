@@ -1,6 +1,6 @@
 package bot.listeners;
 
-import bot.commands.scoresaber.RecentSong;
+import bot.commands.RecentSong;
 import bot.db.DatabaseManager;
 import bot.dto.LeaderboardService;
 import bot.dto.MessageEventDTO;
